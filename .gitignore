@@ -14,3 +14,6 @@ dist/
 npm-debug.log*
 .env
 .env.*
+
+# Wrangler'ın yerel gizli değişkenleri (ileride Workers/Functions eklenirse; asla commit edilmez)
+.dev.vars*
