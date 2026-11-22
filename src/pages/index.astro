@@ -1,0 +1,14 @@
+---
+// Ana sayfa (TR). Şimdilik yalnızca Hakkımda paftası; diğer dört pafta sonraki adımlarda gelecek.
+import Hakkimda from '../components/Hakkimda.astro';
+import { METINLER } from '../i18n';
+import Duzen from '../layouts/Duzen.astro';
+
+const m = METINLER.tr;
+---
+
+<Duzen lang="tr" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={m.taslak}>
+  <main>
+    <Hakkimda lang="tr" />
+  </main>
+</Duzen>

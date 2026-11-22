@@ -1,0 +1,88 @@
+---
+// Robot kolun DURAĞAN çizimi (dekoratif). Koordinatlar tasarım taslağındaki "E · Premium: Hakkımda"
+// karesinden (1184×700'lük pafta koordinatları; viewBox kolu çevreleyen kısmı keser).
+// GEÇİCİ: M3'te canlı kol katmanı (src/kol/: ters kinematik + yay) bunun yerini alır, bu dosya silinir.
+//
+// Renkler tokens.css'teki --kol-* token'larından gelir ("mavi yok" testi onları da denetler).
+// SVG sunum niteliklerinde (fill="var(--x)") var() her tarayıcıda güvenilir değil; bu yüzden renkler
+// style niteliğiyle verildi. Gradyan id'leri "kol-" önekli: sayfadaki başka SVG'lerle çakışmasın.
+---
+
+<svg class="kol" viewBox="550 96 600 584" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="kol-ray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--kol-ray-1)"></stop>
+      <stop offset="0.5" style="stop-color: var(--kol-ray-2)"></stop>
+      <stop offset="1" style="stop-color: var(--kol-ray-3)"></stop>
+    </linearGradient>
+    <linearGradient id="kol-direk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" style="stop-color: var(--kol-direk-1)"></stop>
+      <stop offset="0.45" style="stop-color: var(--kol-direk-2)"></stop>
+      <stop offset="1" style="stop-color: var(--kol-direk-3)"></stop>
+    </linearGradient>
+    <linearGradient id="kol-link" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" style="stop-color: var(--kol-link-1)"></stop>
+      <stop offset="0.5" style="stop-color: var(--kol-link-2)"></stop>
+      <stop offset="1" style="stop-color: var(--kol-link-3)"></stop>
+    </linearGradient>
+    <radialGradient id="kol-eklem" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" style="stop-color: var(--kol-eklem-1)"></stop>
+      <stop offset="1" style="stop-color: var(--kol-eklem-2)"></stop>
+    </radialGradient>
+    <filter id="kol-bulanik-8" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8"></feGaussianBlur>
+    </filter>
+    <filter id="kol-bulanik-3" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3"></feGaussianBlur>
+    </filter>
+  </defs>
+
+  <!-- Zemine düşen yumuşak eliptik gölge -->
+  <ellipse cx="930" cy="640" rx="150" ry="16" style="fill: var(--kol-golge)" filter="url(#kol-bulanik-8)"></ellipse>
+
+  <!-- Tavan rayı ve üzerinde kayan taşıyıcı (X ekseni) -->
+  <rect x="560" y="116" width="580" height="9" rx="4.5" fill="url(#kol-ray)"></rect>
+  <rect x="838" y="106" width="74" height="28" rx="7" style="fill: var(--kol-govde); stroke: var(--kol-govde-cizgi)"></rect>
+  <rect x="846" y="110" width="58" height="2" rx="1" style="fill: var(--kol-govde-isik)"></rect>
+
+  <!-- Teleskopik direk: 3 iç içe segment (Z ekseni) -->
+  <rect x="865" y="134" width="20" height="82" rx="3" fill="url(#kol-direk)"></rect>
+  <rect x="868" y="206" width="14" height="60" rx="3" fill="url(#kol-direk)"></rect>
+  <rect x="870.5" y="256" width="9" height="46" rx="2.5" fill="url(#kol-direk)"></rect>
+
+  <!-- İki link (L1 omuz→dirsek, L2 dirsek→bilek): koyu kontur + turuncu eloksal -->
+  <g stroke-linecap="round">
+    <line x1="875" y1="300" x2="800" y2="410" stroke-width="30" style="stroke: var(--kol-kontur)"></line>
+    <line x1="875" y1="300" x2="800" y2="410" stroke-width="26" stroke="url(#kol-link)"></line>
+    <line x1="800" y1="410" x2="930" y2="498" stroke-width="26" style="stroke: var(--kol-kontur)"></line>
+    <line x1="800" y1="410" x2="930" y2="498" stroke-width="22" stroke="url(#kol-link)"></line>
+  </g>
+
+  <!-- Eklemler: omuz (θ₁), dirsek (θ₂), bilek -->
+  <g fill="url(#kol-eklem)" stroke-width="2" style="stroke: var(--kol-kontur)">
+    <circle cx="875" cy="300" r="19"></circle>
+    <circle cx="800" cy="410" r="17"></circle>
+    <circle cx="930" cy="498" r="12"></circle>
+  </g>
+
+  <!-- Eklem LED'leri: bulanık hâle + sıcak beyaz nokta -->
+  <g>
+    <circle cx="875" cy="300" r="8" opacity="0.55" filter="url(#kol-bulanik-3)" style="fill: var(--kol-hale)"></circle>
+    <circle cx="875" cy="300" r="3" style="fill: var(--kol-led)"></circle>
+    <circle cx="800" cy="410" r="8" opacity="0.55" filter="url(#kol-bulanik-3)" style="fill: var(--kol-hale)"></circle>
+    <circle cx="800" cy="410" r="3" style="fill: var(--kol-led)"></circle>
+  </g>
+
+  <!-- Gripper: koyu gövde + iki metalik parmak -->
+  <rect x="900" y="506" width="60" height="14" rx="4" style="fill: var(--kol-gripper); stroke: var(--kol-govde-cizgi)"></rect>
+  <rect x="903" y="520" width="9" height="30" rx="3" fill="url(#kol-direk)"></rect>
+  <rect x="948" y="520" width="9" height="30" rx="3" fill="url(#kol-direk)"></rect>
+</svg>
+
+<style>
+  .kol {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

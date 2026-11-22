@@ -1,0 +1,174 @@
+---
+// Hakkımda paftası (01): giriş paftası, sade (bant/deste yok). Taslak: "E · Premium: Hakkımda".
+// JS gerektirmez. Metin/yüzey renk çiftleri tests/renk.test.ts kullanım tablosunda ölçülür.
+import { METINLER, type Dil } from '../i18n';
+import { KISI } from '../kisi';
+import DilDugmesi from './DilDugmesi.astro';
+import KolStatik from './KolStatik.astro';
+import PaftaCercevesi from './PaftaCercevesi.astro';
+
+interface Props {
+  lang: Dil;
+}
+
+const { lang } = Astro.props;
+const m = METINLER[lang].hakkimda;
+const eposta = `mailto:${KISI.eposta}`;
+---
+
+<PaftaCercevesi id="hakkimda" baslikId="hakkimda-baslik">
+  <div class="ust">
+    <DilDugmesi lang={lang} />
+  </div>
+
+  <div class="duzen">
+    <div class="metin">
+      <h1 id="hakkimda-baslik">{KISI.adSatirlari[0]}<br />{KISI.adSatirlari[1]}</h1>
+      <p class="unvan">{m.unvan}</p>
+      <p class="tanitim">{m.tanitim}</p>
+
+      <div class="eylemler">
+        {/* M6: "CV'yi indir" (turuncu ana düğme) PDF'ler gelince buraya, bunun soluna eklenecek. */}
+        <a class="dugme-ikincil" href={eposta}>{m.iletisimDugmesi}</a>
+      </div>
+
+      <ul class="iletisim" id="iletisim" aria-label={m.iletisimEtiketi}>
+        <li><a href={KISI.github} rel="me">GitHub</a></li>
+        <li><a href={KISI.linkedin} rel="me">LinkedIn</a></li>
+        <li><a href={eposta}>{KISI.eposta}</a></li>
+      </ul>
+    </div>
+
+    <div class="kol-alani">
+      <KolStatik />
+    </div>
+  </div>
+</PaftaCercevesi>
+
+<style>
+  /* Dil düğmesi paftanın sağ üst köşesinde (taslak: üstten 34px, sağdan 64px).
+     Sağ boşluk PaftaCercevesi'nin kenar boşluğuyla aynı ifade: ara genişliklerde de hizalı kalsın. */
+  .ust {
+    position: absolute;
+    top: 34px;
+    right: clamp(24px, 5.5vw, 64px);
+  }
+
+  /* Solda metin sütunu (taslakta 500px), sağda kol. Yükseklik taslaktaki 700px'lik paftaya denk. */
+  .duzen {
+    display: grid;
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    gap: 32px;
+    align-items: center;
+    min-height: 572px;
+  }
+  .kol-alani {
+    justify-self: end;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(44px, 12vw, 76px);
+    line-height: 1;
+  }
+
+  /* 24px'in ALTINA İNME: koyu temada --turuncu-yazi pafta üstünde 3.98:1; ancak 24px'te
+     "büyük metin" sayılır (eşik 3:1). Bkz. CLAUDE.md §4.2. */
+  .unvan {
+    margin: 18px 0 0;
+    color: var(--turuncu-yazi);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .tanitim {
+    margin: 18px 0 0;
+    color: var(--metin-3);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .eylemler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .dugme-ikincil {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 24px;
+    border: 1px solid var(--dugme-cizgi);
+    border-radius: 999px;
+    color: var(--metin);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+  }
+  .dugme-ikincil:hover {
+    border-color: var(--turuncu-cizgi);
+  }
+
+  /* "GitHub · LinkedIn · e-posta" satırı. Linklerin dikey dolgusu dokunma hedefini ~46px yapar (§8). */
+  .iletisim {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 14px 0 0;
+    padding: 0;
+    color: var(--metin-3);
+    font-size: 14px;
+    list-style: none;
+  }
+  .iletisim li + li::before {
+    content: '·';
+    content: '·' / ''; /* ekran okuyucu ayıracı "nokta" diye okumasın (destekleyen tarayıcılarda) */
+    margin: 0 10px;
+  }
+  .iletisim a {
+    display: inline-block;
+    padding: 12px 0;
+    color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .iletisim a:hover {
+    color: var(--vurgu-metin);
+  }
+
+  /* Tablet ve telefon: tek sütun, kol gizli. Ayrıntılı mobil tasarım M5'te (kol orada ölçeklenecek). */
+  @media (max-width: 1079px) {
+    .ust {
+      position: static;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+    .duzen {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+    .kol-alani {
+      display: none;
+    }
+    /* Dar ekranda satır kırılır; "·" yeni satırın başında öksüz kalmasın diye ayıraç yerine boşluk. */
+    .iletisim {
+      column-gap: 20px;
+    }
+    .iletisim li + li::before {
+      content: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dugme-ikincil {
+      transition: none;
+    }
+  }
+</style>

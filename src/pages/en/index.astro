@@ -1,0 +1,15 @@
+---
+// Ana sayfa (EN). İçerik M6'ya kadar kaba çeviri: en.json'daki `taslak: true` → <html data-taslak>,
+// kontrol.mjs bunu uyarı olarak gösterir.
+import Hakkimda from '../../components/Hakkimda.astro';
+import { METINLER } from '../../i18n';
+import Duzen from '../../layouts/Duzen.astro';
+
+const m = METINLER.en;
+---
+
+<Duzen lang="en" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={m.taslak}>
+  <main>
+    <Hakkimda lang="en" />
+  </main>
+</Duzen>

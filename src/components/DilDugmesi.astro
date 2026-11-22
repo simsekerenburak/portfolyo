@@ -1,0 +1,32 @@
+---
+// Öteki dilin ana sayfasına bağlantı (JS'siz çalışır).
+// Görünen ad o dilin kendi adıyla: TR sayfasında "English", EN sayfasında "Türkçe".
+// `lang` niteliği ekran okuyucunun adı doğru dilde okuması, `hreflang` hedefin dilini bildirmesi için.
+// Sonraki adımlarda: aynı paftaya, adresteki #hash korunarak geçecek.
+import { METINLER, anaSayfa, otekiDil, type Dil } from '../i18n';
+
+interface Props {
+  lang: Dil;
+}
+
+const oteki = otekiDil(Astro.props.lang);
+---
+
+<a class="dil" href={anaSayfa(oteki)} hreflang={oteki} lang={oteki}>{METINLER[oteki].dil.ad}</a>
+
+<style>
+  .dil {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px; /* dokunma hedefi en az 44px (§8) */
+    padding: 0 16px;
+    border: 1px solid var(--dugme-cizgi);
+    border-radius: 999px;
+    color: var(--hap-metin);
+    font: 500 13px/1 var(--font-govde);
+    text-decoration: none;
+  }
+  .dil:hover {
+    background: var(--hap-zemin);
+  }
+</style>

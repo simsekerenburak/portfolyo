@@ -1,0 +1,58 @@
+---
+// Paftanın yüzeyi: öndeki pafta + arkasında üst kenarları görünen iki pafta (deste hissi, CLAUDE.md §3.1).
+// Şimdilik sitede tek pafta var; M2'de Sahne gerçek pafta destesini kurunca arkadakiler gerçek paftalar olur.
+// Kenar boşluğu burada; paftanın içindeki düzeni çağıran bileşen kurar (<slot />).
+interface Props {
+  /** bölümün adresi, ör. "hakkimda" → /#hakkimda */
+  id?: string;
+  /** bölüm başlığının id'si: ekran okuyucu bölümü bu başlıkla adlandırır */
+  baslikId: string;
+}
+
+const { id, baslikId } = Astro.props;
+---
+
+<div class="deste">
+  <section class="pafta" id={id} aria-labelledby={baslikId}>
+    <slot />
+  </section>
+</div>
+
+<style>
+  .deste {
+    position: relative;
+    width: min(100%, 1184px);
+    padding-top: 28px; /* arkadaki iki paftanın görünen üst kenarları: 14px + 14px */
+  }
+
+  /* Arkadaki paftalar yalnızca üst kenarlarıyla görünür. ::before en arkada, ::after ortada.
+     Yan boşluklar yüzde: taslaktaki 76px / 38px (1184px'lik paftada) her genişlikte aynı oranda kalsın. */
+  .deste::before,
+  .deste::after {
+    content: '';
+    position: absolute;
+    bottom: 28px;
+    border: 1px solid var(--pafta-cizgi);
+    border-radius: 28px;
+  }
+  .deste::before {
+    top: 0;
+    inset-inline: 6.4%;
+    background: var(--pafta-arka-2);
+  }
+  .deste::after {
+    top: 14px;
+    inset-inline: 3.2%;
+    background: var(--pafta-arka-1);
+  }
+
+  .pafta {
+    position: relative;
+    z-index: 1; /* iki arka paftanın önünde */
+    border: 1px solid var(--pafta-cizgi);
+    border-radius: 28px;
+    background: var(--pafta);
+    box-shadow: 0 40px 120px var(--pafta-golge);
+    padding: clamp(24px, 5.5vw, 64px);
+  }
+</style>

@@ -1,0 +1,70 @@
+---
+// Bulunamayan sayfa. Astro bunu `dist/404.html` olarak üretir.
+//
+// Neden zorunlu: Cloudflare Pages kökte `404.html` bulamazsa siteyi tek sayfalık uygulama (SPA)
+// sanar ve bilinmeyen HER adrese ana sayfayı döndürür. O zaman kırık linkler gizlenir ve arama
+// motorları aynı içeriği sayısız adreste görür. Bu dosya varken Pages bu sayfayı 404 koduyla verir.
+//
+// Tek dosya, iki dil: Pages istenen adrese en yakın `404.html`'i dizin ağacında yukarı doğru arar,
+// `/en/...` altındaki kırık bir adres de köke, buraya düşer. Linkler "/" ile başlamak zorunda
+// (sayfa her adreste sunulur; kontrol.mjs denetler).
+import PaftaCercevesi from '../components/PaftaCercevesi.astro';
+import Duzen from '../layouts/Duzen.astro';
+import { TAM_AD } from '../kisi';
+---
+
+<Duzen lang="tr" baslik={`Sayfa bulunamadı · ${TAM_AD}`}>
+  <main>
+    <PaftaCercevesi baslikId="bulunamadi-baslik">
+      <p class="kod">404</p>
+      <h1 id="bulunamadi-baslik">Sayfa bulunamadı</h1>
+      <p class="giris">Bu adreste bir pafta yok. Adres yanlış yazılmış ya da sayfa taşınmış olabilir.</p>
+      <p><a href="/">Ana sayfaya dön</a></p>
+
+      <div class="en" lang="en">
+        <h2>Page not found</h2>
+        <p class="giris">There is nothing at this address. The link may be mistyped, or the page may have moved.</p>
+        <p><a href="/en/">Go to the English home page</a></p>
+      </div>
+    </PaftaCercevesi>
+  </main>
+</Duzen>
+
+<style>
+  .kod {
+    margin: 0 0 12px;
+    color: var(--metin-2);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(36px, 8vw, 52px); /* pafta başlığı boyutu (§4.3) */
+  }
+  h2 {
+    margin: 0;
+    font-size: 27px;
+  }
+  .giris {
+    margin: 12px 0 0;
+    max-width: 52ch;
+    color: var(--metin-2);
+  }
+  a {
+    display: inline-block;
+    padding: 12px 0; /* dokunma hedefi (§8) */
+    color: var(--metin);
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--vurgu-metin);
+  }
+  p {
+    margin: 0;
+  }
+  .en {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--pafta-cizgi);
+  }
+</style>

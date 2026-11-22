@@ -1,0 +1,16 @@
+{
+  "taslak": true,
+  "site": {
+    "baslik": "Burak Eren Şimşek · Computer Engineering Student",
+    "aciklama": "Burak Eren Şimşek: computer engineering student building embedded systems with STM32 and ESP32, and AI projects."
+  },
+  "dil": {
+    "ad": "English"
+  },
+  "hakkimda": {
+    "unvan": "Computer Engineering Student",
+    "tanitim": "I’m a fourth-year student at Sivas Cumhuriyet University. I build embedded systems with STM32 and ESP32 and work on projects that bring them together with AI. I’m currently an intern at Kapsam Elektromekanik.",
+    "iletisimDugmesi": "Get in touch",
+    "iletisimEtiketi": "Contact links"
+  }
+}

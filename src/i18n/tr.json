@@ -1,0 +1,16 @@
+{
+  "taslak": false,
+  "site": {
+    "baslik": "Burak Eren Şimşek · Bilgisayar Mühendisliği Öğrencisi",
+    "aciklama": "Burak Eren Şimşek: bilgisayar mühendisliği öğrencisi. STM32 ve ESP32 ile gömülü sistemler ve yapay zekâ projeleri."
+  },
+  "dil": {
+    "ad": "Türkçe"
+  },
+  "hakkimda": {
+    "unvan": "Bilgisayar Mühendisliği Öğrencisi",
+    "tanitim": "Sivas Cumhuriyet Üniversitesi’nde 4. sınıftayım. STM32 ve ESP32 ile gömülü sistemler geliştiriyor, bunları yapay zekâyla buluşturan projeler üzerinde çalışıyorum. Şu an Kapsam Elektromekanik’te stajyerim.",
+    "iletisimDugmesi": "İletişime geç",
+    "iletisimEtiketi": "İletişim bağlantıları"
+  }
+}
