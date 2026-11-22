@@ -266,9 +266,14 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  └─ favicon.svg
 ├─ scripts/kontrol.mjs              (build sonrası dist/ denetimi: TR/EN eşleşmesi, kırık link, 404.html, fontlar)
 ├─ src/
-│  ├─ content.config.ts             (koleksiyonlar + Zod şemaları)
+│  ├─ content.config.ts             (koleksiyon tanımları; şemalar icerik/sema.ts'te)
+│  ├─ icerik/sema.ts                (Zod şemaları, yalnızca astro/zod'a bağlı → Vitest'te test edilir)
+│  ├─ icerik/koleksiyonlar.ts       (astro:content okuması: projeKayitlari(dil))
+│  ├─ pafta/tipler.ts               (ortak paftanın veri sözleşmesi: PaftaOgesi, Ozet)
+│  ├─ pafta/deste.ts                (deste durumu, saf: dongu, sonraki/onceki, konumAdi)
+│  ├─ pafta/projeler.ts             (projeler → kartlar + özet menüsü, saf)
 │  ├─ content/
-│  │  ├─ projeler/{tr,en}/*.md
+│  │  ├─ projeler/{tr,en}/*.md       (frontmatter = kart; gövde = M6 detay sayfasının uzun metni)
 │  │  ├─ stajlar/{tr,en}.json
 │  │  ├─ yetkinlikler/{tr,en}.json
 │  │  └─ belgeler/{tr,en}.json
@@ -287,6 +292,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  │  ├─ Sahne.astro   (pafta destesi + tavan rayı + kol katmanı)
 │  │  ├─ Pafta.astro   (§3.2 şablonu)
 │  │  ├─ Deste.astro, Bant.astro, OzetMenu.astro
+│  │  ├─ Projeler.astro  (Pafta + projeler verisi)
 │  │  ├─ Hakkimda.astro
 │  │  ├─ PaftaCercevesi.astro  (öndeki pafta yüzeyi + arkadaki iki paftanın üst kenarı)
 │  │  ├─ KolStatik.astro  (GEÇİCİ durağan kol çizimi; M3'te canlı kol gelince silinir)
@@ -296,7 +302,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │     ├─ index.astro, en/index.astro
 │     ├─ 404.astro      (iki dilli; Cloudflare Pages için zorunlu, bkz. §2.1)
 │     └─ projeler/[slug].astro, en/projeler/[slug].astro
-└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
+└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
 ```
 
 ---
@@ -311,6 +317,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 - İletişim: GitHub `github.com/simsekerenburak` · LinkedIn `linkedin.com/in/burak-eren-şimşek-` · `burakerensimsek59@gmail.com`
 
 ### Projeler — "4 proje" (3 tamamlanan, 1 yapım aşamasında)
+Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki ilk cümle "Kol bir kutuyu bantten alıp desteye koyar." kol bunu gerçekten yapınca, M4'te geri gelecek). Kartta kısa açıklama, uzun metin md gövdesinde. MediTrack ve Robot Kol için tür (takım/tek kişilik) bilinmiyor → `tur` alanı boş, kartta yazmaz.
 1. **Otonom Yıldız Takip Sistemi** · 2026 · takım projesi · Gömülü Sistemler dersi final projesi — STM32 ile hem otonom hem manuel çalışan teleskop takip sistemi; yıldız haritası çıkarıp seçilen hedefe (GOTO) kilitlenir. Yatay eksende step, dikey eksende servo motor. Yer kontrol istasyonu Python/PyQt6, UART. **Rolüm: sensör verilerinin hesaplanması.** · STM32F401RE, MPU6050, GY-271, C, PyQt6
 2. **Şimşek** · 2026 · tek kişilik · Kişisel yapay zekâ asistanı — iPhone, web ve bilgisayarı tek bir bulut beyne bağlayan asistan: kalıcı hafıza, dosya arama, görevler ve sesli komut. · React Native (Expo), Cloudflare Workers, D1, R2, Workers AI, Whisper
 3. **MediTrack** · 2026 · IoT ilaç takip sistemi — Arduino hatırlatıcı (LCD + buzzer), Python masaüstü uygulaması, FastAPI backend (Render) ve Firebase ile uçtan uca ilaç takip sistemi; PWA. · Arduino, Python, FastAPI, Firebase, PWA
