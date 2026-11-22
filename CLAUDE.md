@@ -268,15 +268,17 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 ├─ src/
 │  ├─ content.config.ts             (koleksiyon tanımları; şemalar icerik/sema.ts'te)
 │  ├─ icerik/sema.ts                (Zod şemaları, yalnızca astro/zod'a bağlı → Vitest'te test edilir)
-│  ├─ icerik/koleksiyonlar.ts       (astro:content okuması: projeKayitlari(dil))
+│  ├─ icerik/koleksiyonlar.ts       (astro:content okuması: sayfaVerisi(dil) = bütün koleksiyonlar + sayfa taslak bayrağı; publicDosyasiVar)
 │  ├─ pafta/tipler.ts               (ortak paftanın veri sözleşmesi: PaftaOgesi, Ozet)
 │  ├─ pafta/deste.ts                (deste durumu, saf: dongu, sonraki/onceki, konumAdi)
 │  ├─ pafta/projeler.ts             (projeler → kartlar + özet menüsü, saf)
+│  ├─ pafta/{stajlar,yetkinlikler,belgeler}.ts  (aynı dönüşüm, diğer paftalar için)
+│  ├─ pafta/bicim.ts                (ay adları/tarih aralığı "Ağu – Eyl 2026", tekil/çoğul)
 │  ├─ content/
 │  │  ├─ projeler/{tr,en}/*.md       (frontmatter = kart; gövde = M6 detay sayfasının uzun metni)
-│  │  ├─ stajlar/{tr,en}.json
-│  │  ├─ yetkinlikler/{tr,en}.json
-│  │  └─ belgeler/{tr,en}.json
+│  │  ├─ stajlar/{tr,en}.json        (dil başına tek dosya: { taslak, stajlar: [...] }; dizideki sıra = destedeki sıra)
+│  │  ├─ yetkinlikler/{tr,en}.json   (kullanım = referans: "proje:<slug>", "staj:<id>", "egitim")
+│  │  └─ belgeler/{tr,en}.json       (cv | sertifika; CV PDF yoksa kart "Yakında")
 │  ├─ i18n/{tr,en}.json             (arayüz ve Hakkımda metinleri; EN'de `taslak`)
 │  ├─ i18n/index.ts                 (METINLER, Dil tipi, anaSayfa/otekiDil)
 │  ├─ kisi.ts                       (çevrilmeyen bilgiler: ad, GitHub, LinkedIn, e-posta)
@@ -292,7 +294,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  │  ├─ Sahne.astro   (pafta destesi + tavan rayı + kol katmanı)
 │  │  ├─ Pafta.astro   (§3.2 şablonu)
 │  │  ├─ Deste.astro, Bant.astro, OzetMenu.astro
-│  │  ├─ Projeler.astro  (Pafta + projeler verisi)
+│  │  ├─ Projeler.astro, Stajlar.astro, Yetkinlikler.astro, Belgeler.astro  (Pafta + o paftanın verisi)
 │  │  ├─ Hakkimda.astro
 │  │  ├─ PaftaCercevesi.astro  (öndeki pafta yüzeyi + arkadaki iki paftanın üst kenarı)
 │  │  ├─ KolStatik.astro  (GEÇİCİ durağan kol çizimi; M3'te canlı kol gelince silinir)
@@ -302,7 +304,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │     ├─ index.astro, en/index.astro
 │     ├─ 404.astro      (iki dilli; Cloudflare Pages için zorunlu, bkz. §2.1)
 │     └─ projeler/[slug].astro, en/projeler/[slug].astro
-└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
+└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler, bicim, stajlar, yetkinlikler, belgeler; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
 ```
 
 ---
@@ -323,13 +325,14 @@ Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki
 3. **MediTrack** · 2026 · IoT ilaç takip sistemi — Arduino hatırlatıcı (LCD + buzzer), Python masaüstü uygulaması, FastAPI backend (Render) ve Firebase ile uçtan uca ilaç takip sistemi; PWA. · Arduino, Python, FastAPI, Firebase, PWA
 4. **Robot Kol** · Bahar 2027 teslim · **Yapım aşamasında** · Bitirme projesi — Ucu değiştirilebilen robotik kol: nesne taşıma, 3D baskı ve çizim. Gövdesi kendi 3D baskı tasarımı. · 3D baskı, Ters kinematik, Değiştirilebilir uç
 
-### Stajlar — "3 staj" → "2 şehir" (Hatay: Demircan, DOĞAKA · Sivas: Kapsam), "1 devam eden" (Kapsam)
+### Stajlar — "3 staj" → "2 şehir" (Sivas: Kapsam · Antakya: DOĞAKA, Demircan), "1 devam eden" (Kapsam)
+Burak 2026-11-22: şehirler **Sivas ve Antakya** (DOĞAKA'nın şehri de Antakya). Kapsam kartında yalnızca "Sivas · uzun dönem staj" + "Gömülü sistemler", "Mobil" hapları; açıklama YOK (`tests/stajlar.test.ts` kaydın tam içeriğini sabitler).
 1. **Kapsam Elektromekanik** · Eylül 2026 → · *Devam ediyor* · Sivas · uzun dönem staj — Gömülü sistemler ve mobil uygulama geliştirme. *(Başka detay yok.)*
-2. **DOĞAKA (Doğu Akdeniz Kalkınma Ajansı)** · Ağu – Eyl 2026 · Hatay — İnsan kaynakları birimi için gerçekten kullanılacak bir personel veritabanı web uygulaması geliştirdim.
+2. **DOĞAKA (Doğu Akdeniz Kalkınma Ajansı)** · Ağu – Eyl 2026 · Antakya — İnsan kaynakları birimi için gerçekten kullanılacak bir personel veritabanı web uygulaması geliştirdim.
 3. **Demircan İnşaat Elektrik** · Tem – Ağu 2026 · Antakya · elektrik taahhüt — Trafo ve kısa devre hesaplarını otomatikleştiren bir Python aracı geliştirdim.
 
 ### Yetkinlikler — "5 alan" → "21 araç", "3 proje"
-Her alan bir kart; üst satırda nerede kullanıldığı yazar. Yüzdelik çubuk **kullanma**.
+Her alan bir kart; üst satırda nerede kullanıldığı yazar. Yüzdelik çubuk **kullanma**. Kullanım yerleri JSON'da referanstır, adlar projeler/stajlar verisinden gelir; "21 araç" ve "3 proje" hesaplanır, kırık referans build'i durdurur.
 1. **Gömülü sistemler** (Yıldız Takip · MediTrack) — STM32, ESP32, Arduino, C, I2C, UART
 2. **Yazılım** (Demircan · Yıldız Takip) — Python, Java, Dart, PyQt6
 3. **Backend ve bulut** (MediTrack · Şimşek) — FastAPI, Firebase, Cloudflare Workers, D1, R2
@@ -337,7 +340,7 @@ Her alan bir kart; üst satırda nerede kullanıldığı yazar. Yüzdelik çubuk
 5. **Yapay zekâ** (Şimşek · eğitimler) — LLM entegrasyonu, Whisper, Workers AI
 
 ### Belgeler — "4 belge" → "3 sertifika", "2 dilde CV"
-1. **Özgeçmiş** — Türkçe / İngilizce PDF *(dosyalar henüz yok; yoksa düğme "Yakında" gösterir, build kırılmaz)*
+1. **Özgeçmiş** — Türkçe / İngilizce PDF *(dosyalar henüz yok. Build `public/cv/burak-eren-simsek-cv-{tr,en}.pdf` var mı diye bakar: yoksa kart "Yakında" etiketiyle çıkar ve link basılmaz; M6'da PDF'ler konunca "Türkçe PDF / İngilizce PDF" linkleri kendiliğinden gelir — sahte PDF ile denendi, `kontrol` linkleri geçerli buldu)*
 2. **Yapay Zekaya İlk Adım** · AI Business School · Eylül 2026 · Yeterlilik no: CERT-094BCBC0
 3. **Data Science and Machine Learning Bootcamp** · Huawei · Ağustos 2026 · Katılım belgesi
 4. **Flutter & Dart: Sıfırdan Mobil App Geliştiriciliğine** · Udemy · Temmuz 2026 · Doğrulanabilir sertifika
