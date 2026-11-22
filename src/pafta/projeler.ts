@@ -3,6 +3,7 @@
 // tests/projeler.test.ts kartlarda ve özet menüsünde ne yazacağını buradan sınar.
 import { DURUMLAR, type Proje } from '../icerik/sema';
 import { METINLER, type Dil } from '../i18n';
+import { cogul } from './bicim';
 import type { Ozet, PaftaOgesi } from './tipler';
 
 /** Koleksiyondan gelen bir proje: dosya adından slug + şemadan geçmiş veri. */
@@ -81,5 +82,5 @@ export function projeOzeti(kayitlar: readonly ProjeKaydi[], dil: Dil): Ozet {
     };
   }).filter((g) => g.sayi > 0);
 
-  return { sayi: sirali.length, etiket: sirali.length === 1 ? m.ozet.bir : m.ozet.cok, gruplar };
+  return { sayi: sirali.length, etiket: cogul(sirali.length, m.ozet), gruplar };
 }

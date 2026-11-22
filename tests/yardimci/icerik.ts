@@ -34,6 +34,11 @@ export function projeler(dil: string): Map<string, Proje> {
   return sonuc;
 }
 
+/** JSON koleksiyonunun bir dil dosyası, şemadan GEÇMEDEN: src/content/<koleksiyon>/<dil>.json */
+export function jsonIcerik(koleksiyon: string, dil: string): unknown {
+  return JSON.parse(readFileSync(new URL(`../../src/content/${koleksiyon}/${dil}.json`, import.meta.url), 'utf8'));
+}
+
 /** Sayfanın kullandığı kayıtlar: src/icerik/koleksiyonlar.ts → projeKayitlari gibi, destedeki sırayla. */
 export function projeKayitlari(dil: string): ProjeKaydi[] {
   return siraliProjeler([...projeler(dil)].map(([slug, veri]) => ({ slug, veri })));

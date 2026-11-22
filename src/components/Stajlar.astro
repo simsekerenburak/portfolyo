@@ -1,0 +1,25 @@
+---
+// Stajlar paftası (03): ortak Pafta şablonu + stajlar koleksiyonunun verisi.
+import type { Staj } from '../icerik/sema';
+import { METINLER, type Dil } from '../i18n';
+import { stajOgeleri, stajOzeti } from '../pafta/stajlar';
+import Pafta from './Pafta.astro';
+
+interface Props {
+  lang: Dil;
+  stajlar: Staj[];
+}
+
+const { lang, stajlar } = Astro.props;
+const m = METINLER[lang].stajlar;
+---
+
+<Pafta
+  id="stajlar"
+  lang={lang}
+  baslik={m.baslik}
+  giris={m.giris}
+  ogeler={stajOgeleri(stajlar, lang)}
+  ozet={stajOzeti(stajlar, lang)}
+  etiketler={{ deste: m.desteEtiketi, bant: m.bantEtiketi }}
+/>

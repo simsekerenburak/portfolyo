@@ -16,8 +16,9 @@ export interface PaftaOgesi {
   baslik: string;
   /** Başlığın altındaki satır */
   altSatir: string;
-  aciklama: string;
-  /** Teknoloji hapları */
+  /** Kısa açıklama. Yoksa kart açıklamasız çıkar (ör. Kapsam stajı: gizlilik, CLAUDE.md §0.7). */
+  aciklama?: string;
+  /** Teknoloji hapları (boşsa hap satırı hiç basılmaz) */
   haplar: string[];
   /** Varsa dış bağlantı (ör. canlı demo) */
   baglanti?: { metin: string; adres: string };

@@ -64,3 +64,58 @@ export const projeSemasi = z
 
 /** Şemadan geçmiş (varsayılanları doldurulmuş) proje verisi. */
 export type Proje = z.output<typeof projeSemasi>;
+
+// ─── Ortak parçalar (JSON koleksiyonları) ──────────────────────────────────
+// Stajlar, Yetkinlikler ve Belgeler dil başına TEK JSON dosyasıdır: src/content/<ad>/{tr,en}.json.
+// Dosya = { taslak, <liste> }; listedeki SIRA destedeki sıradır. Her öğenin `id`'si iki dilde aynıdır
+// (sayfa içi kimlik ve TR↔EN eşleşmesi için).
+
+/** Sayfa içi kimlikte kullanılacak kısa ad: küçük harf, rakam, tire ("dogaka", "ozgecmis"). */
+const kimlik = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'id yalnızca küçük harf, rakam ve tire içermeli');
+
+/** Ay hassasiyetinde tarih: "2026-09". Bu biçimde metin karşılaştırması tarih karşılaştırmasıdır. */
+export const ayTarihi = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'tarih "YYYY-AA" biçiminde olmalı (ör. 2026-09)');
+
+const metin = z.string().trim().min(1);
+
+/** Listede aynı id iki kez geçmesin (kart kimlikleri sayfada benzersiz olmalı). */
+const benzersizIdler = (liste: { id: string }[]) => new Set(liste.map((x) => x.id)).size === liste.length;
+
+// ─── Stajlar ───────────────────────────────────────────────────────────────
+
+/**
+ * Bir staj. Bitiş yoksa staj devam ediyor demektir ("Eylül 2026 →" + "Devam ediyor" etiketi).
+ * GİZLİLİK (CLAUDE.md §0.7): Kapsam stajında yalnızca "uzun dönem staj, gömülü sistemler ve mobil"
+ * yazar. Açıklama bu yüzden opsiyonel; tests/stajlar.test.ts Kapsam kaydının tam içeriğini sabitler.
+ */
+export const stajSemasi = z
+  .object({
+    id: kimlik,
+    /** Bant kutusu ve şerit: "Kapsam" */
+    kisaAd: metin.max(KISA_AD_EN_FAZLA),
+    /** Kart başlığı: "Kapsam Elektromekanik" */
+    ad: metin,
+    /** Şehir: alt satırın başı ve özet menüsündeki şehir grubu */
+    sehir: metin,
+    /** Alt satırda şehirden sonra: "uzun dönem staj", "Doğu Akdeniz Kalkınma Ajansı" */
+    tanim: metin,
+    baslangic: ayTarihi,
+    bitis: ayTarihi.optional(),
+    aciklama: metin.max(240).optional(),
+    etiketler: z.array(metin).min(1).max(8),
+  })
+  .strict()
+  .refine((s) => s.bitis === undefined || s.bitis >= s.baslangic, {
+    message: 'bitis, baslangic’tan önce olamaz',
+    path: ['bitis'],
+  });
+
+export const stajlarDosyasiSemasi = z
+  .object({
+    taslak: z.boolean().default(false),
+    stajlar: z.array(stajSemasi).min(1).refine(benzersizIdler, 'staj id’leri benzersiz olmalı'),
+  })
+  .strict();
+
+export type Staj = z.output<typeof stajSemasi>;
+export type StajlarDosyasi = z.output<typeof stajlarDosyasiSemasi>;

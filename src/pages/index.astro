@@ -2,19 +2,19 @@
 // Ana sayfa (TR). M1: paftalar alt alta (JS'siz düz hâl); M2'de Sahne onları üst üste deste yapacak.
 import Hakkimda from '../components/Hakkimda.astro';
 import Projeler from '../components/Projeler.astro';
+import Stajlar from '../components/Stajlar.astro';
 import { METINLER } from '../i18n';
-import { projeKayitlari } from '../icerik/koleksiyonlar';
+import { sayfaVerisi } from '../icerik/koleksiyonlar';
 import Duzen from '../layouts/Duzen.astro';
 
 const m = METINLER.tr;
-const projeler = await projeKayitlari('tr');
-// Sayfadaki herhangi bir içerik kaba çeviriyse sayfa taslaktır (kontrol.mjs uyarır, M6'da kırar).
-const taslak = m.taslak || projeler.some((p) => p.veri.taslak);
+const v = await sayfaVerisi('tr');
 ---
 
-<Duzen lang="tr" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={taslak}>
+<Duzen lang="tr" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={v.taslak}>
   <main>
     <Hakkimda lang="tr" />
-    <Projeler lang="tr" kayitlar={projeler} />
+    <Projeler lang="tr" kayitlar={v.projeler} />
+    <Stajlar lang="tr" stajlar={v.stajlar} />
   </main>
 </Duzen>

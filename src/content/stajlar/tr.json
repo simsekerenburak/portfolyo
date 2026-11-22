@@ -1,0 +1,36 @@
+{
+  "taslak": false,
+  "stajlar": [
+    {
+      "id": "kapsam",
+      "kisaAd": "Kapsam",
+      "ad": "Kapsam Elektromekanik",
+      "sehir": "Sivas",
+      "tanim": "uzun dönem staj",
+      "baslangic": "2026-09",
+      "etiketler": ["Gömülü sistemler", "Mobil"]
+    },
+    {
+      "id": "dogaka",
+      "kisaAd": "DOĞAKA",
+      "ad": "DOĞAKA",
+      "sehir": "Antakya",
+      "tanim": "Doğu Akdeniz Kalkınma Ajansı",
+      "baslangic": "2026-08",
+      "bitis": "2026-09",
+      "aciklama": "İnsan kaynakları birimi için gerçekten kullanılacak bir personel veritabanı web uygulaması geliştirdim.",
+      "etiketler": ["Web", "Veritabanı"]
+    },
+    {
+      "id": "demircan",
+      "kisaAd": "Demircan",
+      "ad": "Demircan İnşaat Elektrik",
+      "sehir": "Antakya",
+      "tanim": "elektrik taahhüt",
+      "baslangic": "2026-07",
+      "bitis": "2026-08",
+      "aciklama": "Trafo ve kısa devre hesaplarını otomatikleştiren bir Python aracı geliştirdim.",
+      "etiketler": ["Python", "Elektrik hesapları"]
+    }
+  ]
+}

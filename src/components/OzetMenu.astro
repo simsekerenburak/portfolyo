@@ -14,7 +14,8 @@ const { ozet } = Astro.props;
 
 <details class="ozet" open>
   <summary class="ana">
-    <span class="sayi">{ozet.sayi}</span>
+    {/* {' '}: Astro satır arası boşluğu siler; boşluksuz ekran okuyucu "4proje" diye tek kelime okur. */}
+    <span class="sayi">{ozet.sayi}</span>{' '}
     <span class="etiket">{ozet.etiket}</span>
     <svg class="ok" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="m6 9 6 6 6-6"></path>
@@ -25,7 +26,7 @@ const { ozet } = Astro.props;
       ozet.gruplar.map((g) => (
         <details class="grup">
           <summary>
-            <span class="sayi">{g.sayi}</span>
+            <span class="sayi">{g.sayi}</span>{' '}
             <span class="etiket">{g.etiket}</span>
             <svg class="ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 9 6 6 6-6" />

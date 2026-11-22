@@ -1,0 +1,36 @@
+{
+  "taslak": true,
+  "stajlar": [
+    {
+      "id": "kapsam",
+      "kisaAd": "Kapsam",
+      "ad": "Kapsam Elektromekanik",
+      "sehir": "Sivas",
+      "tanim": "long-term internship",
+      "baslangic": "2026-09",
+      "etiketler": ["Embedded systems", "Mobile"]
+    },
+    {
+      "id": "dogaka",
+      "kisaAd": "DOĞAKA",
+      "ad": "DOĞAKA",
+      "sehir": "Antakya",
+      "tanim": "Eastern Mediterranean Development Agency",
+      "baslangic": "2026-08",
+      "bitis": "2026-09",
+      "aciklama": "I built a staff database web application that the human resources department will actually use.",
+      "etiketler": ["Web", "Database"]
+    },
+    {
+      "id": "demircan",
+      "kisaAd": "Demircan",
+      "ad": "Demircan İnşaat Elektrik",
+      "sehir": "Antakya",
+      "tanim": "electrical contracting",
+      "baslangic": "2026-07",
+      "bitis": "2026-08",
+      "aciklama": "I built a Python tool that automates transformer and short-circuit calculations.",
+      "etiketler": ["Python", "Electrical calculations"]
+    }
+  ]
+}

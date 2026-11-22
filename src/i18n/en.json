@@ -48,5 +48,51 @@
     },
     "rol": "My role",
     "demo": "Live demo"
+  },
+  "aylar": {
+    "uzun": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "kisa": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "stajlar": {
+    "baslik": "Internships",
+    "giris": "From an electrical contracting site to a public agency, and on to embedded systems.",
+    "desteEtiketi": "Internship cards",
+    "bantEtiketi": "Internship boxes",
+    "ozet": {
+      "bir": "internship",
+      "cok": "internships"
+    },
+    "sehir": {
+      "bir": "city",
+      "cok": "cities"
+    },
+    "devamEden": "ongoing",
+    "devamEdiyor": "Ongoing"
   }
 }

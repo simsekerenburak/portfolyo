@@ -48,5 +48,51 @@
     },
     "rol": "Rolüm",
     "demo": "Canlı demo"
+  },
+  "aylar": {
+    "uzun": [
+      "Ocak",
+      "Şubat",
+      "Mart",
+      "Nisan",
+      "Mayıs",
+      "Haziran",
+      "Temmuz",
+      "Ağustos",
+      "Eylül",
+      "Ekim",
+      "Kasım",
+      "Aralık"
+    ],
+    "kisa": [
+      "Oca",
+      "Şub",
+      "Mar",
+      "Nis",
+      "May",
+      "Haz",
+      "Tem",
+      "Ağu",
+      "Eyl",
+      "Eki",
+      "Kas",
+      "Ara"
+    ]
+  },
+  "stajlar": {
+    "baslik": "Stajlar",
+    "giris": "Elektrik taahhüt sahasından kamu kurumuna, oradan gömülü sistemlere.",
+    "desteEtiketi": "Staj kartları",
+    "bantEtiketi": "Staj kutuları",
+    "ozet": {
+      "bir": "staj",
+      "cok": "staj"
+    },
+    "sehir": {
+      "bir": "şehir",
+      "cok": "şehir"
+    },
+    "devamEden": "devam eden",
+    "devamEdiyor": "Devam ediyor"
   }
 }

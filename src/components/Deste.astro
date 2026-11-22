@@ -35,12 +35,14 @@ const n = ogeler.length;
             </div>
             <h3 id={`${o.id}-baslik`}>{o.baslik}</h3>
             <p class="alt-satir">{o.altSatir}</p>
-            <p class="aciklama">{o.aciklama}</p>
-            <ul class="haplar">
-              {o.haplar.map((h) => (
-                <li>{h}</li>
-              ))}
-            </ul>
+            {o.aciklama && <p class="aciklama">{o.aciklama}</p>}
+            {o.haplar.length > 0 && (
+              <ul class="haplar">
+                {o.haplar.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+            )}
             {o.baglanti && (
               <a class="baglanti" href={o.baglanti.adres} rel="noopener">
                 {o.baglanti.metin}
