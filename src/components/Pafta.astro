@@ -1,0 +1,165 @@
+---
+// Ortak içerik paftası (CLAUDE.md §3.2). Projeler, Stajlar, Yetkinlikler ve Belgeler bu tek bileşenden,
+// yalnızca farklı veriyle üretilir: solda başlık + giriş, ortada kart destesi, sağda özet menüsü,
+// altta bant. Veri biçimi src/pafta/tipler.ts'te.
+//
+// Aşamalı geliştirme (§3.3): HTML her şeyi JS'siz taşır (düz liste, çalışan linkler, <details> menü).
+// Aşağıdaki betik yalnızca desteyi etkinleştirir; yüklenmezse sayfa düz hâlinde eksiksiz kalır.
+import type { Dil } from '../i18n';
+import type { Ozet, PaftaOgesi } from '../pafta/tipler';
+import Bant from './Bant.astro';
+import Deste from './Deste.astro';
+import OzetMenu from './OzetMenu.astro';
+import PaftaCercevesi from './PaftaCercevesi.astro';
+
+interface Props {
+  /** paftanın adresi: "projeler" → /#projeler */
+  id: string;
+  lang: Dil;
+  baslik: string;
+  giris: string;
+  ogeler: PaftaOgesi[];
+  ozet: Ozet;
+  /** ekran okuyucu adları: destedeki kartlar ve banttaki kutular */
+  etiketler: { deste: string; bant: string };
+}
+
+const { id, lang, baslik, giris, ogeler, ozet, etiketler } = Astro.props;
+const baslikId = `${id}-baslik`;
+---
+
+<PaftaCercevesi id={id} baslikId={baslikId}>
+  <div class="duzen" data-pafta>
+    <header class="giris">
+      <h2 id={baslikId}>{baslik}</h2>
+      <p>{giris}</p>
+    </header>
+    <div class="deste-yeri">
+      <Deste lang={lang} ogeler={ogeler} etiket={etiketler.deste} />
+    </div>
+    <div class="ozet-yeri">
+      <OzetMenu ozet={ozet} />
+    </div>
+    <div class="bant-yeri">
+      <Bant ogeler={ogeler} etiket={etiketler.bant} />
+    </div>
+  </div>
+</PaftaCercevesi>
+
+<script>
+  // Desteyi etkinleştirir: ← → düğmeleri ve bant kutuları öndeki kartı değiştirir.
+  // Durum tek bir sayı (`on`, öndeki kartın indisi); konum hesabı src/pafta/deste.ts'teki saf fonksiyonlarda.
+  import { konumAdi, onceki, sonraki } from '../pafta/deste';
+
+  for (const kok of document.querySelectorAll<HTMLElement>('[data-pafta]')) {
+    const deste = kok.querySelector<HTMLElement>('[data-deste]');
+    const kartlar = [...kok.querySelectorAll<HTMLElement>('[data-kart]')];
+    const kutular = [...kok.querySelectorAll<HTMLAnchorElement>('[data-kutu]')];
+    const sayac = kok.querySelector<HTMLElement>('[data-sayac]');
+    const duyuru = kok.querySelector<HTMLElement>('[data-duyuru]');
+    const n = kartlar.length;
+    // Tek kartlık destede döndürülecek bir şey yok: düz hâl kalır.
+    if (!deste || n < 2) continue;
+
+    /** Kutunun gösterdiği kartın indisi: kutu `#<kart-id>` linki (JS'siz hâlde de bu adrese atlar). */
+    const kartIndisi = (href: string | null) => kartlar.findIndex((kart) => `#${kart.id}` === href);
+
+    // Adres bir kartı gösteriyorsa (/#projeler-simsek) o kart önde başlar.
+    let on = Math.max(0, kartIndisi(location.hash));
+
+    const goster = (duyur: boolean) => {
+      kartlar.forEach((kart, k) => {
+        const konum = konumAdi(k, on, n);
+        kart.dataset.konum = konum;
+        // inert: arkadaki kartın linkleri Tab ile odaklanmaz, ekran okuyucu onu okumaz.
+        kart.inert = konum !== 'on';
+      });
+      kutular.forEach((kutu) => {
+        if (kartIndisi(kutu.getAttribute('href')) === on) kutu.setAttribute('aria-current', 'true');
+        else kutu.removeAttribute('aria-current');
+      });
+      const sira = `${on + 1} / ${n}`;
+      if (sayac) sayac.textContent = sira;
+      // Odak düğmede kalırken yeni kartın adını ekran okuyucuya söyle (sayfa ilk açılışta konuşmasın).
+      if (duyur && duyuru) duyuru.textContent = `${kartlar[on]?.querySelector('h3')?.textContent ?? ''} · ${sira}`;
+    };
+
+    const git = (yeni: number) => {
+      on = yeni;
+      goster(true);
+    };
+
+    kok.querySelector('[data-onceki]')?.addEventListener('click', () => git(onceki(on, n)));
+    kok.querySelector('[data-sonraki]')?.addEventListener('click', () => git(sonraki(on, n)));
+    for (const kutu of kutular) {
+      kutu.addEventListener('click', (olay) => {
+        const k = kartIndisi(kutu.getAttribute('href'));
+        if (k < 0) return; // tanımadığımız link: tarayıcı normal davransın
+        olay.preventDefault(); // sayfa karta atlamasın, adres değişmesin (adres M2'de paftanın)
+        git(k);
+      });
+    }
+
+    goster(false);
+    deste.dataset.deste = 'etkin';
+  }
+</script>
+
+<style>
+  /* Masaüstü: solda deste (640px = 600px kart + iki arka kartın 2 × 20px kayması), sağda 280px özet,
+     altta tam genişlikte bant. Ölçüler taslaktaki "E · Premium: Projeler" paftasından. */
+  .duzen {
+    display: grid;
+    grid-template-columns: minmax(0, 640px) minmax(0, 1fr) minmax(0, 280px);
+    grid-template-areas:
+      'giris giris .'
+      'deste . ozet'
+      'bant bant bant';
+  }
+  .giris {
+    grid-area: giris;
+    max-width: 560px;
+  }
+  .deste-yeri {
+    grid-area: deste;
+    margin-top: 24px;
+  }
+  /* Özetin üstü öndeki kartın üstüyle hizalı (arkadaki iki kartın şeridi 2 × 20px). */
+  .ozet-yeri {
+    grid-area: ozet;
+    margin-top: calc(24px + 40px);
+  }
+  .bant-yeri {
+    grid-area: bant;
+    margin-top: 12px;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--metin);
+    font-size: clamp(40px, 9vw, 52px);
+  }
+  .giris p {
+    margin: 10px 0 0;
+    color: var(--metin-2);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  /* Tablet ve telefon: tek sütun; özet destenin altına iner (§8). Ayrıntılı mobil tasarım M5'te. */
+  @media (max-width: 1079px) {
+    .duzen {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'giris' 'deste' 'ozet' 'bant';
+    }
+    .deste-yeri {
+      max-width: 640px;
+    }
+    .ozet-yeri {
+      margin-top: 24px;
+    }
+    .bant-yeri {
+      margin-top: 24px;
+    }
+  }
+</style>

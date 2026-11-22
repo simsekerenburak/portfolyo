@@ -1,0 +1,25 @@
+---
+// Projeler paftası (02): ortak Pafta şablonu + projeler koleksiyonunun verisi.
+// Koleksiyonu sayfa okur ve buraya verir (sayfa aynı veriden taslak bayrağını da hesaplıyor).
+import { METINLER, type Dil } from '../i18n';
+import { projeOgeleri, projeOzeti, type ProjeKaydi } from '../pafta/projeler';
+import Pafta from './Pafta.astro';
+
+interface Props {
+  lang: Dil;
+  kayitlar: ProjeKaydi[];
+}
+
+const { lang, kayitlar } = Astro.props;
+const m = METINLER[lang].projeler;
+---
+
+<Pafta
+  id="projeler"
+  lang={lang}
+  baslik={m.baslik}
+  giris={m.giris}
+  ogeler={projeOgeleri(kayitlar, lang)}
+  ozet={projeOzeti(kayitlar, lang)}
+  etiketler={{ deste: m.desteEtiketi, bant: m.bantEtiketi }}
+/>

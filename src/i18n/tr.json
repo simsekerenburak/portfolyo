@@ -17,5 +17,36 @@
     "tanitim": "Sivas Cumhuriyet Üniversitesi’nde 4. sınıftayım. STM32 ve ESP32 ile gömülü sistemler geliştiriyor, bunları yapay zekâyla buluşturan projeler üzerinde çalışıyorum. Şu an Kapsam Elektromekanik’te stajyerim.",
     "iletisimDugmesi": "İletişime geç",
     "iletisimEtiketi": "İletişim bağlantıları"
+  },
+  "pafta": {
+    "onceki": "Önceki",
+    "sonraki": "Sonraki"
+  },
+  "projeler": {
+    "baslik": "Projeler",
+    "giris": "Dört proje var, biri hâlâ yapım aşamasında.",
+    "desteEtiketi": "Proje kartları",
+    "bantEtiketi": "Proje kutuları",
+    "ozet": {
+      "bir": "proje",
+      "cok": "proje"
+    },
+    "durum": {
+      "tamamlandi": "tamamlanan",
+      "yapim-asamasinda": "yapım aşamasında"
+    },
+    "etiket": {
+      "yapim-asamasinda": "Yapım aşamasında"
+    },
+    "tur": {
+      "takim": "takım projesi",
+      "tek-kisilik": "tek kişilik"
+    },
+    "turKisa": {
+      "takim": "takım",
+      "tek-kisilik": "tek kişilik"
+    },
+    "rol": "Rolüm",
+    "demo": "Canlı demo"
   }
 }

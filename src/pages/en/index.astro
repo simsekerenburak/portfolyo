@@ -1,15 +1,20 @@
 ---
-// Ana sayfa (EN). İçerik M6'ya kadar kaba çeviri: en.json'daki `taslak: true` → <html data-taslak>,
-// kontrol.mjs bunu uyarı olarak gösterir.
+// Ana sayfa (EN). İçerik M6'ya kadar kaba çeviri: en.json'daki ve EN projelerdeki `taslak: true`
+// → <html data-taslak>, kontrol.mjs bunu uyarı olarak gösterir.
 import Hakkimda from '../../components/Hakkimda.astro';
+import Projeler from '../../components/Projeler.astro';
 import { METINLER } from '../../i18n';
+import { projeKayitlari } from '../../icerik/koleksiyonlar';
 import Duzen from '../../layouts/Duzen.astro';
 
 const m = METINLER.en;
+const projeler = await projeKayitlari('en');
+const taslak = m.taslak || projeler.some((p) => p.veri.taslak);
 ---
 
-<Duzen lang="en" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={m.taslak}>
+<Duzen lang="en" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={taslak}>
   <main>
     <Hakkimda lang="en" />
+    <Projeler lang="en" kayitlar={projeler} />
   </main>
 </Duzen>

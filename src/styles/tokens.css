@@ -41,6 +41,8 @@
   --kart-on: linear-gradient(170deg, var(--kart-on-1), var(--kart-on-2));
   --kart-orta: light-dark(#D3E0CA, #154434);
   --kart-arka: light-dark(#C9D8BF, #12392B);
+  --kart-cizgi: light-dark(rgba(15, 46, 34, 0.1), rgba(243, 235, 221, 0.1)); /* kart kenarı */
+  --kart-golge: light-dark(rgba(10, 40, 25, 0.22), rgba(0, 20, 12, 0.5)); /* öndeki kartın gölgesi */
 
   /* ── Metin ───────────────────────────────────────────────────────────── */
   --metin: light-dark(#0F2E22, #F3EBDD);
@@ -69,6 +71,8 @@
   --krem-kutu: linear-gradient(180deg, var(--krem-kutu-1), var(--krem-kutu-2));
   --kutu-metin: #0F2E22;
   --bant: light-dark(#13110F, #0A1E16);
+  --bant-cizgi: #3D3A37; /* bandın üst ışık çizgisi ve uçtaki makaralar */
+  --kutu-golge: rgba(12, 11, 10, 0.45); /* krem kutunun banda düşen gölgesi (saf siyah değil: sıcak gri) */
 
   /* ── Kenar, gölge, çerçeve (metin değil; beyaz yerine krem/yeşil: saf beyaz "sıcak gri" kuralına takılır) ── */
   --pafta-cizgi: light-dark(rgba(15, 46, 34, 0.08), rgba(243, 235, 221, 0.08)); /* pafta kenarı */

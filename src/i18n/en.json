@@ -17,5 +17,36 @@
     "tanitim": "I’m a fourth-year student at Sivas Cumhuriyet University. I build embedded systems with STM32 and ESP32 and work on projects that bring them together with AI. I’m currently an intern at Kapsam Elektromekanik.",
     "iletisimDugmesi": "Get in touch",
     "iletisimEtiketi": "Contact links"
+  },
+  "pafta": {
+    "onceki": "Previous",
+    "sonraki": "Next"
+  },
+  "projeler": {
+    "baslik": "Projects",
+    "giris": "Four projects, one of them still in progress.",
+    "desteEtiketi": "Project cards",
+    "bantEtiketi": "Project boxes",
+    "ozet": {
+      "bir": "project",
+      "cok": "projects"
+    },
+    "durum": {
+      "tamamlandi": "completed",
+      "yapim-asamasinda": "in progress"
+    },
+    "etiket": {
+      "yapim-asamasinda": "In progress"
+    },
+    "tur": {
+      "takim": "team project",
+      "tek-kisilik": "solo"
+    },
+    "turKisa": {
+      "takim": "team",
+      "tek-kisilik": "solo"
+    },
+    "rol": "My role",
+    "demo": "Live demo"
   }
 }

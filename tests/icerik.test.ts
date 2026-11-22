@@ -6,43 +6,13 @@
 //
 // Astro build de her dosyayı şemadan geçirir; bu test aynı hatayı build'den önce, hangi dosyada
 // olduğunu söyleyerek yakalar ve build'in denetleyemediği kuralları (dil eşleşmesi) ekler.
-// Frontmatter Astro'nun kullandığı aynı YAML ayrıştırıcısıyla (yaml@2) okunur.
-import { readFileSync, readdirSync } from 'node:fs';
+// Frontmatter Astro'nun kullandığı aynı YAML ayrıştırıcısıyla (yaml@2) okunur (tests/yardimci/icerik.ts).
 import { describe, expect, it } from 'vitest';
-import { parse } from 'yaml';
 import { KISA_AD_EN_FAZLA, projeSemasi, type Proje } from '../src/icerik/sema';
+import { hamProjeler, projeler } from './yardimci/icerik';
 
-const KOK = new URL('../src/content/projeler/', import.meta.url);
 const DILLER = ['tr', 'en'] as const;
-
-/** Markdown dosyasının baştaki `---` blokları arasındaki YAML'ı nesneye çevirir. */
-function frontmatter(metin: string): unknown {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(metin);
-  if (!m) throw new Error('frontmatter bulunamadı');
-  return parse(m[1]!);
-}
-
-/** Bir dil klasöründeki tüm projeler: slug → ham frontmatter */
-function hamProjeler(dil: string): Map<string, unknown> {
-  const klasor = new URL(`${dil}/`, KOK);
-  const sonuc = new Map<string, unknown>();
-  for (const dosya of readdirSync(klasor).filter((d) => d.endsWith('.md')).sort()) {
-    sonuc.set(dosya.replace(/\.md$/, ''), frontmatter(readFileSync(new URL(dosya, klasor), 'utf8')));
-  }
-  return sonuc;
-}
-
 const HAM = { tr: hamProjeler('tr'), en: hamProjeler('en') };
-
-/** Şemadan geçmiş veri (geçmezse test burada değil, aşağıdaki "şemadan geçiyor" testinde kırılır). */
-function projeler(dil: (typeof DILLER)[number]): Map<string, Proje> {
-  const sonuc = new Map<string, Proje>();
-  for (const [slug, ham] of HAM[dil]) {
-    const r = projeSemasi.safeParse(ham);
-    if (r.success) sonuc.set(slug, r.data);
-  }
-  return sonuc;
-}
 
 // Şemaya uyan en küçük örnek; negatif testler bunu tek bir noktada bozar ("tek bozma → tek hata").
 const ORNEK = {

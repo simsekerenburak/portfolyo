@@ -189,6 +189,8 @@ const KULLANIMLAR: Kullanim[] = [
 
   // Durum çizgileri (WCAG 1.4.11): çerçeve kutudan 2px açıkta durur, çevresi pafta; kutular bandın hemen üstünde.
   { ne: 'Seçili kutu çerçevesi', metin: '--turuncu-cizgi', yuzey: [...PAFTA, '--bant'], px: 2, kalinlik: 400, simge: true },
+  // Bant kutusunun odak halkası kutudan 6px açıkta: alt kenarı bandın üstüne düşer (Bant.astro).
+  { ne: 'Bant kutusu odak halkası', metin: '--turuncu-cizgi', yuzey: [...PAFTA, '--bant'], px: 2, kalinlik: 400, simge: true },
   { ne: 'Aktif pafta göstergesi', metin: '--turuncu-cizgi', yuzey: PAFTA, px: 6, kalinlik: 400, simge: true },
   { ne: 'Klavye odak halkası (temel.css)', metin: '--turuncu-cizgi', yuzey: STANDART, px: 2, kalinlik: 400, simge: true },
 

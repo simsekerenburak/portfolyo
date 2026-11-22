@@ -1,0 +1,137 @@
+---
+// Sağdaki özet açılır menüsü (CLAUDE.md §3.2): "4 proje" → "3 tamamlanan" / "1 yapım aşamasında" → satırlar.
+// <details>/<summary>: tarayıcının yerleşik aç-kapa öğesi. JS gerektirmez, klavyeyle (Enter/Boşluk)
+// çalışır, ekran okuyucu "genişletildi / daraltıldı" diye okur. Taslaktaki gibi ana menü açık başlar,
+// alt menüler kapalı.
+import type { Ozet } from '../pafta/tipler';
+
+interface Props {
+  ozet: Ozet;
+}
+
+const { ozet } = Astro.props;
+---
+
+<details class="ozet" open>
+  <summary class="ana">
+    <span class="sayi">{ozet.sayi}</span>
+    <span class="etiket">{ozet.etiket}</span>
+    <svg class="ok" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+  </summary>
+  <div class="kutu">
+    {
+      ozet.gruplar.map((g) => (
+        <details class="grup">
+          <summary>
+            <span class="sayi">{g.sayi}</span>
+            <span class="etiket">{g.etiket}</span>
+            <svg class="ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </summary>
+          <ul class="satirlar">
+            {g.satirlar.map((s) => (
+              <li>
+                <span class="satir-baslik">{s.baslik}</span>
+                <span class="satir-aciklama">{s.aciklama}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))
+    }
+  </div>
+</details>
+
+<style>
+  summary {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-height: 44px; /* dokunma hedefi (§8) */
+    cursor: pointer;
+    list-style: none; /* tarayıcının ▸ işaretini kaldır; yerine kendi okumuz */
+  }
+  summary::-webkit-details-marker {
+    display: none; /* Safari */
+  }
+
+  /* Ok, yanındaki etiketin taban çizgisine oturur (taslaktaki ⌄ gibi); alt menüde ortalanır. */
+  .ok {
+    align-self: baseline;
+    flex: none;
+    color: var(--turuncu-yazi);
+    transition: transform 0.2s ease;
+  }
+  /* Yalnızca KENDİ details'i açıksa döner (iç içe menülerde dıştaki açık diye içteki dönmesin). */
+  details[open] > summary > .ok {
+    transform: rotate(180deg);
+  }
+
+  .ana .sayi {
+    color: var(--turuncu-yazi);
+    font: 600 56px/1 var(--font-baslik);
+    letter-spacing: -0.02em;
+  }
+  .ana .etiket {
+    color: var(--metin);
+    font-size: 17px;
+  }
+
+  .kutu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 14px;
+    padding: 6px 16px;
+    border: 1px solid var(--menu-cizgi);
+    border-radius: 14px;
+    background: var(--menu-zemin);
+  }
+
+  .grup summary {
+    align-items: center;
+  }
+  .grup .ok {
+    align-self: center;
+  }
+  .grup .sayi {
+    color: var(--turuncu-yazi);
+    font: 600 30px/1 var(--font-baslik);
+    letter-spacing: -0.02em;
+  }
+  .grup .etiket {
+    color: var(--metin-2);
+    font-size: 15px;
+  }
+
+  .satirlar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0 10px;
+    padding: 0 0 0 4px;
+    list-style: none;
+  }
+  .satir-baslik {
+    display: block;
+    color: var(--metin);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .satir-aciklama {
+    display: block;
+    color: var(--metin-3);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ok {
+      transition: none;
+    }
+  }
+</style>

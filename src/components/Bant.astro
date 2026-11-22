@@ -1,0 +1,107 @@
+---
+// Yürüyen bant (CLAUDE.md §3.2): her öğe krem renkli bir kutu. Kutu, karta `#<id>` linkidir:
+//   JS yok  → link sayfada o karta atlar (düz listede de gezinme çalışır).
+//   JS var  → Pafta.astro'daki betik linki yakalar, kartı destenin önüne getirir ve kutuya
+//             aria-current="true" koyar (turuncu çerçeve). M4'te kutuyu kol taşıyacak.
+import type { PaftaOgesi } from '../pafta/tipler';
+
+interface Props {
+  ogeler: PaftaOgesi[];
+  /** listenin ekran okuyucu adı: "Proje kutuları" */
+  etiket: string;
+}
+
+const { ogeler, etiket } = Astro.props;
+---
+
+<div class="bant-alani">
+  <div class="bant-ic">
+    <ul class="kutular" aria-label={etiket}>
+      {
+        ogeler.map((o) => (
+          <li>
+            <a class="kutu" href={`#${o.id}`} data-kutu>
+              {o.kisaAd}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="bant" aria-hidden="true"></div>
+  </div>
+</div>
+
+<style>
+  /* Dar ekranda bant yatay kayar. Kaydırılan kutu taşanı keser; 8px iç boşluk seçili çerçeveye
+     (4px) ve odak halkasına (8px) yer açar, eksi kenar boşluğu bu payı hizadan geri alır. */
+  .bant-alani {
+    overflow-x: auto;
+    margin: -8px;
+    padding: 8px;
+    scrollbar-width: thin;
+  }
+  .bant-ic {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .kutular {
+    display: flex;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kutu {
+    position: relative;
+    display: flex; /* inline-flex olsaydı satır kutusu altta birkaç px boşluk bırakırdı; kutu banda otursun */
+    align-items: center;
+    height: 44px; /* dokunma hedefi (§8) */
+    padding: 0 16px;
+    border-radius: 8px;
+    background: var(--krem-kutu);
+    box-shadow: 0 10px 18px -8px var(--kutu-golge);
+    color: var(--kutu-metin);
+    font: 500 14px/1 var(--font-govde);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.15s ease;
+  }
+  .kutu:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Öndeki kartın kutusu: 2px turuncu çerçeve, kutudan 2px açıkta (taslaktaki outline).
+     outline yerine ::after: outline klavye odağına ayrıldı, ikisi aynı anda görünebilsin. */
+  .kutu[aria-current='true']::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--turuncu-cizgi);
+    border-radius: 10px;
+    pointer-events: none;
+  }
+  .kutu:focus-visible {
+    outline-offset: 6px;
+  }
+
+  /* Bant: koyu kayış, üstte 3px ışık çizgisi, iki uçta makara. Kutular tam üstüne oturur. */
+  .bant {
+    height: 20px;
+    border-radius: 10px;
+    background:
+      radial-gradient(circle 6px at 12px 10px, var(--bant-cizgi) 95%, transparent),
+      radial-gradient(circle 6px at calc(100% - 12px) 10px, var(--bant-cizgi) 95%, transparent),
+      linear-gradient(var(--bant-cizgi) 0 3px, var(--bant) 3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kutu {
+      transition: none;
+    }
+    .kutu:hover {
+      transform: none;
+    }
+  }
+</style>
