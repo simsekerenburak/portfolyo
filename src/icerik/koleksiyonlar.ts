@@ -4,7 +4,7 @@ import { getCollection, getEntry } from 'astro:content';
 import type { Dil } from '../i18n';
 import { METINLER } from '../i18n';
 import { kimlikCoz, siraliProjeler, type ProjeKaydi } from '../pafta/projeler';
-import type { StajlarDosyasi } from './sema';
+import type { StajlarDosyasi, YetkinliklerDosyasi } from './sema';
 
 /** Bir dilin projeleri, destedeki sırayla. */
 export async function projeKayitlari(dil: Dil): Promise<ProjeKaydi[]> {
@@ -22,13 +22,25 @@ export async function stajlarDosyasi(dil: Dil): Promise<StajlarDosyasi> {
   return kayit.data;
 }
 
+/** Bir dilin yetkinlikler dosyası (src/content/yetkinlikler/<dil>.json). */
+export async function yetkinliklerDosyasi(dil: Dil): Promise<YetkinliklerDosyasi> {
+  const kayit = await getEntry('yetkinlikler', dil);
+  if (!kayit) throw new Error(`src/content/yetkinlikler/${dil}.json bulunamadı`);
+  return kayit.data;
+}
+
 /** Ana sayfanın bütün içeriği, tek yerden. Sayfa ve paftalar aynı veriyi kullanır. */
 export async function sayfaVerisi(dil: Dil) {
-  const [projeler, stajlar] = await Promise.all([projeKayitlari(dil), stajlarDosyasi(dil)]);
+  const [projeler, stajlar, yetkinlikler] = await Promise.all([
+    projeKayitlari(dil),
+    stajlarDosyasi(dil),
+    yetkinliklerDosyasi(dil),
+  ]);
   return {
     projeler,
     stajlar: stajlar.stajlar,
+    alanlar: yetkinlikler.alanlar,
     // Sayfadaki herhangi bir içerik kaba çeviriyse sayfa taslaktır (kontrol.mjs M1–M5 uyarır, M6'da kırar).
-    taslak: METINLER[dil].taslak || projeler.some((p) => p.veri.taslak) || stajlar.taslak,
+    taslak: METINLER[dil].taslak || projeler.some((p) => p.veri.taslak) || stajlar.taslak || yetkinlikler.taslak,
   };
 }

@@ -94,5 +94,20 @@
     },
     "devamEden": "ongoing",
     "devamEdiyor": "Ongoing"
+  },
+  "yetkinlikler": {
+    "baslik": "Skills",
+    "giris": "Every tool, together with the project I actually used it in.",
+    "desteEtiketi": "Skill cards",
+    "bantEtiketi": "Skill boxes",
+    "ozet": {
+      "bir": "area",
+      "cok": "areas"
+    },
+    "arac": {
+      "bir": "tool",
+      "cok": "tools"
+    },
+    "egitim": "training"
   }
 }

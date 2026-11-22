@@ -119,3 +119,46 @@ export const stajlarDosyasiSemasi = z
 
 export type Staj = z.output<typeof stajSemasi>;
 export type StajlarDosyasi = z.output<typeof stajlarDosyasiSemasi>;
+
+// ─── Yetkinlikler ──────────────────────────────────────────────────────────
+
+/**
+ * Bir yetkinliğin nerede kullanıldığı, serbest metin değil REFERANS olarak:
+ *   "proje:<slug>"  → projeler koleksiyonundaki proje (kısa adı yazılır: "Yıldız Takip")
+ *   "staj:<id>"     → stajlar dosyasındaki staj ("Demircan")
+ *   "egitim"        → eğitimler (sertifikalar)
+ * Böylece özet menüsündeki "3 proje" sayısı hesaplanır ve adlar her yerde aynı kalır. Şema yalnızca
+ * BİÇİMİ denetler; referansın gerçekten var olduğunu src/pafta/yetkinlikler.ts build sırasında denetler.
+ */
+export const KULLANIM_DESENI = /^(?:(?:proje|staj):[a-z0-9]+(?:-[a-z0-9]+)*|egitim)$/;
+
+const benzersiz = (liste: string[]) => new Set(liste).size === liste.length;
+
+export const yetkinlikSemasi = z
+  .object({
+    id: kimlik,
+    /** Bant kutusu: "Gömülü" */
+    kisaAd: metin.max(KISA_AD_EN_FAZLA),
+    /** Kart başlığı: "Gömülü sistemler" */
+    ad: metin,
+    altBaslik: metin,
+    aciklama: metin.max(240),
+    kullanim: z
+      .array(z.string().regex(KULLANIM_DESENI, 'kullanım "proje:<slug>", "staj:<id>" ya da "egitim" olmalı'))
+      .min(1)
+      .max(4)
+      .refine(benzersiz, 'aynı kullanım iki kez yazılmış'),
+    /** Araçlar (kartta hap olarak). Yüzdelik çubuk YOK (CLAUDE.md §7). */
+    araclar: z.array(metin).min(1).max(10).refine(benzersiz, 'aynı araç iki kez yazılmış'),
+  })
+  .strict();
+
+export const yetkinliklerDosyasiSemasi = z
+  .object({
+    taslak: z.boolean().default(false),
+    alanlar: z.array(yetkinlikSemasi).min(1).refine(benzersizIdler, 'alan id’leri benzersiz olmalı'),
+  })
+  .strict();
+
+export type Yetkinlik = z.output<typeof yetkinlikSemasi>;
+export type YetkinliklerDosyasi = z.output<typeof yetkinliklerDosyasiSemasi>;

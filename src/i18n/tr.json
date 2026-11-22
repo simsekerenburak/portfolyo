@@ -94,5 +94,20 @@
     },
     "devamEden": "devam eden",
     "devamEdiyor": "Devam ediyor"
+  },
+  "yetkinlikler": {
+    "baslik": "Yetkinlikler",
+    "giris": "Her araç, onu gerçekten kullandığım projeyle birlikte.",
+    "desteEtiketi": "Yetkinlik kartları",
+    "bantEtiketi": "Yetkinlik kutuları",
+    "ozet": {
+      "bir": "alan",
+      "cok": "alan"
+    },
+    "arac": {
+      "bir": "araç",
+      "cok": "araç"
+    },
+    "egitim": "eğitimler"
   }
 }

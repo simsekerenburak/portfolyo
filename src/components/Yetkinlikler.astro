@@ -1,0 +1,27 @@
+---
+// Yetkinlikler paftası (04): ortak Pafta şablonu + yetkinlikler koleksiyonu.
+// Kullanım referansları projeler ve stajlar verisinden çözülür (src/pafta/yetkinlikler.ts).
+import type { Yetkinlik } from '../icerik/sema';
+import { METINLER, type Dil } from '../i18n';
+import { yetkinlikOgeleri, yetkinlikOzeti, type Kaynaklar } from '../pafta/yetkinlikler';
+import Pafta from './Pafta.astro';
+
+interface Props {
+  lang: Dil;
+  alanlar: Yetkinlik[];
+  kaynak: Kaynaklar;
+}
+
+const { lang, alanlar, kaynak } = Astro.props;
+const m = METINLER[lang].yetkinlikler;
+---
+
+<Pafta
+  id="yetkinlikler"
+  lang={lang}
+  baslik={m.baslik}
+  giris={m.giris}
+  ogeler={yetkinlikOgeleri(alanlar, kaynak, lang)}
+  ozet={yetkinlikOzeti(alanlar, kaynak, lang)}
+  etiketler={{ deste: m.desteEtiketi, bant: m.bantEtiketi }}
+/>

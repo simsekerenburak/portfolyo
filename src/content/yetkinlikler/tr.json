@@ -1,0 +1,50 @@
+{
+  "taslak": false,
+  "alanlar": [
+    {
+      "id": "gomulu",
+      "kisaAd": "Gömülü",
+      "ad": "Gömülü sistemler",
+      "altBaslik": "Ana odak alanım",
+      "aciklama": "Mikrodenetleyici yazılımı ve sensör entegrasyonu: STM32 ile ivmeölçer ve pusula verisi, Arduino ile fiziksel hatırlatıcı.",
+      "kullanim": ["proje:yildiz-takip", "proje:meditrack"],
+      "araclar": ["STM32", "ESP32", "Arduino", "C", "I2C", "UART"]
+    },
+    {
+      "id": "yazilim",
+      "kisaAd": "Yazılım",
+      "ad": "Yazılım",
+      "altBaslik": "Masaüstü ve otomasyon",
+      "aciklama": "Mühendislik hesaplarını otomatikleştiren araçlar ve UART üzerinden veri alan yer kontrol istasyonu arayüzü.",
+      "kullanim": ["staj:demircan", "proje:yildiz-takip"],
+      "araclar": ["Python", "Java", "Dart", "PyQt6"]
+    },
+    {
+      "id": "backend",
+      "kisaAd": "Backend",
+      "ad": "Backend ve bulut",
+      "altBaslik": "API, veritabanı, depolama",
+      "aciklama": "FastAPI ile REST servisleri, Firebase veri katmanı ve Cloudflare üzerinde ücretsiz çalışan bulut altyapısı.",
+      "kullanim": ["proje:meditrack", "proje:simsek"],
+      "araclar": ["FastAPI", "Firebase", "Cloudflare Workers", "D1", "R2"]
+    },
+    {
+      "id": "mobil",
+      "kisaAd": "Mobil",
+      "ad": "Mobil",
+      "altBaslik": "iOS ve Android",
+      "aciklama": "Expo ile iPhone’da çalışan asistan uygulaması ve stajda mobil geliştirme.",
+      "kullanim": ["proje:simsek", "staj:kapsam"],
+      "araclar": ["React Native", "Expo", "Flutter"]
+    },
+    {
+      "id": "yapay-zeka",
+      "kisaAd": "Yapay zekâ",
+      "ad": "Yapay zekâ",
+      "altBaslik": "Uygulamalı yapay zekâ",
+      "aciklama": "Dil modellerini uygulamaya bağlama ve Whisper ile sesli komut. Huawei ve AI Business School eğitimleri.",
+      "kullanim": ["proje:simsek", "egitim"],
+      "araclar": ["LLM entegrasyonu", "Whisper", "Workers AI"]
+    }
+  ]
+}

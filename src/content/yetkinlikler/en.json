@@ -1,0 +1,50 @@
+{
+  "taslak": true,
+  "alanlar": [
+    {
+      "id": "gomulu",
+      "kisaAd": "Embedded",
+      "ad": "Embedded systems",
+      "altBaslik": "My main focus",
+      "aciklama": "Microcontroller firmware and sensor integration: accelerometer and compass data on STM32, a physical reminder on Arduino.",
+      "kullanim": ["proje:yildiz-takip", "proje:meditrack"],
+      "araclar": ["STM32", "ESP32", "Arduino", "C", "I2C", "UART"]
+    },
+    {
+      "id": "yazilim",
+      "kisaAd": "Software",
+      "ad": "Software",
+      "altBaslik": "Desktop and automation",
+      "aciklama": "Tools that automate engineering calculations, and a ground control station interface that receives data over UART.",
+      "kullanim": ["staj:demircan", "proje:yildiz-takip"],
+      "araclar": ["Python", "Java", "Dart", "PyQt6"]
+    },
+    {
+      "id": "backend",
+      "kisaAd": "Backend",
+      "ad": "Backend and cloud",
+      "altBaslik": "APIs, databases, storage",
+      "aciklama": "REST services with FastAPI, a Firebase data layer and a cloud stack that runs for free on Cloudflare.",
+      "kullanim": ["proje:meditrack", "proje:simsek"],
+      "araclar": ["FastAPI", "Firebase", "Cloudflare Workers", "D1", "R2"]
+    },
+    {
+      "id": "mobil",
+      "kisaAd": "Mobile",
+      "ad": "Mobile",
+      "altBaslik": "iOS and Android",
+      "aciklama": "An assistant app running on iPhone with Expo, and mobile development during my internship.",
+      "kullanim": ["proje:simsek", "staj:kapsam"],
+      "araclar": ["React Native", "Expo", "Flutter"]
+    },
+    {
+      "id": "yapay-zeka",
+      "kisaAd": "AI",
+      "ad": "Artificial intelligence",
+      "altBaslik": "Applied AI",
+      "aciklama": "Connecting language models to applications, and voice commands with Whisper. Huawei and AI Business School training.",
+      "kullanim": ["proje:simsek", "egitim"],
+      "araclar": ["LLM integration", "Whisper", "Workers AI"]
+    }
+  ]
+}
