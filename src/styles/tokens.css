@@ -1,0 +1,122 @@
+/*
+ * Tasarım token'ları — kaynak: CLAUDE.md §4.2 (yeşil %60 · turuncu %30 · krem %10).
+ *
+ * Her renk tek satırda iki temayı birden tutar:  light-dark(AÇIK, KOYU)
+ * Tarayıcı hangisini kullanacağını `color-scheme` özelliğine bakarak seçer:
+ *   - varsayılan `light dark` → cihaz ayarı (JS kapalıyken de çalışır),
+ *   - <html data-theme="koyu|acik"> → tema düğmesinin seçimi zorlanır.
+ *
+ * Kurallar (tests/renk.test.ts bunları denetler):
+ *   - Mavi ve soğuk gri yok: renkli tonlar 170°–270° bandının dışında, griler sıcak (R > B).
+ *   - Metin/yüzey çiftleri WCAG kontrastını geçer (normal 4.5:1, büyük metin ve simge 3:1).
+ *   - Turuncu METİN her zaman --turuncu-yazi; --turuncu yalnızca dolgu (düğme, nokta, gösterge).
+ */
+
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme='koyu'] {
+  color-scheme: dark;
+}
+:root[data-theme='acik'] {
+  color-scheme: light;
+}
+
+:root {
+  /* ── Zemin (sahnenin arkası) ─────────────────────────────────────────── */
+  --zemin: light-dark(#BFD0B6, #0B241B);
+  --zemin-isik: light-dark(#E6EEDF, #2C6A50); /* radyal ışığın merkezi */
+  --zemin-gradyan: radial-gradient(ellipse 70% 60% at 70% 18%, var(--zemin-isik) 0%, var(--zemin) 64%);
+
+  /* ── Paftalar (üst üste deste) ───────────────────────────────────────── */
+  --pafta-1: light-dark(#E4ECDC, #18503C); /* gradyanın ışık alan ucu */
+  --pafta-2: light-dark(#D5E2CC, #0E3326);
+  --pafta: linear-gradient(var(--pafta-aci), var(--pafta-1), var(--pafta-2));
+  --pafta-arka-1: light-dark(#C6D6BD, #12392B);
+  --pafta-arka-2: light-dark(#B3C6A9, #0F3427);
+
+  /* ── Kartlar (içerik destesi) ────────────────────────────────────────── */
+  --kart-on-1: light-dark(#F4F7EF, #1E5C45);
+  --kart-on-2: light-dark(#E6EEDD, #164A37);
+  --kart-on: linear-gradient(170deg, var(--kart-on-1), var(--kart-on-2));
+  --kart-orta: light-dark(#D3E0CA, #154434);
+  --kart-arka: light-dark(#C9D8BF, #12392B);
+
+  /* ── Metin ───────────────────────────────────────────────────────────── */
+  --metin: light-dark(#0F2E22, #F3EBDD);
+  --metin-2: light-dark(#2E4A3A, #C9D2BC);
+  --metin-3: light-dark(#43594A, #BFCABB); /* kontrast için koyulaştırıldı / açıldı (2026-11) */
+
+  /* ── Turuncu (etkileşim) ─────────────────────────────────────────────── */
+  --turuncu: #FF7A1A; /* yalnızca DOLGU: ana düğme, kart üst satırı noktası */
+  --turuncu-cizgi: light-dark(#C2410C, #FF7A1A); /* durum çizgisi: seçili kutu çerçevesi, aktif pafta göstergesi (≥ 3:1) */
+  --turuncu-yazi: light-dark(#973308, #FF8A3D); /* turuncu METİN: alt başlık, büyük sayılar, ok simgeleri */
+  --turuncu-ustu: #2A0E02; /* turuncu dolgunun üstündeki yazı/simge */
+  --led: light-dark(#FF7A1A, #FFF1D6);
+
+  /* ── Yarı saydam yüzeyler (alttaki yüzeyle karışarak görünür) ──────────── */
+  --hap-zemin: light-dark(rgba(15, 46, 34, 0.07), rgba(243, 235, 221, 0.08)); /* teknoloji hapı */
+  --hap-metin: light-dark(#1F3D2F, #DCE3D2); /* hap yazısı, dil/tema düğmesi */
+  --etiket-zemin: light-dark(rgba(234, 90, 20, 0.14), rgba(255, 122, 26, 0.18)); /* "Devam ediyor" */
+  --sekme-zemin: light-dark(rgba(234, 90, 20, 0.16), rgba(255, 122, 26, 0.2)); /* aktif sekme */
+  --vurgu-metin: light-dark(#973308, #FFD2B0); /* etiket ve aktif sekme yazısı */
+  --menu-zemin: light-dark(rgba(234, 90, 20, 0.08), rgba(255, 122, 26, 0.08)); /* özet açılır menüsü */
+  --menu-cizgi: light-dark(rgba(234, 90, 20, 0.25), rgba(255, 122, 26, 0.25));
+
+  /* ── Krem kutular (bant) ─────────────────────────────────────────────── */
+  --krem-kutu-1: #FBF7EE;
+  --krem-kutu-2: #EFE7D6;
+  --krem-kutu: linear-gradient(180deg, var(--krem-kutu-1), var(--krem-kutu-2));
+  --kutu-metin: #0F2E22;
+  --bant: light-dark(#13110F, #0A1E16);
+
+  /* ── Kenar, gölge, çerçeve (metin değil; beyaz yerine krem/yeşil: saf beyaz "sıcak gri" kuralına takılır) ── */
+  --pafta-cizgi: light-dark(rgba(15, 46, 34, 0.08), rgba(243, 235, 221, 0.08)); /* pafta kenarı */
+  --pafta-golge: light-dark(rgba(15, 46, 34, 0.18), rgba(0, 20, 12, 0.55)); /* öndeki paftanın gölgesi */
+  --dugme-cizgi: light-dark(rgba(15, 46, 34, 0.28), rgba(243, 235, 221, 0.22)); /* çerçeveli düğme, dil düğmesi */
+
+  /* ── Robot kol (§4.4) — metal ve eloksal iki temada aynı ────────────────── */
+  --kol-ray-1: #A9B7A3; /* tavan rayı: alüminyum, dikey gradyan */
+  --kol-ray-2: #4D4945;
+  --kol-ray-3: #252220;
+  --kol-direk-1: #2D2A28; /* teleskopik direk ve gripper parmakları: metalik yatay gradyan */
+  --kol-direk-2: #7C7873;
+  --kol-direk-3: #292624;
+  --kol-link-1: #FF9A4D; /* linkler: turuncu eloksal, çapraz gradyan */
+  --kol-link-2: #C2410C;
+  --kol-link-3: #EA6A1F;
+  --kol-eklem-1: #FFB37A; /* eklemler: turuncu radyal gradyan */
+  --kol-eklem-2: #7A2A08;
+  --kol-hale: #FFD27A; /* LED'in bulanık hâlesi */
+  --kol-led: #FFF1D6; /* eklem LED'i: sıcak beyaz (iki temada) */
+  --kol-govde: #211E1C; /* taşıyıcı: koyu grafit */
+  --kol-govde-cizgi: #3D3A37;
+  --kol-govde-isik: #5E5A55;
+  --kol-gripper: #262321;
+  --kol-kontur: #0C0B0A; /* parçaların koyu dış çizgisi */
+  --kol-golge: light-dark(rgba(15, 46, 34, 0.28), rgba(12, 11, 10, 0.55)); /* zemine düşen eliptik gölge */
+
+  /* ── Tipografi (§4.3) — dosyalar fontlar.css'te ──
+   * "… Yedek …" aileleri: ölçüsü asıl fonta uydurulmuş yerel fontlar (yedekFontlar.ts üretir).
+   * Font yüklenene kadar onlar görünür, böylece font gelince satırlar kaymaz.
+   * Sıra: Segoe UI (Windows) → Arial (macOS/iOS) → ayarsız sistem fontu (ör. Android). */
+  --font-baslik: 'Inter Tight', 'Inter Tight Yedek Segoe', 'Inter Tight Yedek Arial', system-ui, -apple-system, sans-serif;
+  --font-govde: 'Inter', 'Inter Yedek Segoe', 'Inter Yedek Arial', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+/*
+ * Pafta gradyanının açısı temaya göre değişir (koyu 160°, açık 170°).
+ * Açı renk olmadığı için light-dark() ile yazılamaz; bu yüzden ayrı bloklarda.
+ */
+:root {
+  --pafta-aci: 160deg;
+}
+:root[data-theme='acik'] {
+  --pafta-aci: 170deg;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='koyu']) {
+    --pafta-aci: 170deg;
+  }
+}
