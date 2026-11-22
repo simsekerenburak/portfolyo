@@ -1,0 +1,178 @@
+// İçerik koleksiyonu denetimi: src/icerik/sema.ts (Zod şeması) ve src/content/projeler/{tr,en}/*.md.
+//   1) Önce ölçüm aleti: şema hatalı veriyi gerçekten reddediyor mu?
+//   2) Her dosya şemadan geçiyor mu?
+//   3) TR ve EN aynı projeleri, aynı çevrilmeyen alanlarla taşıyor mu?
+//   4) İçerik CLAUDE.md §7 ile uyuşuyor mu (4 proje: 3 tamamlanan, 1 yapım aşamasında)?
+//
+// Astro build de her dosyayı şemadan geçirir; bu test aynı hatayı build'den önce, hangi dosyada
+// olduğunu söyleyerek yakalar ve build'in denetleyemediği kuralları (dil eşleşmesi) ekler.
+// Frontmatter Astro'nun kullandığı aynı YAML ayrıştırıcısıyla (yaml@2) okunur.
+import { readFileSync, readdirSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { parse } from 'yaml';
+import { KISA_AD_EN_FAZLA, projeSemasi, type Proje } from '../src/icerik/sema';
+
+const KOK = new URL('../src/content/projeler/', import.meta.url);
+const DILLER = ['tr', 'en'] as const;
+
+/** Markdown dosyasının baştaki `---` blokları arasındaki YAML'ı nesneye çevirir. */
+function frontmatter(metin: string): unknown {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(metin);
+  if (!m) throw new Error('frontmatter bulunamadı');
+  return parse(m[1]!);
+}
+
+/** Bir dil klasöründeki tüm projeler: slug → ham frontmatter */
+function hamProjeler(dil: string): Map<string, unknown> {
+  const klasor = new URL(`${dil}/`, KOK);
+  const sonuc = new Map<string, unknown>();
+  for (const dosya of readdirSync(klasor).filter((d) => d.endsWith('.md')).sort()) {
+    sonuc.set(dosya.replace(/\.md$/, ''), frontmatter(readFileSync(new URL(dosya, klasor), 'utf8')));
+  }
+  return sonuc;
+}
+
+const HAM = { tr: hamProjeler('tr'), en: hamProjeler('en') };
+
+/** Şemadan geçmiş veri (geçmezse test burada değil, aşağıdaki "şemadan geçiyor" testinde kırılır). */
+function projeler(dil: (typeof DILLER)[number]): Map<string, Proje> {
+  const sonuc = new Map<string, Proje>();
+  for (const [slug, ham] of HAM[dil]) {
+    const r = projeSemasi.safeParse(ham);
+    if (r.success) sonuc.set(slug, r.data);
+  }
+  return sonuc;
+}
+
+// Şemaya uyan en küçük örnek; negatif testler bunu tek bir noktada bozar ("tek bozma → tek hata").
+const ORNEK = {
+  baslik: 'Örnek Proje',
+  kisaAd: 'Örnek',
+  altBaslik: 'Ders projesi',
+  aciklama: 'Kısa açıklama.',
+  alan: 'gömülü',
+  yil: 2026,
+  durum: 'tamamlandi',
+  etiketler: ['C'],
+  sira: 1,
+};
+
+// ─── 1) Ölçüm aleti ────────────────────────────────────────────────────────
+describe('proje şeması (önce şemanın kendisini doğrula)', () => {
+  it('geçerli örnek geçiyor; taslak verilmezse false', () => {
+    const r = projeSemasi.parse(ORNEK);
+    expect(r.taslak).toBe(false);
+  });
+
+  it.each([
+    ['zorunlu alan eksik', { ...ORNEK, baslik: undefined }],
+    ['boş başlık', { ...ORNEK, baslik: '   ' }],
+    ['bilinmeyen anahtar (yazım hatası)', { ...ORNEK, durm: 'tamamlandi' }],
+    ['geçersiz tür', { ...ORNEK, tur: 'grup' }],
+    ['geçersiz durum', { ...ORNEK, durum: 'bitti' }],
+    ['yıl metin', { ...ORNEK, yil: '2026' }],
+    ['yıl kesirli', { ...ORNEK, yil: 2026.5 }],
+    ['etiket yok', { ...ORNEK, etiketler: [] }],
+    ['kısa ad bant kutusuna sığmıyor', { ...ORNEK, kisaAd: 'x'.repeat(KISA_AD_EN_FAZLA + 1) }],
+    ['demo http (https değil)', { ...ORNEK, demo: 'http://ornek.dev' }],
+    ['demo javascript: adresi', { ...ORNEK, demo: 'javascript:alert(1)' }],
+    ['zaman metninde yıl yok', { ...ORNEK, yil: 2027, zaman: 'Bahar teslim' }],
+    ['sıra sıfır', { ...ORNEK, sira: 0 }],
+  ])('reddediyor: %s', (_, veri) => {
+    expect(projeSemasi.safeParse(veri).success).toBe(false);
+  });
+
+  it.each([
+    ['opsiyonel alanlar dolu', { ...ORNEK, tur: 'takim', rol: 'sensörler', demo: 'https://ornek.dev/' }],
+    ['zaman metni yılı içeriyor', { ...ORNEK, yil: 2027, zaman: 'Bahar 2027 teslim' }],
+  ])('kabul ediyor: %s', (_, veri) => {
+    expect(projeSemasi.safeParse(veri).success).toBe(true);
+  });
+});
+
+// ─── 2) Dosyalar ───────────────────────────────────────────────────────────
+describe('proje dosyaları şemadan geçiyor', () => {
+  it.each(DILLER)('%s klasöründe proje var', (dil) => {
+    expect(HAM[dil].size).toBeGreaterThan(0);
+  });
+
+  for (const dil of DILLER) {
+    for (const [slug, ham] of HAM[dil]) {
+      it(`${dil}/${slug}.md`, () => {
+        const r = projeSemasi.safeParse(ham);
+        // Hata mesajı alan yolunu gösterir: "aciklama: Too big…"
+        const mesaj = r.success ? '' : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('\n');
+        expect(r.success, mesaj).toBe(true);
+      });
+    }
+  }
+
+  it('slug yalnızca küçük harf, rakam ve tire (adres olarak kullanılacak: /projeler/<slug>/)', () => {
+    for (const dil of DILLER) {
+      for (const slug of HAM[dil].keys()) expect(slug, `${dil}/${slug}`).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+    }
+  });
+
+  it('metinlerde düz kesme işareti yok (tipografik ’ kullanılır)', () => {
+    for (const dil of DILLER) {
+      for (const [slug, p] of projeler(dil)) {
+        const metinler = [p.baslik, p.kisaAd, p.altBaslik, p.aciklama, p.rol, p.alan, p.zaman, ...p.etiketler];
+        expect(metinler.filter((m) => m?.includes("'")), `${dil}/${slug}`).toEqual([]);
+      }
+    }
+  });
+});
+
+// ─── 3) TR ↔ EN ───────────────────────────────────────────────────────────
+describe('TR ve EN aynı projeleri taşıyor', () => {
+  const tr = projeler('tr');
+  const en = projeler('en');
+
+  it('iki dilde aynı slug kümesi', () => {
+    expect([...en.keys()].sort()).toEqual([...tr.keys()].sort());
+  });
+
+  it.each([...tr.keys()])('%s: çevrilmeyen alanlar aynı (yil, tur, durum, sira, demo, etiket sayısı)', (slug) => {
+    const a = tr.get(slug)!;
+    const b = en.get(slug);
+    expect(b, `en/${slug}.md yok`).toBeDefined();
+    const ortak = (p: Proje) => ({
+      yil: p.yil,
+      tur: p.tur,
+      durum: p.durum,
+      sira: p.sira,
+      demo: p.demo,
+      etiketSayisi: p.etiketler.length,
+      rolVar: p.rol !== undefined,
+      zamanVar: p.zaman !== undefined,
+    });
+    expect(ortak(b!)).toEqual(ortak(a));
+  });
+
+  it('TR asıl dil: hiçbir TR proje taslak değil', () => {
+    expect([...tr.values()].filter((p) => p.taslak)).toEqual([]);
+  });
+
+  it.each(DILLER)('%s: sıra numaraları 1..n, tekrarsız', (dil) => {
+    const siralar = [...projeler(dil).values()].map((p) => p.sira).sort((x, y) => x - y);
+    expect(siralar).toEqual(siralar.map((_, i) => i + 1));
+  });
+});
+
+// ─── 4) CLAUDE.md §7 ──────────────────────────────────────────────────────
+describe('içerik CLAUDE.md §7 ile uyuşuyor', () => {
+  const tr = [...projeler('tr').values()].sort((x, y) => x.sira - y.sira);
+
+  it('4 proje, sırasıyla: Yıldız Takip, Şimşek, MediTrack, Robot Kol', () => {
+    expect(tr.map((p) => p.kisaAd)).toEqual(['Yıldız Takip', 'Şimşek', 'MediTrack', 'Robot Kol']);
+  });
+
+  it('3 tamamlanan, 1 yapım aşamasında (Robot Kol)', () => {
+    expect(tr.filter((p) => p.durum === 'tamamlandi')).toHaveLength(3);
+    expect(tr.filter((p) => p.durum === 'yapim-asamasinda').map((p) => p.kisaAd)).toEqual(['Robot Kol']);
+  });
+
+  it('tür bilgisi yalnızca §7’de yazanlarda: Yıldız Takip takım, Şimşek tek kişilik', () => {
+    expect(tr.map((p) => p.tur)).toEqual(['takim', 'tek-kisilik', undefined, undefined]);
+  });
+});
