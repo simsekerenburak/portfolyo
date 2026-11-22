@@ -1,0 +1,16 @@
+# Bağımlılıklar (npm ci ile yeniden kurulur)
+node_modules/
+
+# Build çıktısı (`npm run yayinla` her seferinde yeniden üretir)
+dist/
+
+# Wrangler'ın yerel önbellek ve durum klasörü
+.wrangler/
+
+# Astro'nun ürettiği tip dosyaları
+.astro/
+
+# Günlükler ve ortam dosyaları
+npm-debug.log*
+.env
+.env.*
