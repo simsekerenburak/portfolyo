@@ -1,0 +1,7 @@
+# Satır sonları depoda ve her işletim sisteminde LF olsun (Windows core.autocrlf CRLF yapmasın).
+* text=auto eol=lf
+
+# İkili dosyalar
+*.png binary
+*.woff2 binary
+*.pdf binary
