@@ -6,6 +6,7 @@ import { KISI } from '../kisi';
 import DilDugmesi from './DilDugmesi.astro';
 import KolStatik from './KolStatik.astro';
 import PaftaCercevesi from './PaftaCercevesi.astro';
+import TemaDugmesi from './TemaDugmesi.astro';
 
 interface Props {
   lang: Dil;
@@ -19,6 +20,7 @@ const eposta = `mailto:${KISI.eposta}`;
 <PaftaCercevesi id="hakkimda" baslikId="hakkimda-baslik">
   <div class="ust">
     <DilDugmesi lang={lang} />
+    <TemaDugmesi lang={lang} />
   </div>
 
   <div class="duzen">
@@ -52,6 +54,8 @@ const eposta = `mailto:${KISI.eposta}`;
     position: absolute;
     top: 34px;
     right: clamp(24px, 5.5vw, 64px);
+    display: flex;
+    gap: 8px;
   }
 
   /* Solda metin sütunu (taslakta 500px), sağda kol. Yükseklik taslaktaki 700px'lik paftaya denk. */

@@ -12,6 +12,8 @@ import baslikLatin from '@fontsource/inter-tight/files/inter-tight-latin-600-nor
 import baslikLatinExt from '@fontsource/inter-tight/files/inter-tight-latin-ext-600-normal.woff2?url';
 // Ölçüsü ayarlı yedek fontlar: build sırasında @capsizecss/metrics ölçülerinden hesaplanır.
 import { yedekFontCss } from '../styles/yedekFontlar';
+// Kayıtlı tema seçimini sayfa boyanmadan önce uygulayan satır içi betik (src/tema/tema.ts).
+import { ILK_BETIK } from '../tema/tema';
 
 interface Props {
   lang: 'tr' | 'en';
@@ -34,6 +36,8 @@ const { lang, baslik, aciklama, taslak = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- CSS yüklenmeden önce de tarayıcı koyu/açık zemini doğru seçsin (beyaz parlama olmasın) -->
     <meta name="color-scheme" content="light dark" />
+    <!-- Kayıtlı tema seçimi (varsa) ilk boyamadan önce: is:inline → Astro dokunmaz, ayrı istek yok -->
+    <script is:inline set:html={ILK_BETIK} />
     <title>{baslik}</title>
     {aciklama && <meta name="description" content={aciklama} />}
     <link rel="preload" href={baslikLatin} as="font" type="font/woff2" crossorigin />

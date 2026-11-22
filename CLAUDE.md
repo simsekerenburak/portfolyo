@@ -163,7 +163,7 @@ Kural: Yeşil = zemin/kartlar. Turuncu = etkileşim (kolun metali, ana düğme, 
 - **Hakkımda unvanı 24px / 500** (taslakta 22px): koyu temada `--turuncu-yazi` pafta üstünde 3.98; 24px'te büyük metin sayılır (3:1).
 - **Kart üst satırı** (mono, 13px): `--metin-2`, önünde **6px `--turuncu` nokta** (turuncu yazı değil).
 
-Tema: varsayılan cihaz ayarı (`prefers-color-scheme`), üstteki düğmeyle değiştirilir, seçim `localStorage`'da (try/catch ile) saklanır. `<html data-theme="koyu|acik">`. Uygulama: her renk `light-dark(AÇIK, KOYU)` ile tek satırda; `:root { color-scheme: light dark }` cihaza uyar, `[data-theme]` `color-scheme`'i zorlar (JS kapalıyken de cihaz ayarı çalışır).
+Tema: varsayılan cihaz ayarı (`prefers-color-scheme`), üstteki düğmeyle değiştirilir, seçim `localStorage`'da (try/catch ile) saklanır. `<html data-theme="koyu|acik">`. Uygulama: her renk `light-dark(AÇIK, KOYU)` ile tek satırda; `:root { color-scheme: light dark }` cihaza uyar, `[data-theme]` `color-scheme`'i zorlar (JS kapalıyken de cihaz ayarı çalışır). **Yapıldı (2026-11-22):** mantık `src/tema/tema.ts` (anahtar `tema`); kayıtlı seçim `<head>`'deki satır içi `ILK_BETIK` ile ilk boyamadan önce uygulanır (meta `color-scheme` de güncellenir), kayıt yoksa `data-theme` konmaz; `TemaDugmesi.astro` JS'siz gizli (`hidden`), simge hedef temayı gösterir (koyuda güneş, açıkta ay).
 
 ### 4.3 Tipografi
 - Başlıklar: **Inter Tight** 600, `letter-spacing: -0.02em`. İsim 76px, pafta başlığı 52px, kart başlığı 27px. Hakkımda unvanı 24px / 500 (`--turuncu-yazi`, bkz. §4.2).
@@ -276,6 +276,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  ├─ i18n/index.ts                 (METINLER, Dil tipi, anaSayfa/otekiDil)
 │  ├─ kisi.ts                       (çevrilmeyen bilgiler: ad, GitHub, LinkedIn, e-posta)
 │  ├─ styles/tokens.css             (§4 token'ları, iki tema)
+│  ├─ tema/tema.ts                  (tema seçimi mantığı + <head> ILK_BETIK)
 │  ├─ kol/
 │  │  ├─ kinematik.ts  (ik2, gantry çözümü)
 │  │  ├─ yay.ts
@@ -295,7 +296,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │     ├─ index.astro, en/index.astro
 │     ├─ 404.astro      (iki dilli; Cloudflare Pages için zorunlu, bkz. §2.1)
 │     └─ projeler/[slug].astro, en/projeler/[slug].astro
-└─ tests/ (kinematik.test.ts, yay.test.ts, durum.test.ts)
+└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
 ```
 
 ---

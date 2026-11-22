@@ -1,0 +1,110 @@
+---
+// Tema düğmesi (CLAUDE.md §4.2): koyu ↔ açık. Seçim <html data-theme> + localStorage.
+// Aşamalı geliştirme: düğme `hidden` başlar, yalnızca betik çalışınca görünür. JS kapalıyken
+// işe yaramayacak bir düğme gösterilmez; tema yine cihaz ayarına uyar.
+// Simge hedef temayı gösterir: koyu temadayken güneş ("açık temaya geç"), açıkta ay.
+import { METINLER, type Dil } from '../i18n';
+
+interface Props {
+  lang: Dil;
+}
+
+const m = METINLER[Astro.props.lang].tema;
+---
+
+<button
+  type="button"
+  class="tema"
+  data-tema-dugmesi
+  data-aciga-gec={m.acigaGec}
+  data-koyuya-gec={m.koyuyaGec}
+  aria-label={m.degistir}
+  hidden
+>
+  <svg class="gunes" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+  </svg>
+  <svg class="ay" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+  </svg>
+</button>
+
+<script>
+  import { TEMA_ANAHTARI, digerTema, etkinTema, kayitliTema, type Tema } from '../tema/tema';
+
+  const kok = document.documentElement;
+  const cihaz = window.matchMedia('(prefers-color-scheme: dark)');
+  // Geçerli tema data-theme'den okunur (depodan değil): depolama engelliyse de oturum içinde çalışsın.
+  const simdiki = (): Tema => etkinTema(kayitliTema(kok.dataset.theme), cihaz.matches);
+
+  for (const dugme of document.querySelectorAll<HTMLButtonElement>('[data-tema-dugmesi]')) {
+    const etiketGuncelle = () => {
+      const etiket = simdiki() === 'koyu' ? dugme.dataset.acigaGec : dugme.dataset.koyuyaGec;
+      if (etiket) {
+        dugme.setAttribute('aria-label', etiket);
+        dugme.title = etiket;
+      }
+    };
+    dugme.addEventListener('click', () => {
+      const yeni = digerTema(simdiki());
+      kok.dataset.theme = yeni;
+      // ILK_BETIK'in yaptığı gibi meta'yı da seçime çek (durum her yerde aynı olsun).
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+      if (meta) meta.content = yeni === 'koyu' ? 'dark' : 'light';
+      try {
+        localStorage.setItem(TEMA_ANAHTARI, yeni);
+      } catch {
+        // Depolama engelli: seçim yalnızca bu sayfa açıkken geçerli kalır.
+      }
+      etiketGuncelle();
+    });
+    // Seçim yapılmamışsa cihaz teması değişince etiket de değişsin.
+    cihaz.addEventListener('change', etiketGuncelle);
+    etiketGuncelle();
+    dugme.hidden = false;
+  }
+</script>
+
+<style>
+  .tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; /* dokunma hedefi en az 44px (§8) */
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--dugme-cizgi);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--hap-metin);
+    cursor: pointer;
+  }
+  /* Yazar CSS'indeki display, tarayıcının [hidden] kuralını ezer; açıkça geri koy. */
+  .tema[hidden] {
+    display: none;
+  }
+  .tema:hover {
+    background: var(--hap-zemin);
+  }
+
+  /* Hangi simge? Etkin tema koyu → güneş, açık → ay. data-theme yoksa cihaz ayarına bakılır. */
+  .gunes,
+  .ay {
+    display: none;
+  }
+  :global(:root[data-theme='koyu']) .gunes,
+  :global(:root[data-theme='acik']) .ay {
+    display: block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .gunes {
+      display: block;
+    }
+  }
+  @media (prefers-color-scheme: light) {
+    :global(:root:not([data-theme])) .ay {
+      display: block;
+    }
+  }
+</style>

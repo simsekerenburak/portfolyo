@@ -7,6 +7,11 @@
   "dil": {
     "ad": "English"
   },
+  "tema": {
+    "degistir": "Change theme",
+    "acigaGec": "Switch to light theme",
+    "koyuyaGec": "Switch to dark theme"
+  },
   "hakkimda": {
     "unvan": "Computer Engineering Student",
     "tanitim": "I’m a fourth-year student at Sivas Cumhuriyet University. I build embedded systems with STM32 and ESP32 and work on projects that bring them together with AI. I’m currently an intern at Kapsam Elektromekanik.",

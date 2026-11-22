@@ -7,6 +7,11 @@
   "dil": {
     "ad": "Türkçe"
   },
+  "tema": {
+    "degistir": "Temayı değiştir",
+    "acigaGec": "Açık temaya geç",
+    "koyuyaGec": "Koyu temaya geç"
+  },
   "hakkimda": {
     "unvan": "Bilgisayar Mühendisliği Öğrencisi",
     "tanitim": "Sivas Cumhuriyet Üniversitesi’nde 4. sınıftayım. STM32 ve ESP32 ile gömülü sistemler geliştiriyor, bunları yapay zekâyla buluşturan projeler üzerinde çalışıyorum. Şu an Kapsam Elektromekanik’te stajyerim.",
