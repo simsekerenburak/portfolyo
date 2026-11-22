@@ -5,6 +5,7 @@ altBaslik: IoT ilaç takip sistemi
 aciklama: Arduino hatırlatıcı, masaüstü uygulaması, FastAPI backend ve Firebase ile uçtan uca ilaç takip sistemi.
 alan: IoT
 yil: 2026
+tur: tek-kisilik
 durum: tamamlandi
 etiketler: [Arduino, Python, FastAPI, Firebase, PWA]
 sira: 3

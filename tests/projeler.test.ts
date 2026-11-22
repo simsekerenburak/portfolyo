@@ -37,8 +37,8 @@ describe('kartlar (TR)', () => {
     expect(ogeler.map((o) => o.ustSatir)).toEqual([
       '2026 · takım projesi',
       '2026 · tek kişilik',
-      '2026',
-      'Bahar 2027 teslim',
+      '2026 · tek kişilik',
+      'Bahar 2027 teslim · tek kişilik',
     ]);
   });
 
@@ -69,7 +69,7 @@ describe('kartlar (EN)', () => {
     const tr = projeOgeleri(TR, 'tr');
     const en = projeOgeleri(EN, 'en');
     expect(en.map((o) => o.id)).toEqual(tr.map((o) => o.id));
-    expect(en.map((o) => o.ustSatir)).toEqual(['2026 · team project', '2026 · solo', '2026', 'Due spring 2027']);
+    expect(en.map((o) => o.ustSatir)).toEqual(['2026 · team project', '2026 · solo', '2026 · solo', 'Due spring 2027 · solo']);
     expect(en[3]!.etiket).toBe('In progress');
     expect(en[0]!.aciklama).toMatch(/My role: computing the sensor data\.$/);
   });
@@ -87,13 +87,13 @@ describe('özet menüsü', () => {
           satirlar: [
             { baslik: 'Yıldız Takip', aciklama: 'gömülü · takım' },
             { baslik: 'Şimşek', aciklama: 'yapay zekâ · tek kişilik' },
-            { baslik: 'MediTrack', aciklama: 'IoT' },
+            { baslik: 'MediTrack', aciklama: 'IoT · tek kişilik' },
           ],
         },
         {
           sayi: 1,
           etiket: 'yapım aşamasında',
-          satirlar: [{ baslik: 'Robot Kol', aciklama: 'robotik · Bahar 2027 teslim' }],
+          satirlar: [{ baslik: 'Robot Kol', aciklama: 'robotik · tek kişilik · Bahar 2027 teslim' }],
         },
       ],
     });
@@ -127,6 +127,6 @@ describe('özet menüsü', () => {
     const veri: Proje = { ...TR[3]!.veri };
     delete veri.zaman;
     const o = projeOzeti([{ slug: 'robot-kol', veri }], 'tr');
-    expect(o.gruplar[0]!.satirlar[0]!.aciklama).toBe('robotik · 2027');
+    expect(o.gruplar[0]!.satirlar[0]!.aciklama).toBe('robotik · tek kişilik · 2027');
   });
 });

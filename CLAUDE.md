@@ -319,11 +319,11 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 - İletişim: GitHub `github.com/simsekerenburak` · LinkedIn `linkedin.com/in/burak-eren-şimşek-` · `burakerensimsek59@gmail.com`
 
 ### Projeler — "4 proje" (3 tamamlanan, 1 yapım aşamasında)
-Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki ilk cümle "Kol bir kutuyu bantten alıp desteye koyar." kol bunu gerçekten yapınca, M4'te geri gelecek). Kartta kısa açıklama, uzun metin md gövdesinde. MediTrack ve Robot Kol için tür (takım/tek kişilik) bilinmiyor → `tur` alanı boş, kartta yazmaz.
+Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki ilk cümle "Kol bir kutuyu bantten alıp desteye koyar." kol bunu gerçekten yapınca, M4'te geri gelecek). Kartta kısa açıklama, uzun metin md gövdesinde. MediTrack ve Robot Kol tek kişilik (Burak, 2026-11-22). Kol cümlesinin M4'e ertelenmesini Burak onayladı.
 1. **Otonom Yıldız Takip Sistemi** · 2026 · takım projesi · Gömülü Sistemler dersi final projesi — STM32 ile hem otonom hem manuel çalışan teleskop takip sistemi; yıldız haritası çıkarıp seçilen hedefe (GOTO) kilitlenir. Yatay eksende step, dikey eksende servo motor. Yer kontrol istasyonu Python/PyQt6, UART. **Rolüm: sensör verilerinin hesaplanması.** · STM32F401RE, MPU6050, GY-271, C, PyQt6
 2. **Şimşek** · 2026 · tek kişilik · Kişisel yapay zekâ asistanı — iPhone, web ve bilgisayarı tek bir bulut beyne bağlayan asistan: kalıcı hafıza, dosya arama, görevler ve sesli komut. · React Native (Expo), Cloudflare Workers, D1, R2, Workers AI, Whisper
-3. **MediTrack** · 2026 · IoT ilaç takip sistemi — Arduino hatırlatıcı (LCD + buzzer), Python masaüstü uygulaması, FastAPI backend (Render) ve Firebase ile uçtan uca ilaç takip sistemi; PWA. · Arduino, Python, FastAPI, Firebase, PWA
-4. **Robot Kol** · Bahar 2027 teslim · **Yapım aşamasında** · Bitirme projesi — Ucu değiştirilebilen robotik kol: nesne taşıma, 3D baskı ve çizim. Gövdesi kendi 3D baskı tasarımı. · 3D baskı, Ters kinematik, Değiştirilebilir uç
+3. **MediTrack** · 2026 · tek kişilik · IoT ilaç takip sistemi — Arduino hatırlatıcı (LCD + buzzer), Python masaüstü uygulaması, FastAPI backend (Render) ve Firebase ile uçtan uca ilaç takip sistemi; PWA. · Arduino, Python, FastAPI, Firebase, PWA
+4. **Robot Kol** · Bahar 2027 teslim · tek kişilik · **Yapım aşamasında** · Bitirme projesi — Ucu değiştirilebilen robotik kol: nesne taşıma, 3D baskı ve çizim. Gövdesi kendi 3D baskı tasarımı. · 3D baskı, Ters kinematik, Değiştirilebilir uç
 
 ### Stajlar — "3 staj" → "2 şehir" (Sivas: Kapsam · Antakya: DOĞAKA, Demircan), "1 devam eden" (Kapsam)
 Burak 2026-11-22: şehirler **Sivas ve Antakya** (DOĞAKA'nın şehri de Antakya). Kapsam kartında yalnızca "Sivas · uzun dönem staj" + "Gömülü sistemler", "Mobil" hapları; açıklama YOK (`tests/stajlar.test.ts` kaydın tam içeriğini sabitler).

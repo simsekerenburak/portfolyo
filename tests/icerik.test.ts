@@ -142,7 +142,7 @@ describe('içerik CLAUDE.md §7 ile uyuşuyor', () => {
     expect(tr.filter((p) => p.durum === 'yapim-asamasinda').map((p) => p.kisaAd)).toEqual(['Robot Kol']);
   });
 
-  it('tür bilgisi yalnızca §7’de yazanlarda: Yıldız Takip takım, Şimşek tek kişilik', () => {
-    expect(tr.map((p) => p.tur)).toEqual(['takim', 'tek-kisilik', undefined, undefined]);
+  it('tür: Yıldız Takip takım, diğer üçü tek kişilik (Burak, 2026-11-22)', () => {
+    expect(tr.map((p) => p.tur)).toEqual(['takim', 'tek-kisilik', 'tek-kisilik', 'tek-kisilik']);
   });
 });
