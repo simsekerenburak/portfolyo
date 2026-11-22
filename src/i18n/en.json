@@ -109,5 +109,36 @@
       "cok": "tools"
     },
     "egitim": "training"
+  },
+  "belgeler": {
+    "baslik": "Documents",
+    "giris": "Certificates and résumé. Those with a credential ID can be verified.",
+    "desteEtiketi": "Document cards",
+    "bantEtiketi": "Document boxes",
+    "ozet": {
+      "bir": "document",
+      "cok": "documents"
+    },
+    "sertifika": {
+      "bir": "certificate",
+      "cok": "certificates"
+    },
+    "cvDil": {
+      "bir": "CV language",
+      "cok": "CV languages"
+    },
+    "yakinda": "Coming soon",
+    "pdf": "PDF",
+    "diller": {
+      "tr": "Turkish",
+      "en": "English"
+    },
+    "belgeTuru": {
+      "sertifika": "Certificate",
+      "katilim": "Certificate of participation"
+    },
+    "dogrulanabilir": "Verifiable",
+    "dogrulamaNo": "Credential ID",
+    "dogrula": "Verify"
   }
 }

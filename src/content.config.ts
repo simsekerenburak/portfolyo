@@ -4,7 +4,7 @@
 // Şemaların kendisi src/icerik/sema.ts'te (testler oradan kullanır).
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { projeSemasi, stajlarDosyasiSemasi, yetkinliklerDosyasiSemasi } from './icerik/sema';
+import { belgelerDosyasiSemasi, projeSemasi, stajlarDosyasiSemasi, yetkinliklerDosyasiSemasi } from './icerik/sema';
 
 // glob yükleyicisi: klasördeki her dosya bir kayıt. Kaydın kimliği (id) dosya yolundan üretilir:
 //   src/content/projeler/tr/yildiz-takip.md → "tr/yildiz-takip"
@@ -26,4 +26,9 @@ const yetkinlikler = defineCollection({
   schema: yetkinliklerDosyasiSemasi,
 });
 
-export const collections = { projeler, stajlar, yetkinlikler };
+const belgeler = defineCollection({
+  loader: glob({ pattern: '{tr,en}.json', base: './src/content/belgeler' }),
+  schema: belgelerDosyasiSemasi,
+});
+
+export const collections = { projeler, stajlar, yetkinlikler, belgeler };

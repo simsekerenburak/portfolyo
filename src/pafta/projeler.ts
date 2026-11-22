@@ -56,7 +56,7 @@ export function projeOgesi({ slug, veri: p }: ProjeKaydi, dil: Dil): PaftaOgesi 
     altSatir: p.altBaslik,
     aciklama: p.rol ? `${p.aciklama} ${m.rol}: ${p.rol}.` : p.aciklama,
     haplar: p.etiketler,
-    ...(p.demo && { baglanti: { metin: m.demo, adres: p.demo } }),
+    ...(p.demo && { baglantilar: [{ metin: m.demo, adres: p.demo }] }),
   };
 }
 

@@ -1,0 +1,52 @@
+{
+  "taslak": false,
+  "belgeler": [
+    {
+      "id": "ozgecmis",
+      "tur": "cv",
+      "kisaAd": "Özgeçmiş",
+      "ad": "Özgeçmiş",
+      "altBaslik": "Güncel CV",
+      "aciklama": "Güncel özgeçmişimi Türkçe veya İngilizce olarak indirebilirsiniz.",
+      "yakindaAciklama": "Türkçe ve İngilizce özgeçmişim çok yakında burada olacak.",
+      "dosyalar": [
+        { "dil": "tr", "yol": "/cv/burak-eren-simsek-cv-tr.pdf" },
+        { "dil": "en", "yol": "/cv/burak-eren-simsek-cv-en.pdf" }
+      ]
+    },
+    {
+      "id": "ai-business-school",
+      "tur": "sertifika",
+      "kisaAd": "AI Business School",
+      "ad": "Yapay Zekaya İlk Adım",
+      "kurum": "AI Business School",
+      "tarih": "2026-09",
+      "belgeTuru": "sertifika",
+      "aciklama": "Yapay zekâ temelleri eğitimi.",
+      "dogrulanabilir": true,
+      "dogrulamaNo": "CERT-094BCBC0"
+    },
+    {
+      "id": "huawei",
+      "tur": "sertifika",
+      "kisaAd": "Huawei",
+      "ad": "Data Science and Machine Learning Bootcamp",
+      "kurum": "Huawei",
+      "tarih": "2026-08",
+      "belgeTuru": "katilim",
+      "aciklama": "Veri bilimi ve makine öğrenmesi bootcamp’i.",
+      "dogrulanabilir": false
+    },
+    {
+      "id": "udemy-flutter",
+      "tur": "sertifika",
+      "kisaAd": "Udemy",
+      "ad": "Flutter & Dart: Sıfırdan Mobil App Geliştiriciliğine",
+      "kurum": "Udemy",
+      "tarih": "2026-07",
+      "belgeTuru": "sertifika",
+      "aciklama": "Flutter ve Dart ile mobil uygulama geliştirme kursu.",
+      "dogrulanabilir": true
+    }
+  ]
+}

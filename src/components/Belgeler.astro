@@ -1,0 +1,27 @@
+---
+// Belgeler paftası (05): ortak Pafta şablonu + belgeler koleksiyonu.
+// CV PDF'leri yoksa (M6'ya kadar) özgeçmiş kartı "Yakında" durumunda çıkar (src/pafta/belgeler.ts).
+import type { Belge } from '../icerik/sema';
+import { publicDosyasiVar } from '../icerik/koleksiyonlar';
+import { METINLER, type Dil } from '../i18n';
+import { belgeOgeleri, belgeOzeti } from '../pafta/belgeler';
+import Pafta from './Pafta.astro';
+
+interface Props {
+  lang: Dil;
+  belgeler: Belge[];
+}
+
+const { lang, belgeler } = Astro.props;
+const m = METINLER[lang].belgeler;
+---
+
+<Pafta
+  id="belgeler"
+  lang={lang}
+  baslik={m.baslik}
+  giris={m.giris}
+  ogeler={belgeOgeleri(belgeler, lang, publicDosyasiVar)}
+  ozet={belgeOzeti(belgeler, lang, publicDosyasiVar)}
+  etiketler={{ deste: m.desteEtiketi, bant: m.bantEtiketi }}
+/>

@@ -1,5 +1,6 @@
 ---
 // Ana sayfa (TR). M1: paftalar alt alta (JS'siz düz hâl); M2'de Sahne onları üst üste deste yapacak.
+import Belgeler from '../components/Belgeler.astro';
 import Hakkimda from '../components/Hakkimda.astro';
 import Projeler from '../components/Projeler.astro';
 import Stajlar from '../components/Stajlar.astro';
@@ -18,5 +19,6 @@ const v = await sayfaVerisi('tr');
     <Projeler lang="tr" kayitlar={v.projeler} />
     <Stajlar lang="tr" stajlar={v.stajlar} />
     <Yetkinlikler lang="tr" alanlar={v.alanlar} kaynak={{ projeler: v.projeler, stajlar: v.stajlar }} />
+    <Belgeler lang="tr" belgeler={v.belgeler} />
   </main>
 </Duzen>

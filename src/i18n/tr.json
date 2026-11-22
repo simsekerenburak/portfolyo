@@ -109,5 +109,36 @@
       "cok": "araç"
     },
     "egitim": "eğitimler"
+  },
+  "belgeler": {
+    "baslik": "Belgeler",
+    "giris": "Sertifikalar ve özgeçmiş. Doğrulama numarası olanlar doğrulanabilir.",
+    "desteEtiketi": "Belge kartları",
+    "bantEtiketi": "Belge kutuları",
+    "ozet": {
+      "bir": "belge",
+      "cok": "belge"
+    },
+    "sertifika": {
+      "bir": "sertifika",
+      "cok": "sertifika"
+    },
+    "cvDil": {
+      "bir": "dilde CV",
+      "cok": "dilde CV"
+    },
+    "yakinda": "Yakında",
+    "pdf": "PDF",
+    "diller": {
+      "tr": "Türkçe",
+      "en": "İngilizce"
+    },
+    "belgeTuru": {
+      "sertifika": "Sertifika",
+      "katilim": "Katılım belgesi"
+    },
+    "dogrulanabilir": "Doğrulanabilir",
+    "dogrulamaNo": "Yeterlilik no",
+    "dogrula": "Doğrula"
   }
 }

@@ -43,13 +43,19 @@ const n = ogeler.length;
                 ))}
               </ul>
             )}
-            {o.baglanti && (
-              <a class="baglanti" href={o.baglanti.adres} rel="noopener">
-                {o.baglanti.metin}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M7 17 17 7M7 7h10v10" />
-                </svg>
-              </a>
+            {o.baglantilar && o.baglantilar.length > 0 && (
+              <ul class="baglantilar">
+                {o.baglantilar.map((b) => (
+                  <li>
+                    <a class="baglanti" href={b.adres} rel="noopener">
+                      {b.metin}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 17 17 7M7 7h10v10" />
+                      </svg>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             )}
             <p class="sayac">
               {i + 1} / {n}
@@ -188,10 +194,17 @@ const n = ogeler.length;
     line-height: 1.3;
   }
 
+  .baglantilar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
   .baglanti {
     display: inline-flex;
     align-items: center;
-    align-self: flex-start;
     gap: 4px;
     min-height: 44px;
     color: var(--metin);

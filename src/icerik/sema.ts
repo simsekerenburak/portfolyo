@@ -16,8 +16,8 @@ export type Tur = (typeof TURLER)[number];
 export const DURUMLAR = ['tamamlandi', 'yapim-asamasinda'] as const;
 export type Durum = (typeof DURUMLAR)[number];
 
-/** Bant kutusuna sığması gereken kısa ad için üst sınır (taslakta en uzunu "Yıldız Takip", 12). */
-export const KISA_AD_EN_FAZLA = 16;
+/** Bant kutusuna sığması gereken kısa ad için üst sınır (taslakta en uzunu "AI Business School", 18). */
+export const KISA_AD_EN_FAZLA = 20;
 
 /**
  * Bir projenin frontmatter'ı. Her proje iki dosyadır: `projeler/tr/<slug>.md` ve `projeler/en/<slug>.md`.
@@ -162,3 +162,74 @@ export const yetkinliklerDosyasiSemasi = z
 
 export type Yetkinlik = z.output<typeof yetkinlikSemasi>;
 export type YetkinliklerDosyasi = z.output<typeof yetkinliklerDosyasiSemasi>;
+
+// ─── Belgeler ──────────────────────────────────────────────────────────────
+// İki tür belge var, `tur` alanı hangisi olduğunu söyler (ayırt edici birleşim / discriminated union):
+// Zod önce `tur`'a bakar, sonra yalnızca o türün şemasını uygular. Hata mesajı da o türe göre çıkar.
+
+/** CV dosyasının public/ altındaki yolu: "/cv/burak-eren-simsek-cv-tr.pdf". ".." gibi kaçışlar desene uymaz. */
+const cvYolu = z.string().regex(/^\/cv\/[a-z0-9]+(?:-[a-z0-9]+)*\.pdf$/, 'CV yolu "/cv/<ad>.pdf" biçiminde olmalı');
+
+/**
+ * Özgeçmiş. PDF'ler M6'da gelecek (public/cv/). Build, dosyanın var olup olmadığına bakar:
+ * yoksa kart "Yakında" etiketi ve `yakindaAciklama` ile çıkar, link basılmaz (kırık link olmaz).
+ */
+export const cvSemasi = z
+  .object({
+    id: kimlik,
+    tur: z.literal('cv'),
+    kisaAd: metin.max(KISA_AD_EN_FAZLA),
+    ad: metin,
+    altBaslik: metin,
+    /** PDF'lerin hepsi varken */
+    aciklama: metin.max(240),
+    /** PDF'lerden biri bile yokken */
+    yakindaAciklama: metin.max(240),
+    dosyalar: z
+      .array(z.object({ dil: z.enum(['tr', 'en']), yol: cvYolu }).strict())
+      .min(1)
+      .max(2)
+      .refine((d) => new Set(d.map((x) => x.dil)).size === d.length, 'aynı dilde iki CV dosyası var'),
+  })
+  .strict();
+
+/** Sertifika ya da katılım belgesi. */
+export const BELGE_TURLERI = ['sertifika', 'katilim'] as const;
+
+export const sertifikaSemasi = z
+  .object({
+    id: kimlik,
+    tur: z.literal('sertifika'),
+    /** Bant kutusu: kurumun adı ("AI Business School") */
+    kisaAd: metin.max(KISA_AD_EN_FAZLA),
+    /** Kart başlığı: belgenin adı */
+    ad: metin,
+    kurum: metin,
+    tarih: ayTarihi,
+    belgeTuru: z.enum(BELGE_TURLERI),
+    aciklama: metin.max(240),
+    dogrulanabilir: z.boolean(),
+    /** "Yeterlilik no: CERT-094BCBC0" */
+    dogrulamaNo: metin.optional(),
+    /** Doğrulama sayfası; yalnızca https */
+    dogrulamaAdresi: z.url({ protocol: /^https$/ }).optional(),
+  })
+  .strict()
+  .refine((s) => s.dogrulanabilir || (s.dogrulamaNo === undefined && s.dogrulamaAdresi === undefined), {
+    message: 'doğrulama numarası/adresi olan belge "dogrulanabilir: true" olmalı',
+    path: ['dogrulanabilir'],
+  });
+
+export const belgeSemasi = z.discriminatedUnion('tur', [cvSemasi, sertifikaSemasi]);
+
+export const belgelerDosyasiSemasi = z
+  .object({
+    taslak: z.boolean().default(false),
+    belgeler: z.array(belgeSemasi).min(1).refine(benzersizIdler, 'belge id’leri benzersiz olmalı'),
+  })
+  .strict();
+
+export type Belge = z.output<typeof belgeSemasi>;
+export type Cv = z.output<typeof cvSemasi>;
+export type Sertifika = z.output<typeof sertifikaSemasi>;
+export type BelgelerDosyasi = z.output<typeof belgelerDosyasiSemasi>;

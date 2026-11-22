@@ -20,8 +20,8 @@ export interface PaftaOgesi {
   aciklama?: string;
   /** Teknoloji hapları (boşsa hap satırı hiç basılmaz) */
   haplar: string[];
-  /** Varsa dış bağlantı (ör. canlı demo) */
-  baglanti?: { metin: string; adres: string };
+  /** Kartın altındaki bağlantılar (canlı demo, CV PDF'leri, doğrulama). Boşsa hiç basılmaz. */
+  baglantilar?: { metin: string; adres: string }[];
 }
 
 /** Özet menüsünün en iç satırı: "Yıldız Takip / gömülü · takım" */

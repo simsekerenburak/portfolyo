@@ -58,9 +58,9 @@ describe('kartlar (TR)', () => {
   });
 
   it('demo yoksa bağlantı yok; varsa yalnızca https adresiyle', () => {
-    expect(ogeler.every((o) => o.baglanti === undefined)).toBe(true);
+    expect(ogeler.every((o) => o.baglantilar === undefined)).toBe(true);
     const demolu: ProjeKaydi = { ...TR[0]!, veri: { ...TR[0]!.veri, demo: 'https://ornek.dev/' } };
-    expect(projeOgesi(demolu, 'tr').baglanti).toEqual({ metin: 'Canlı demo', adres: 'https://ornek.dev/' });
+    expect(projeOgesi(demolu, 'tr').baglantilar).toEqual([{ metin: 'Canlı demo', adres: 'https://ornek.dev/' }]);
   });
 });
 
