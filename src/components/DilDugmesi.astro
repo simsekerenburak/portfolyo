@@ -1,8 +1,10 @@
 ---
-// Öteki dilin ana sayfasına bağlantı (JS'siz çalışır).
+// Öteki dilin ana sayfasına bağlantı.
 // Görünen ad o dilin kendi adıyla: TR sayfasında "English", EN sayfasında "Türkçe".
 // `lang` niteliği ekran okuyucunun adı doğru dilde okuması, `hreflang` hedefin dilini bildirmesi için.
-// Sonraki adımlarda: aynı paftaya, adresteki #hash korunarak geçecek.
+//
+// Aşamalı geliştirme: HTML'deki href dilin ana sayfasıdır (JS'siz de çalışır). Betik, adresteki #parçayı
+// (ör. /#stajlar) linke ekler: dil değişince aynı paftada kalınır. Kimlikler iki dilde aynı.
 import { METINLER, anaSayfa, otekiDil, type Dil } from '../i18n';
 
 interface Props {
@@ -10,9 +12,25 @@ interface Props {
 }
 
 const oteki = otekiDil(Astro.props.lang);
+const taban = anaSayfa(oteki);
 ---
 
-<a class="dil" href={anaSayfa(oteki)} hreflang={oteki} lang={oteki}>{METINLER[oteki].dil.ad}</a>
+<a class="dil" href={taban} hreflang={oteki} lang={oteki} data-dil-dugmesi data-taban={taban}>{METINLER[oteki].dil.ad}</a>
+
+<script>
+  import { dilAdresi } from '../i18n/adres';
+
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-dil-dugmesi]')) {
+    const taban = link.dataset.taban;
+    if (!taban) continue;
+    const guncelle = () => link.setAttribute('href', dilAdresi(taban, location.hash));
+    guncelle();
+    // #parça sayfa açıkken değişebilir (sayfa içi link; M2'de pafta geçişleri). Tıklama anında da tazele:
+    // history.replaceState ile değişen adres hashchange olayı üretmez.
+    window.addEventListener('hashchange', guncelle);
+    link.addEventListener('click', guncelle);
+  }
+</script>
 
 <style>
   .dil {
