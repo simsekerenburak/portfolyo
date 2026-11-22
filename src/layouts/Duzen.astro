@@ -1,0 +1,46 @@
+---
+// Tüm sayfaların ortak iskeleti: <html>/<head>, stiller, fontlar ve başlık fontunun preload'u.
+// Sayfa içeriği <slot /> yerine gelir.
+import '../styles/fontlar.css';
+import '../styles/tokens.css';
+import '../styles/temel.css';
+
+// `?url`: Vite dosyayı build çıktısına (hash'li adla) kopyalar ve son adresini verir.
+// fontlar.css aynı dosyaya başvurduğu için iki adres birebir aynıdır (build sonrası doğrulandı).
+// İsimdeki "Şimşek" latin-ext glifleri kullandığından iki alt küme de preload edilir.
+import baslikLatin from '@fontsource/inter-tight/files/inter-tight-latin-600-normal.woff2?url';
+import baslikLatinExt from '@fontsource/inter-tight/files/inter-tight-latin-ext-600-normal.woff2?url';
+// Ölçüsü ayarlı yedek fontlar: build sırasında @capsizecss/metrics ölçülerinden hesaplanır.
+import { yedekFontCss } from '../styles/yedekFontlar';
+
+interface Props {
+  lang: 'tr' | 'en';
+  baslik: string;
+  aciklama?: string;
+  /**
+   * Sayfa kaba çeviri (EN taslak) içeriyorsa true. <html data-taslak="true"> olarak çıkar;
+   * scripts/kontrol.mjs bunu M1–M5'te uyarı, M6'dan itibaren hata sayar.
+   */
+  taslak?: boolean;
+}
+
+const { lang, baslik, aciklama, taslak = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} data-taslak={taslak ? 'true' : undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- CSS yüklenmeden önce de tarayıcı koyu/açık zemini doğru seçsin (beyaz parlama olmasın) -->
+    <meta name="color-scheme" content="light dark" />
+    <title>{baslik}</title>
+    {aciklama && <meta name="description" content={aciklama} />}
+    <link rel="preload" href={baslikLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={baslikLatinExt} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={yedekFontCss()} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

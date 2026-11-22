@@ -1,0 +1,19 @@
+/*
+ * Fontlar — self-host, @fontsource npm paketleri (CLAUDE.md §4.3).
+ * Yalnızca şu ağırlıklar: Inter 400/500 (gövde), Inter Tight 500/600 (başlık), JetBrains Mono 400 (sayı, telemetri).
+ *
+ * Ağırlık başına BİRLEŞİK dosya içe aktarılır (ör. `inter/400.css`): içinde her alt küme kendi
+ * `unicode-range` değeriyle tanımlı, tarayıcı yalnızca sayfadaki karakterlerin düştüğü alt kümeleri indirir.
+ * Türkçe iki alt kümeye bölünür, ikisi de gerekir:
+ *   latin     → ç ö ü Ç Ö Ü ve ı (U+0131)
+ *   latin-ext → ğ Ğ ş Ş İ (U+011E/F, U+015E/F, U+0130)
+ *
+ * Alt kümeye özel dosyalar (`latin-400.css`, `latin-ext-400.css`) KULLANILMAZ: onlarda `unicode-range`
+ * yok, ikisi birlikte yüklenince sonraki öncekini tamamen ezer ve Türkçe harflerin bir kısmı kaybolur.
+ * tests/fontlar.test.ts bu kuralları denetler.
+ */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter-tight/500.css';
+@import '@fontsource/inter-tight/600.css';
+@import '@fontsource/jetbrains-mono/400.css';

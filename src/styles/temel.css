@@ -1,0 +1,58 @@
+/*
+ * Temel stiller: her sayfada ortak olan, bileşene ait olmayan kurallar.
+ * Renk ve font değerleri yalnızca tokens.css'teki token'lardan gelir.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--zemin);
+  background-image: var(--zemin-gradyan);
+  color: var(--metin);
+  font-family: var(--font-govde);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* Sahne: pafta(lar) ekranın ortasında, kenarlarda nefes payı (telefonda 16px). */
+main {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 48px);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-baslik);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
+/* Klavye odağı her zaman görünür; renk ölçümü tests/renk.test.ts'te ("Klavye odak halkası"). */
+:focus-visible {
+  outline: 2px solid var(--turuncu-cizgi);
+  outline-offset: 2px;
+}
