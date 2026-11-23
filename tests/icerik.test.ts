@@ -2,7 +2,7 @@
 //   1) Önce ölçüm aleti: şema hatalı veriyi gerçekten reddediyor mu?
 //   2) Her dosya şemadan geçiyor mu?
 //   3) TR ve EN aynı projeleri, aynı çevrilmeyen alanlarla taşıyor mu?
-//   4) İçerik CLAUDE.md §7 ile uyuşuyor mu (4 proje: 3 tamamlanan, 1 yapım aşamasında)?
+//   4) İçerik CLAUDE.md §7 ile uyuşuyor mu (5 proje: 4 tamamlanan, 1 yapım aşamasında)?
 //
 // Astro build de her dosyayı şemadan geçirir; bu test aynı hatayı build'den önce, hangi dosyada
 // olduğunu söyleyerek yakalar ve build'in denetleyemediği kuralları (dil eşleşmesi) ekler.
@@ -133,16 +133,16 @@ describe('TR ve EN aynı projeleri taşıyor', () => {
 describe('içerik CLAUDE.md §7 ile uyuşuyor', () => {
   const tr = [...projeler('tr').values()].sort((x, y) => x.sira - y.sira);
 
-  it('4 proje, sırasıyla: Yıldız Takip, Şimşek, MediTrack, Robot Kol', () => {
-    expect(tr.map((p) => p.kisaAd)).toEqual(['Yıldız Takip', 'Şimşek', 'MediTrack', 'Robot Kol']);
+  it('5 proje, sırasıyla: Yıldız Takip, Şimşek, MediTrack, İK Veritabanı, Robot Kol (2026-11-23: İK eklendi)', () => {
+    expect(tr.map((p) => p.kisaAd)).toEqual(['Yıldız Takip', 'Şimşek', 'MediTrack', 'İK Veritabanı', 'Robot Kol']);
   });
 
-  it('3 tamamlanan, 1 yapım aşamasında (Robot Kol)', () => {
-    expect(tr.filter((p) => p.durum === 'tamamlandi')).toHaveLength(3);
+  it('4 tamamlanan, 1 yapım aşamasında (Robot Kol)', () => {
+    expect(tr.filter((p) => p.durum === 'tamamlandi')).toHaveLength(4);
     expect(tr.filter((p) => p.durum === 'yapim-asamasinda').map((p) => p.kisaAd)).toEqual(['Robot Kol']);
   });
 
-  it('tür: Yıldız Takip takım, diğer üçü tek kişilik (Burak, 2026-11-22)', () => {
-    expect(tr.map((p) => p.tur)).toEqual(['takim', 'tek-kisilik', 'tek-kisilik', 'tek-kisilik']);
+  it('tür: Yıldız Takip takım, diğerleri tek kişilik (Burak, 2026-11-22 / 23)', () => {
+    expect(tr.map((p) => p.tur)).toEqual(['takim', 'tek-kisilik', 'tek-kisilik', 'tek-kisilik', 'tek-kisilik']);
   });
 });

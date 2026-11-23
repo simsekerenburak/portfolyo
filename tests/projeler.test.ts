@@ -25,8 +25,8 @@ describe('kimlikCoz: koleksiyon kimliği → dil + slug', () => {
 describe('kartlar (TR)', () => {
   const ogeler = projeOgeleri(TR, 'tr');
 
-  it('sıra: Yıldız Takip, Şimşek, MediTrack, Robot Kol', () => {
-    expect(ogeler.map((o) => o.kisaAd)).toEqual(['Yıldız Takip', 'Şimşek', 'MediTrack', 'Robot Kol']);
+  it('sıra: Yıldız Takip, Şimşek, MediTrack, İK Veritabanı, Robot Kol', () => {
+    expect(ogeler.map((o) => o.kisaAd)).toEqual(['Yıldız Takip', 'Şimşek', 'MediTrack', 'İK Veritabanı', 'Robot Kol']);
   });
 
   it('girdi sırası önemli değil (sira alanına göre dizilir)', () => {
@@ -38,12 +38,13 @@ describe('kartlar (TR)', () => {
       '2026 · takım projesi',
       '2026 · tek kişilik',
       '2026 · tek kişilik',
+      'Ağu – Eyl 2026 · tek kişilik',
       'Bahar 2027 teslim · tek kişilik',
     ]);
   });
 
   it('etiket hapı yalnızca yapım aşamasındaki projede', () => {
-    expect(ogeler.map((o) => o.etiket)).toEqual([undefined, undefined, undefined, 'Yapım aşamasında']);
+    expect(ogeler.map((o) => o.etiket)).toEqual([undefined, undefined, undefined, undefined, 'Yapım aşamasında']);
   });
 
   it('takım projesinde rol açıklamanın sonuna eklenir', () => {
@@ -54,7 +55,7 @@ describe('kartlar (TR)', () => {
   it('id’ler benzersiz ve "projeler-" önekli (bant kutuları #id ile bağlanır)', () => {
     const idler = ogeler.map((o) => o.id);
     expect(new Set(idler).size).toBe(idler.length);
-    expect(idler).toEqual(['projeler-yildiz-takip', 'projeler-simsek', 'projeler-meditrack', 'projeler-robot-kol']);
+    expect(idler).toEqual(['projeler-yildiz-takip', 'projeler-simsek', 'projeler-meditrack', 'projeler-ik-personel-veritabani', 'projeler-robot-kol']);
   });
 
   it('demo yoksa bağlantı yok; varsa yalnızca https adresiyle', () => {
@@ -69,25 +70,26 @@ describe('kartlar (EN)', () => {
     const tr = projeOgeleri(TR, 'tr');
     const en = projeOgeleri(EN, 'en');
     expect(en.map((o) => o.id)).toEqual(tr.map((o) => o.id));
-    expect(en.map((o) => o.ustSatir)).toEqual(['2026 · team project', '2026 · solo', '2026 · solo', 'Due spring 2027 · solo']);
-    expect(en[3]!.etiket).toBe('In progress');
+    expect(en.map((o) => o.ustSatir)).toEqual(['2026 · team project', '2026 · solo', '2026 · solo', 'Aug – Sep 2026 · solo', 'Due spring 2027 · solo']);
+    expect(en[4]!.etiket).toBe('In progress');
     expect(en[0]!.aciklama).toMatch(/My role: computing the sensor data\.$/);
   });
 });
 
 describe('özet menüsü', () => {
-  it('TR: 4 proje → 3 tamamlanan / 1 yapım aşamasında, satırlar taslaktaki gibi', () => {
+  it('TR: 5 proje → 4 tamamlanan / 1 yapım aşamasında, satırlar taslaktaki gibi', () => {
     expect(projeOzeti(TR, 'tr')).toEqual({
-      sayi: 4,
+      sayi: 5,
       etiket: 'proje',
       gruplar: [
         {
-          sayi: 3,
+          sayi: 4,
           etiket: 'tamamlanan',
           satirlar: [
             { baslik: 'Yıldız Takip', aciklama: 'gömülü · takım' },
             { baslik: 'Şimşek', aciklama: 'yapay zekâ · tek kişilik' },
             { baslik: 'MediTrack', aciklama: 'IoT · tek kişilik' },
+            { baslik: 'İK Veritabanı', aciklama: 'web · tek kişilik' },
           ],
         },
         {
@@ -99,11 +101,11 @@ describe('özet menüsü', () => {
     });
   });
 
-  it('EN: 4 projects → 3 completed / 1 in progress', () => {
+  it('EN: 5 projects → 4 completed / 1 in progress', () => {
     const o = projeOzeti(EN, 'en');
-    expect([o.sayi, o.etiket]).toEqual([4, 'projects']);
+    expect([o.sayi, o.etiket]).toEqual([5, 'projects']);
     expect(o.gruplar.map((g) => [g.sayi, g.etiket])).toEqual([
-      [3, 'completed'],
+      [4, 'completed'],
       [1, 'in progress'],
     ]);
   });
@@ -124,7 +126,7 @@ describe('özet menüsü', () => {
   });
 
   it('yapım aşamasındaki projede zaman metni yoksa yıl yazılır', () => {
-    const veri: Proje = { ...TR[3]!.veri };
+    const veri: Proje = { ...TR.find((k) => k.slug === 'robot-kol')!.veri };
     delete veri.zaman;
     const o = projeOzeti([{ slug: 'robot-kol', veri }], 'tr');
     expect(o.gruplar[0]!.satirlar[0]!.aciklama).toBe('robotik · tek kişilik · 2027');

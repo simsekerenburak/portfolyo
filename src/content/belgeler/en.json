@@ -10,8 +10,14 @@
       "aciklama": "You can download my current résumé in Turkish or English.",
       "yakindaAciklama": "My résumé in Turkish and English will be here very soon.",
       "dosyalar": [
-        { "dil": "tr", "yol": "/cv/burak-eren-simsek-cv-tr.pdf" },
-        { "dil": "en", "yol": "/cv/burak-eren-simsek-cv-en.pdf" }
+        {
+          "dil": "tr",
+          "yol": "/cv/burak-eren-simsek-cv-tr.pdf"
+        },
+        {
+          "dil": "en",
+          "yol": "/cv/burak-eren-simsek-cv-en.pdf"
+        }
       ]
     },
     {
@@ -45,8 +51,27 @@
       "kurum": "Udemy",
       "tarih": "2026-07",
       "belgeTuru": "sertifika",
-      "aciklama": "A course on building mobile apps with Flutter and Dart (in Turkish).",
-      "dogrulanabilir": true
+      "aciklama": "Mobile app development course with Flutter and Dart (25.5 hours).",
+      "dogrulanabilir": true,
+      "dogrulamaNo": "UC-593389b9-5056-430c-9ac2-48217381e84d"
+    },
+    {
+      "id": "nasa-space-apps",
+      "tur": "sertifika",
+      "kisaAd": "NASA Space Apps",
+      "ad": "NASA Space Apps Challenge 2026 – Sivas",
+      "kurum": "NASA Space Apps Challenge",
+      "unvan": "Galactic Team Member",
+      "rol": "technical team (student staff), technical support for the participants",
+      "tarih": "2026-11",
+      "belgeTuru": "sertifika",
+      "aciklama": "14–15 November 2026, Sivas Cumhuriyet University (coordinated by the Faculty of Engineering): the first edition in Sivas, a ~30-hour international hackathon with ~300 participants in 60 teams.",
+      "dogrulanabilir": false,
+      "etiketler": [
+        "Hackathon",
+        "Technical support",
+        "Organisation"
+      ]
     }
   ]
 }

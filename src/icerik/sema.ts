@@ -213,6 +213,12 @@ export const sertifikaSemasi = z
     dogrulamaNo: metin.optional(),
     /** Doğrulama sayfası; yalnızca https */
     dogrulamaAdresi: z.url({ protocol: /^https$/ }).optional(),
+    /** Belgenin üstünde yazan unvan, AYNEN ("Galactic Team Member"). Belgede yazmayan unvan yazılmaz. */
+    unvan: metin.optional(),
+    /** Burak'ın etkinlikteki rolü (unvandan ayrı): "Teknik ekip (görevli öğrenci)". Kartta "Rolüm: …" diye çıkar. */
+    rol: metin.optional(),
+    /** Ek haplar: "Hackathon", "Teknik destek" */
+    etiketler: z.array(metin).min(1).max(6).optional(),
   })
   .strict()
   .refine((s) => s.dogrulanabilir || (s.dogrulamaNo === undefined && s.dogrulamaAdresi === undefined), {

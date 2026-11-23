@@ -4,13 +4,13 @@ import { cakismalar, duzenKur, elemanlar, mulberry32, OLCU, sekilBoslugu, type D
 import { nokta } from '../src/pcb/geometri';
 import { noktaAl, yolKur } from '../src/pcb/yol';
 
-/** Sitenin bugünkü içeriğiyle aynı sayılar: 4 proje, 3 staj, 5 alan, 4 belge (kimlikler M1'deki gibi). */
+/** Sitenin bugünkü içeriğiyle aynı sayılar: 5 proje, 3 staj, 5 alan, 5 belge (2026-11-23 akşam). */
 const SITE: DuzenGirdisi = {
   sapaklar: [
-    { id: 'projeler', ogeler: ['yildiz-takip', 'simsek', 'meditrack', 'robot-kol'].map((s) => ({ id: `projeler-${s}`, kisaAd: s })) },
+    { id: 'projeler', ogeler: ['yildiz-takip', 'simsek', 'meditrack', 'ik-personel-veritabani', 'robot-kol'].map((s) => ({ id: `projeler-${s}`, kisaAd: s })) },
     { id: 'stajlar', ogeler: ['kapsam', 'dogaka', 'demircan'].map((s) => ({ id: `stajlar-${s}`, kisaAd: s })) },
     { id: 'yetkinlikler', ogeler: ['gomulu', 'yazilim', 'backend', 'mobil', 'yapay-zeka'].map((s) => ({ id: `yetkinlikler-${s}`, kisaAd: s })) },
-    { id: 'belgeler', ogeler: ['ozgecmis', 'ai', 'huawei', 'udemy'].map((s) => ({ id: `belgeler-${s}`, kisaAd: s })) },
+    { id: 'belgeler', ogeler: ['ozgecmis', 'ai', 'huawei', 'udemy', 'nasa-space-apps'].map((s) => ({ id: `belgeler-${s}`, kisaAd: s })) },
   ],
 };
 

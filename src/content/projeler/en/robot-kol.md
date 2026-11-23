@@ -9,7 +9,7 @@ zaman: Due spring 2027
 tur: tek-kisilik
 durum: yapim-asamasinda
 etiketler: [3D printing, Inverse kinematics, Interchangeable tool]
-sira: 4
+sira: 5
 taslak: true
 ---
 

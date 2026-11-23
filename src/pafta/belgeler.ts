@@ -38,18 +38,24 @@ function cvOgesi(cv: Cv, dil: Dil, dosyaVar: DosyaVar): PaftaOgesi {
   };
 }
 
-/** Sertifika kartı: tarih, kurum; varsa doğrulama numarası açıklamanın sonuna eklenir. */
+/**
+ * Sertifika kartı: tarih, kurum (varsa yanında belgedeki unvan, aynen); açıklamanın sonuna varsa rol ("Rolüm: …")
+ * ve doğrulama numarası eklenir; haplar: belge türü, doğrulanabilir, varsa ek etiketler.
+ */
 function sertifikaOgesi(s: Sertifika, dil: Dil): PaftaOgesi {
   const m = METINLER[dil].belgeler;
-  const haplar: string[] = [m.belgeTuru[s.belgeTuru]];
-  if (s.dogrulanabilir) haplar.push(m.dogrulanabilir);
+  const haplar: string[] = [m.belgeTuru[s.belgeTuru], ...(s.etiketler ?? [])];
+  if (s.dogrulanabilir) haplar.splice(1, 0, m.dogrulanabilir);
+  let aciklama = s.aciklama;
+  if (s.rol) aciklama += ` ${METINLER[dil].projeler.rol}: ${s.rol}.`;
+  if (s.dogrulamaNo) aciklama += ` ${m.dogrulamaNo}: ${s.dogrulamaNo}.`;
   return {
     id: `belgeler-${s.id}`,
     kisaAd: s.kisaAd,
     ustSatir: ayYil(s.tarih, dil),
     baslik: s.ad,
-    altSatir: s.kurum,
-    aciklama: s.dogrulamaNo ? `${s.aciklama} ${m.dogrulamaNo}: ${s.dogrulamaNo}.` : s.aciklama,
+    altSatir: s.unvan ? `${s.kurum} · ${s.unvan}` : s.kurum,
+    aciklama,
     haplar,
     ...(s.dogrulamaAdresi && { baglantilar: [{ metin: m.dogrula, adres: s.dogrulamaAdresi }] }),
   };

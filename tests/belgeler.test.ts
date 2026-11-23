@@ -66,9 +66,9 @@ describe('belgeler içeriği', () => {
     expect(r.success, mesaj).toBe(true);
   });
 
-  it('CLAUDE.md §7: özgeçmiş + 3 sertifika, bu sırayla; CV iki dilde', () => {
+  it('CLAUDE.md §7: özgeçmiş + 4 sertifika, bu sırayla; CV iki dilde', () => {
     const b = belgeler('tr');
-    expect(b.map((x) => x.id)).toEqual(['ozgecmis', 'ai-business-school', 'huawei', 'udemy-flutter']);
+    expect(b.map((x) => x.id)).toEqual(['ozgecmis', 'ai-business-school', 'huawei', 'udemy-flutter', 'nasa-space-apps']);
     const cv = b[0]!;
     expect(cv.tur === 'cv' && cv.dosyalar.map((d) => d.dil)).toEqual(['tr', 'en']);
   });
@@ -77,7 +77,7 @@ describe('belgeler içeriği', () => {
     const ortak = (b: Belge) =>
       b.tur === 'cv'
         ? { id: b.id, tur: b.tur, dosyalar: b.dosyalar }
-        : { id: b.id, tur: b.tur, tarih: b.tarih, belgeTuru: b.belgeTuru, d: b.dogrulanabilir, no: b.dogrulamaNo, adres: b.dogrulamaAdresi };
+        : { id: b.id, tur: b.tur, tarih: b.tarih, belgeTuru: b.belgeTuru, d: b.dogrulanabilir, no: b.dogrulamaNo, adres: b.dogrulamaAdresi, unvan: b.unvan };
     expect(belgeler('en').map(ortak)).toEqual(belgeler('tr').map(ortak));
   });
 
@@ -117,39 +117,50 @@ describe('sertifika kartları', () => {
   const kartlar = belgeOgeleri(belgeler('tr'), 'tr', YOK).slice(1);
 
   it('üst satır tarih, alt satır kurum', () => {
-    expect(kartlar.map((k) => k.ustSatir)).toEqual(['Eylül 2026', 'Ağustos 2026', 'Temmuz 2026']);
-    expect(kartlar.map((k) => k.altSatir)).toEqual(['AI Business School', 'Huawei', 'Udemy']);
+    expect(kartlar.map((k) => k.ustSatir)).toEqual(['Eylül 2026', 'Ağustos 2026', 'Temmuz 2026', 'Kasım 2026']);
+    expect(kartlar.map((k) => k.altSatir)).toEqual(['AI Business School', 'Huawei', 'Udemy', 'NASA Space Apps Challenge · Galactic Team Member']);
   });
 
   it('doğrulama numarası açıklamaya eklenir; haplar tür + doğrulanabilir', () => {
     expect(kartlar[0]!.aciklama).toBe('Yapay zekâ temelleri eğitimi. Yeterlilik no: CERT-094BCBC0.');
+    expect(kartlar[2]!.aciklama).toBe('Flutter ve Dart ile mobil uygulama geliştirme kursu (25,5 saat). Yeterlilik no: UC-593389b9-5056-430c-9ac2-48217381e84d.');
     expect(kartlar.map((k) => k.haplar)).toEqual([
       ['Sertifika', 'Doğrulanabilir'],
       ['Katılım belgesi'],
       ['Sertifika', 'Doğrulanabilir'],
+      ['Sertifika', 'Hackathon', 'Teknik destek', 'Organizasyon'],
     ]);
+  });
+
+  it('NASA Space Apps (Burak, 2026-11-23): unvan belgedeki gibi AYNEN, rol ayrıca; yarışmacı değil, teknik ekip', () => {
+    const nasa = kartlar[3]!;
+    expect(nasa.baslik).toBe('NASA Space Apps Challenge 2026 – Sivas');
+    expect(nasa.altSatir).toContain('Galactic Team Member');
+    expect(nasa.aciklama).toMatch(/Rolüm: teknik ekip \(görevli öğrenci\), yarışmacılara teknik destek\.$/);
+    expect(nasa.aciklama).not.toMatch(/yarışmacıydım|katıldım|takımımız/i);
   });
 
   it('id’ler "belgeler-" önekli ve benzersiz', () => {
     const idler = belgeOgeleri(belgeler('tr'), 'tr', YOK).map((k) => k.id);
-    expect(new Set(idler).size).toBe(4);
+    expect(new Set(idler).size).toBe(5);
     expect(idler.every((id) => id.startsWith('belgeler-'))).toBe(true);
   });
 });
 
 describe('özet menüsü', () => {
-  it('TR: 4 belge → 3 sertifika / 2 dilde CV (PDF yokken Yakında)', () => {
+  it('TR: 5 belge → 4 sertifika / 2 dilde CV (PDF yokken Yakında)', () => {
     expect(belgeOzeti(belgeler('tr'), 'tr', YOK)).toEqual({
-      sayi: 4,
+      sayi: 5,
       etiket: 'belge',
       gruplar: [
         {
-          sayi: 3,
+          sayi: 4,
           etiket: 'sertifika',
           satirlar: [
             { baslik: 'AI Business School', aciklama: 'Eylül 2026' },
             { baslik: 'Huawei', aciklama: 'Ağustos 2026' },
             { baslik: 'Udemy', aciklama: 'Temmuz 2026' },
+            { baslik: 'NASA Space Apps Challenge', aciklama: 'Kasım 2026' },
           ],
         },
         {
@@ -169,9 +180,9 @@ describe('özet menüsü', () => {
     expect(cvGrubu.satirlar.map((s) => s.aciklama)).toEqual(['PDF', 'PDF']);
   });
 
-  it('EN: 4 documents → 3 certificates / 2 CV languages', () => {
+  it('EN: 5 documents → 4 certificates / 2 CV languages', () => {
     const o = belgeOzeti(belgeler('en'), 'en', YOK);
-    expect(`${o.sayi} ${o.etiket}`).toBe('4 documents');
-    expect(o.gruplar.map((g) => `${g.sayi} ${g.etiket}`)).toEqual(['3 certificates', '2 CV languages']);
+    expect(`${o.sayi} ${o.etiket}`).toBe('5 documents');
+    expect(o.gruplar.map((g) => `${g.sayi} ${g.etiket}`)).toEqual(['4 certificates', '2 CV languages']);
   });
 });
