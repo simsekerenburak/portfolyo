@@ -70,5 +70,5 @@ export async function sayfaVerisi(dil: Dil) {
   };
 }
 
-/** sayfaVerisi'nin döndürdüğü veri (Sahne bütün paftalara bunu dağıtır). */
+/** sayfaVerisi'nin döndürdüğü veri (YedekSayfa bütün bölümlere bunu dağıtır). */
 export type SayfaVerisi = Awaited<ReturnType<typeof sayfaVerisi>>;

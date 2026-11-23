@@ -422,7 +422,7 @@ Kurallar: geçiş durumlarında kaydırma, tabela ve çip tıklamaları yok say�
            yeni: duzen, yol, kaydirma, kamera, yay (M2–M3); kinematik, durum (M4))
 ```
 
-Yeni M2'de silinecekler (eski pafta destesi): `src/sahne/sahne.ts`, `src/sahne/ilkBetik.ts`, `tests/sahne.test.ts`, `PaftaGostergesi.astro`, `Sahne.astro`'nun deste kısmı ve `PaftaCercevesi.astro`'daki konum/kayma CSS'i.
+Eski pafta destesi **silindi** (M2 1. adım, 2026-11-23): `src/sahne/sahne.ts`, `src/sahne/ilkBetik.ts`, `tests/sahne.test.ts`, `PaftaGostergesi.astro`, `--gosterge` token'ı, `PaftaCercevesi.astro`'daki konum/kayma CSS'i. `Sahne.astro` → `YedekSayfa.astro` (düz sayfa); `parcaKimligi` → `src/i18n/adres.ts`.
 
 ---
 

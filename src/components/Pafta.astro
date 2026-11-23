@@ -52,7 +52,7 @@ const baslikId = `${id}-baslik`;
   // klavye kuralı src/sahne/klavye.ts'te.
   import { konumAdi, onceki, sonraki } from '../pafta/deste';
   import { baglamOku, klavyeEylemi } from '../sahne/klavye';
-  import { parcaKimligi } from '../sahne/sahne';
+  import { parcaKimligi } from '../i18n/adres';
 
   for (const kok of document.querySelectorAll<HTMLElement>('[data-pafta]')) {
     const deste = kok.querySelector<HTMLElement>('[data-deste]');
@@ -102,13 +102,13 @@ const baslikId = `${id}-baslik`;
       kutu.addEventListener('click', (olay) => {
         const k = kartIndisi(kutu.getAttribute('href'));
         if (k < 0) return; // tanımadığımız link: tarayıcı normal davransın
-        olay.preventDefault(); // sayfa karta atlamasın, adres değişmesin (adres paftanın: Sahne yazar)
+        olay.preventDefault(); // sayfa karta atlamasın, adres değişmesin
         git(k);
       });
     }
 
     // Klavye: odak destede ya da bantta ([data-kart-alani]) iken ← → kartı çevirir. Basış "kullanıldı" diye
-    // işaretlenir (preventDefault) ki Sahne'nin sayfa düzeyindeki dinleyicisi aynı basışla paftayı da değiştirmesin.
+    // işaretlenir (preventDefault): sayfa düzeyindeki başka bir dinleyici (M3: 3D kamera) aynı basışı kullanmasın.
     kok.addEventListener('keydown', (olay) => {
       const eylem = klavyeEylemi(olay, baglamOku(olay.target));
       if (eylem?.hedef !== 'kart') return;
@@ -123,7 +123,7 @@ const baslikId = `${id}-baslik`;
       if (odakBantta) kutular.find((kutu) => kartIndisi(kutu.getAttribute('href')) === on)?.focus();
     });
 
-    // Adres sonradan bir kartı gösterirse (elle yazılan /#projeler-simsek) o kart öne gelir; paftayı Sahne getirir.
+    // Adres sonradan bir kartı gösterirse (elle yazılan /#projeler-simsek) o kart öne gelir.
     window.addEventListener('hashchange', () => {
       const k = kartIndisi(location.hash);
       if (k >= 0 && k !== on) git(k);

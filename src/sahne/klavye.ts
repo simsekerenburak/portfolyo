@@ -1,9 +1,10 @@
 // Klavyede ← → (Burak'ın kararı, 2026-11-23: "odağa göre"):
 //   odak bir destenin içindeyse (kart, kart okları, bant kutusu) → o destenin KARTINI çevirir,
-//   değilse (sekme, Hakkımda'daki linkler, özet menüsü, sayfanın boş yeri) → PAFTAYI değiştirir.
+//   değilse (bölüm linkleri, Hakkımda'daki linkler, özet menüsü, sayfanın boş yeri) → "pafta" eylemi: yedek sayfada
+//   karşılığı yok (bölümler alt alta), M3'te 3D'de önceki/sonraki kavşağa gider (CLAUDE.md §3.5).
 // Oklar odaktaki parçaya etki eder: ekran okuyucu kullananların ve klavyeyle gezenlerin beklediği davranış.
 //
-// klavyeEylemi saf bir karar fonksiyonudur (tests/klavye.test.ts). Pafta.astro ve Sahne.astro'daki betikler
+// klavyeEylemi saf bir karar fonksiyonudur (tests/klavye.test.ts). Pafta.astro'daki betik (ve M3'te 3D katmanı)
 // olayı ve odağın yerini (baglamOku) verir, dönen eyleme göre kartı ya da paftayı çevirir.
 
 export type Yon = 'ileri' | 'geri';

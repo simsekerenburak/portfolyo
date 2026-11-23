@@ -27,16 +27,18 @@ body {
 }
 
 :root {
-  /* Paftanın iç kenar boşluğu. Pafta (PaftaCercevesi) ve üstüne binen sahne şeritleri (Sahne) aynı değeri
-     kullanır: sekmeler ve gösterge paftanın içeriğiyle aynı hizada dursun. */
+  /* Paftanın iç kenar boşluğu (PaftaCercevesi). */
   --pafta-bosluk: clamp(24px, 5.5vw, 64px);
 }
 
-/* Sayfa: içerik ekranın ortasında, kenarlarda nefes payı (telefonda 16px). Paftaların düzeni Sahne.astro'da. */
+/* Sayfa: içerik ekranın ortasında, kenarlarda nefes payı (telefonda 16px). Bölümlerin düzeni YedekSayfa.astro'da. */
 main {
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
+  /* minmax(0, 1fr): sütun kabı aşamaz. Tanımsız (auto) sütun içeriğin min-content genişliğine açılırdı:
+     telefonda kayan sekme şeridi (beş link yan yana) sayfayı 79px taşırıyordu. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: clamp(16px, 4vw, 48px);
 }

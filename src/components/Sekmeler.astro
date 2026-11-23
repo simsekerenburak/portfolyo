@@ -1,9 +1,6 @@
 ---
-// Pafta sekmeleri (CLAUDE.md §3.1): her pafta bir #hash linki.
-//   JS yok → link sayfada o bölüme atlar (paftalar alt alta).
-//   JS var → Sahne'nin betiği tıklamayı yakalar ve paftayı öne getirir; öndeki paftanın sekmesine
-//            aria-current="true" konur (ekran okuyucu "geçerli" der, CSS turuncu hapı çizer).
-// data-isaret: ilk betik (src/sahne/ilkBetik.ts) ve Sahne betiği aria-current'i bu kimliğe göre koyar.
+// Yedek sayfanın bölüm linkleri (CLAUDE.md §3.4): her bölüm bir #hash linki, sayfada o bölüme atlar.
+// JS gerektirmez. Aktif sekme stili (aria-current) ileride kullanılırsa diye CSS'te duruyor.
 interface Props {
   sekmeler: { id: string; ad: string }[];
   /** gezinme bölgesinin ekran okuyucu adı: "Paftalar" */
@@ -18,7 +15,7 @@ const { sekmeler, etiket } = Astro.props;
     {
       sekmeler.map((s) => (
         <li>
-          <a class="sekme" href={`#${s.id}`} data-sekme={s.id} data-isaret={s.id}>
+          <a class="sekme" href={`#${s.id}`}>
             {s.ad}
           </a>
         </li>
@@ -34,7 +31,6 @@ const { sekmeler, etiket } = Astro.props;
 
   /* Dar ekranda yatay kayan şerit (§8). 4px iç boşluk odak halkasına yer açar, eksi kenar hizayı geri alır. */
   ul {
-    position: relative; /* sekmenin offsetLeft'i şeride göre ölçülsün (Sahne betiği öndeki sekmeyi ortalar) */
     display: flex;
     gap: 6px;
     margin: -4px;

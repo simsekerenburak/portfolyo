@@ -78,7 +78,6 @@
   --pafta-cizgi: light-dark(rgba(15, 46, 34, 0.08), rgba(243, 235, 221, 0.08)); /* pafta kenarı */
   --pafta-golge: light-dark(rgba(15, 46, 34, 0.18), rgba(0, 20, 12, 0.55)); /* öndeki paftanın gölgesi */
   --dugme-cizgi: light-dark(rgba(15, 46, 34, 0.28), rgba(243, 235, 221, 0.22)); /* çerçeveli düğme, dil düğmesi */
-  --gosterge: light-dark(#A9BD9E, #2E5A47); /* pafta göstergesinin pasif noktası (süs: anlamı sekmelerde; aktif olan --turuncu-cizgi) */
 
   /* ── Robot kol (§4.4) — metal ve eloksal iki temada aynı ────────────────── */
   --kol-ray-1: #A9B7A3; /* tavan rayı: alüminyum, dikey gradyan */
