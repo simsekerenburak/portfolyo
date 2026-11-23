@@ -23,6 +23,9 @@ export default defineConfig({
       // (ör. JetBrains Mono Kiril/Vietnam) unicode-range eşleşmese de CSS'le birlikte HER ZAMAN iner.
       // Ayrı dosya olursa tarayıcı yalnızca gereken alt kümeyi ister. Diğer dosyalarda varsayılan kalır.
       assetsInlineLimit: (dosya) => (/\.woff2?$/.test(dosya) ? false : undefined),
+      // 3D parçası (Three.js) küçültülmüş ~540 KB: Vite'ın 500 KB uyarısı her build'de boşuna çıkmasın.
+      // Asıl bütçe sıkıştırılmış boyuttur (≤ 200 KB gz) ve onu scripts/kontrol.mjs denetler (CLAUDE.md §2.2).
+      chunkSizeWarningLimit: 600,
     },
   },
 

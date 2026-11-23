@@ -1,5 +1,6 @@
 ---
-// Ana sayfa (TR): yedek sayfa (düz HTML, CLAUDE.md §3.4); bölümlerin sırası YedekSayfa.astro'da.
+// Ana sayfa (TR): yedek sayfa (düz HTML, CLAUDE.md §3.4) + üstünde açılabilen 3D katmanı (Pcb.astro, §2.2).
+import Pcb from '../components/Pcb.astro';
 import YedekSayfa from '../components/YedekSayfa.astro';
 import { METINLER } from '../i18n';
 import { sayfaVerisi } from '../icerik/koleksiyonlar';
@@ -11,4 +12,5 @@ const v = await sayfaVerisi('tr');
 
 <Duzen lang="tr" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={v.taslak}>
   <YedekSayfa lang="tr" veri={v} />
+  <Pcb lang="tr" veri={v} />
 </Duzen>

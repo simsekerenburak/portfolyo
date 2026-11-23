@@ -96,6 +96,8 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 
 **Bütçe.** `kontrol.mjs` build sonrası gz boyutlarını denetler; sınır aşılırsa yayın durur.
 
+**Uygulama (M2 3. adım, 2026-11-23):** durum `<html data-gorunum="yukleniyor|3d|yedek">` (JS yoksa hiç konmaz); seçim localStorage `gorunum` = `duz` | `3d`; karar saf fonksiyon `ucBoyutKarari` (sıra: düz seçimi → hareket azaltma → veri tasarrufu → ada bozuk → WebGL2; WebGL denemesi `failIfMajorPerformanceCaveat` ile ve en son). Yedek sayfada "3D görünüm" / "3D'yi yine de aç" düğmesi yalnızca düz seçimi ve hareket azaltmada çıkar. Her açma denemesi yeni bir `<canvas>` kullanır, "Düz görünüm" bağlamı bırakır (`forceContextLoss`). `kontrol.mjs` bütçeyi şöyle ölçer: sayfanın satır içi betikleri + `<script src>` + statik import zinciri = "hemen"; dist'teki geri kalan `.js` (yalnızca `import()` ile inen) = 3D parçası. İlk ölçüm: hemen 4,0 KB gz, 3D parçası 131,8 KB gz. Uçtan uca: `npm run uctan-uca -- <site> [görüntü klasörü] [önek]` (`scripts/uctan-uca.mjs`).
+
 **Ölçüm (M2 0. adım, 2026-11-23; three 0.187.0, projenin Vite 8 / Rolldown derleyicisi, küçültülmüş):** en küçük sahne (renderer + kamera + tek kutu + ışık) 518 KB → **126,8 KB gz** (brotli 104,1): Three.js'in taban maliyeti budur, `WebGLRenderer` çekirdeğin çoğunu çeker. Prototip sahne (§3.1 ölçüleri: tahta, ana hat, Hakkımda çipi, 4 kavşak + tabela + bölüm çipi, via'lar, ızgara, gölge, `RoomEnvironment`, canvas yazı dokuları) **132,8 KB gz** (brotli 109,1): sahne kodu yalnızca ~6 KB ekliyor. Prototip 79 çizim çağrısı, ~29 bin üçgen; entegre Intel UHD'de (D3D11) headless ortalama kare 7,4 ms, en kötü %1 12,3 ms (gerçek ölçüm tarayıcıda M2 6. adımda).
 
 | Ölçüt | Hedef | Sınır |

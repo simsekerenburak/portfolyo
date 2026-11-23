@@ -26,6 +26,13 @@
     "sekmeEtiketi": "Sections",
     "hakkimda": "About"
   },
+  "pcb": {
+    "duzGorunum": "Flat view",
+    "ucGorunum": "3D view",
+    "ucYineDe": "Open 3D anyway",
+    "yukleniyor": "Loading the circuit board",
+    "ustEtiketi": "View and language"
+  },
   "projeler": {
     "baslik": "Projects",
     "giris": "Four projects, one of them still in progress.",

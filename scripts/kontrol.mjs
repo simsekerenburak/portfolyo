@@ -4,7 +4,7 @@
 // wrangler'a sıra gelmez (site son sağlam sürümde kalır). UYARI yazdırılır ama yayını durdurmaz.
 //
 // Yapı: çekirdek saf fonksiyonlardır, diske dokunmaz. Girdisi dist'in bellekteki kopyasıdır:
-//   Map<"en/index.html", içerik>   (yollar dist'e göreli ve "/" ayraçlı; yalnızca .html/.css okunur)
+//   Map<"en/index.html", içerik>   (yollar dist'e göreli ve "/" ayraçlı; yalnızca .html/.css/.js okunur)
 // Böylece testler (tests/kontrol.test.ts) sahte bir dist'i birkaç satırla kurar. Dosyanın sonundaki
 // küçük bölüm yalnızca `node scripts/kontrol.mjs` ile doğrudan çalıştırılınca devreye girer.
 //
@@ -14,12 +14,26 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
 
 /**
  * M1–M5: `data-taslak` işaretli sayfa (kaba EN çevirisi) UYARI verir.
  * M6'dan itibaren `true` yapılır → HATA, yani taslak kaldıkça yayın olmaz (Burak'ın kararı).
  */
 export const TASLAK_HATA = false;
+
+/**
+ * JS bütçesi (CLAUDE.md §2.2), gzip'li bayt. Hedef aşılırsa UYARI, sınır aşılırsa HATA (yayın durur).
+ *   yedek:   bir sayfanın hemen indirdiği JS (satır içi betikler + <script src> + statik import zinciri)
+ *   ucBoyut: yalnızca dinamik import() ile inen JS (Three.js + sahne kodu)
+ */
+export const BUTCE = {
+  yedek: { hedef: 15 * 1024, sinir: 25 * 1024 },
+  ucBoyut: { hedef: 170 * 1024, sinir: 200 * 1024 },
+};
+
+/** 3D katmanının JSON adasının kimliği (src/pcb/veri.ts → PCB_VERI_KIMLIGI ile aynı). */
+const ADA_KIMLIGI = 'pcb-veri';
 
 /** Göreli adresleri çözmek için sahte köken. `.invalid` gerçek bir alan adıyla asla çakışmaz. */
 const TABAN = 'https://dist.invalid';
@@ -53,29 +67,121 @@ const NITELIK = /([^\s"'=<>/]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))
  * (ör. bir JS dizgisindeki `href="…"`) link sayılmasın. <style> gövdeleri ayrıca CSS olarak döner.
  * Değeri olmayan nitelik (`crossorigin`) boş metinle kaydedilir; varlığı `in` ile sınanır.
  * @param {string} html
- * @returns {{ etiketler: Etiket[], stiller: string[] }}
+ * @returns {{ etiketler: Etiket[], stiller: string[], betikler: Array<{ nit: Record<string, string>, govde: string }> }}
  */
 export function htmlParcala(html) {
   /** @type {string[]} */
   const stiller = [];
+  /** @type {Array<{ nit: Record<string, string>, govde: string }>} */
+  const betikler = [];
   const sade = html
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/(<(script|style)\b[^>]*>)([\s\S]*?)(<\/\2\s*>)/gi, (_, ac, ad, govde, kapa) => {
       if (String(ad).toLowerCase() === 'style') stiller.push(govde);
+      else betikler.push({ nit: nitelikler(String(ac).replace(/^<script\b/i, '').replace(/>$/, '')), govde });
       return ac + kapa;
     });
 
   /** @type {Etiket[]} */
   const etiketler = [];
-  for (const [, ad, nitelikler] of sade.matchAll(ETIKET)) {
-    /** @type {Record<string, string>} */
-    const nit = {};
-    for (const [, n, cift, tek, ciplak] of (nitelikler ?? '').matchAll(NITELIK)) {
-      nit[String(n).toLowerCase()] = varlikCoz(cift ?? tek ?? ciplak ?? '');
+  for (const [, ad, nitMetni] of sade.matchAll(ETIKET)) etiketler.push({ ad: String(ad).toLowerCase(), nit: nitelikler(nitMetni ?? '') });
+  return { etiketler, stiller, betikler };
+}
+
+/**
+ * Etiketin nitelik metni → { ad: değer } (küçük harfli adlar, karakter göndermeleri çözülmüş).
+ * @param {string} metin
+ */
+function nitelikler(metin) {
+  /** @type {Record<string, string>} */
+  const nit = {};
+  for (const [, n, cift, tek, ciplak] of metin.matchAll(NITELIK)) nit[String(n).toLowerCase()] = varlikCoz(cift ?? tek ?? ciplak ?? '');
+  return nit;
+}
+
+/**
+ * JS kodundaki STATİK import / re-export hedefleri ("./a.js", "/_astro/b.js"). Dinamik import("…") sayılmaz:
+ * `import` sözcüğünden hemen sonra "(" gelir, desen tırnak bekler. Küçültülmüş kod: import{a as b}from"./x.js";
+ * @param {string} kod
+ * @returns {string[]}
+ */
+export function statikIthalatlar(kod) {
+  /** @type {string[]} */
+  const sonuc = [];
+  for (const m of kod.matchAll(/\b(?:import|export)\s*(?:[^'"`();]*?\bfrom\s*)?["']([^"']+)["']/g)) sonuc.push(String(m[1]));
+  return sonuc;
+}
+
+/** Çalıştırılan betik mi (JSON adası, şablon vb. değil)? @param {Record<string, string>} nit */
+const calisanBetik = (nit) => {
+  const tur = (nit.type ?? '').toLowerCase();
+  return tur === '' || tur === 'module' || tur === 'text/javascript' || tur === 'application/javascript';
+};
+
+/** @param {string} metin */
+const gzBoyutu = (metin) => gzipSync(Buffer.from(metin, 'utf8'), { level: 9 }).length;
+
+/** @param {number} n */
+const kb = (n) => `${(n / 1024).toFixed(1)} KB`;
+
+/**
+ * JS bütçesinin ölçümü (CLAUDE.md §2.2).
+ *   Sayfa başına "hemen" JS: satır içi çalışan betikler + <script src> / modulepreload dosyaları + bunların statik
+ *   import zinciri. "Dinamik" JS: dist'teki hemen inmeyen bütün .js dosyaları (yalnızca import() ile iner: 3D parçası).
+ * Her parça ayrı gzip'lenir (ayrı ayrı iner).
+ * @param {Dist} dosyalar
+ * @param {string} [site]
+ * @returns {{ sayfalar: Array<{ yol: string, gz: number }>, dinamik: { dosyalar: string[], gz: number } }}
+ */
+export function jsButcesi(dosyalar, site) {
+  /** @type {Set<string>} */
+  const hemenTum = new Set();
+  const sayfalar = [];
+  for (const [yol, icerik] of dosyalar) {
+    if (!yol.endsWith('.html') || is404(yol)) continue;
+    const { etiketler, betikler } = htmlParcala(icerik);
+    const temel = sunumAdresi(yol);
+    /** @type {Set<string>} */
+    const hemen = new Set();
+    /** @type {string[]} */
+    const kuyruk = [];
+    /** URL'yi dist dosyasına çevirip kuyruğa ekler. @param {string} deger @param {string} taban */
+    const ekle = (deger, taban) => {
+      const c = adresCoz(deger, taban, site);
+      if (c.tur !== 'ic') return;
+      const h = hedefBul(c.yol, dosyalar);
+      if ('dosya' in h && h.dosya.endsWith('.js') && !hemen.has(h.dosya)) {
+        hemen.add(h.dosya);
+        kuyruk.push(h.dosya);
+      }
+    };
+    let gz = 0;
+    for (const { nit, govde } of betikler) {
+      if (!calisanBetik(nit)) continue;
+      if (nit.src) ekle(nit.src, temel);
+      else if (govde.trim()) {
+        gz += gzBoyutu(govde);
+        for (const i of statikIthalatlar(govde)) ekle(i, temel);
+      }
     }
-    etiketler.push({ ad: String(ad).toLowerCase(), nit });
+    for (const { ad, nit } of etiketler) {
+      if (ad === 'link' && (nit.rel ?? '').toLowerCase().split(/\s+/).includes('modulepreload') && nit.href) ekle(nit.href, temel);
+    }
+    while (kuyruk.length > 0) {
+      const dosya = /** @type {string} */ (kuyruk.shift());
+      for (const i of statikIthalatlar(dosyalar.get(dosya) ?? '')) ekle(i, sunumAdresi(dosya));
+    }
+    for (const d of hemen) {
+      gz += gzBoyutu(dosyalar.get(d) ?? '');
+      hemenTum.add(d);
+    }
+    sayfalar.push({ yol, gz });
   }
-  return { etiketler, stiller };
+  const dinamikDosyalar = [...dosyalar.keys()].filter((y) => y.endsWith('.js') && !hemenTum.has(y)).sort();
+  return {
+    sayfalar,
+    dinamik: { dosyalar: dinamikDosyalar, gz: dinamikDosyalar.reduce((t, y) => t + gzBoyutu(dosyalar.get(y) ?? ''), 0) },
+  };
 }
 
 /** @param {string} css */
@@ -321,11 +427,48 @@ export function kontrolEt(dosyalar, { site, taslakHata = TASLAK_HATA } = {}) {
     }
   }
 
+  // 4) JS bütçesi
+  const butce = jsButcesi(dosyalar, site);
+  for (const { yol, gz } of butce.sayfalar) {
+    if (gz > BUTCE.yedek.sinir) hata(`${yol}: hemen inen JS ${kb(gz)} gz > sınır ${kb(BUTCE.yedek.sinir)} (§2.2)`);
+    else if (gz > BUTCE.yedek.hedef) sonuc.uyarilar.push(`${yol}: hemen inen JS ${kb(gz)} gz > hedef ${kb(BUTCE.yedek.hedef)}`);
+  }
+  const d3 = butce.dinamik.gz;
+  if (d3 > BUTCE.ucBoyut.sinir) hata(`3D parçası (dinamik JS) ${kb(d3)} gz > sınır ${kb(BUTCE.ucBoyut.sinir)} (§2.2)`);
+  else if (d3 > BUTCE.ucBoyut.hedef) sonuc.uyarilar.push(`3D parçası (dinamik JS) ${kb(d3)} gz > hedef ${kb(BUTCE.ucBoyut.hedef)}`);
+
+  // 5) JSON adası: 3D katmanı kart metnini yedek sayfadaki <article>'dan alır; her kimliğin karşılığı olmalı
+  for (const [yol, { etiketler }] of htmller) {
+    const ada = htmlParcala(dosyalar.get(yol) ?? '').betikler.find((b) => b.nit.id === ADA_KIMLIGI);
+    if (!ada) continue;
+    /** @type {any} */
+    let veri;
+    try {
+      veri = JSON.parse(ada.govde);
+    } catch {
+      hata(`${yol}: JSON adası (#${ADA_KIMLIGI}) okunamıyor`);
+      continue;
+    }
+    if (!Array.isArray(veri?.sapaklar)) {
+      hata(`${yol}: JSON adasında sapaklar listesi yok`);
+      continue;
+    }
+    const makaleler = new Set(etiketler.filter((e) => e.ad === 'article').map((e) => e.nit['aria-labelledby']));
+    for (const sapak of veri.sapaklar) {
+      if (typeof sapak?.id !== 'string' || !idler(yol).has(sapak.id)) hata(`${yol}: JSON adasındaki sapak "${String(sapak?.id)}" için sayfada bölüm (id) yok`);
+      for (const oge of Array.isArray(sapak?.ogeler) ? sapak.ogeler : []) {
+        if (typeof oge?.id !== 'string' || !makaleler.has(`${oge.id}-baslik`)) {
+          hata(`${yol}: JSON adasındaki "${String(oge?.id)}" için yedek sayfada <article aria-labelledby="${String(oge?.id)}-baslik"> yok`);
+        }
+      }
+    }
+  }
+
   return sonuc;
 }
 
 /**
- * Gerçek dist klasörünü okur. Yalnızca .html/.css içeriği okunur; diğer dosyaların (font, görsel) varlığı yeter.
+ * Gerçek dist klasörünü okur. Yalnızca .html/.css/.js içeriği okunur; diğer dosyaların (font, görsel) varlığı yeter.
  * @param {string} kok
  * @returns {Dist}
  */
@@ -336,7 +479,7 @@ export function distOku(kok) {
     const tam = join(kok, ad);
     if (!statSync(tam).isFile()) continue;
     const yol = ad.split(sep).join('/');
-    dosyalar.set(yol, /\.(html|css)$/i.test(yol) ? readFileSync(tam, 'utf8') : '');
+    dosyalar.set(yol, /\.(html|css|js)$/i.test(yol) ? readFileSync(tam, 'utf8') : '');
   }
   return dosyalar;
 }
@@ -355,6 +498,9 @@ if (import.meta.main) {
     const sayfaSayisi = [...dosyalar.keys()].filter((y) => y.endsWith('.html')).length;
 
     console.log(`kontrol: ${sayfaSayisi} sayfa, ${dosyalar.size} dosya tarandı`);
+    const butce = jsButcesi(dosyalar, ayar.site);
+    for (const { yol, gz } of butce.sayfalar) console.log(`JS     ${yol}: hemen ${kb(gz)} gz (hedef ${kb(BUTCE.yedek.hedef)}, sınır ${kb(BUTCE.yedek.sinir)})`);
+    console.log(`JS     3D parçası: ${kb(butce.dinamik.gz)} gz, ${butce.dinamik.dosyalar.length} dosya (hedef ${kb(BUTCE.ucBoyut.hedef)}, sınır ${kb(BUTCE.ucBoyut.sinir)})`);
     for (const u of uyarilar) console.log(`UYARI  ${u}`);
     for (const h of hatalar) console.error(`HATA   ${h}`);
     if (hatalar.length > 0) {

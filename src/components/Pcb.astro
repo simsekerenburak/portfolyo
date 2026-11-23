@@ -1,0 +1,158 @@
+---
+// 3D katmanının HTML kabuğu (CLAUDE.md §2.2, §3.3–3.5): canvas, 3D üst şeridi (dil + "Düz görünüm"), yükleniyor
+// çizgisi, JSON adası ve giriş betiği. Sayfa ilk açıldığında bu katman GİZLİDİR (hidden): görünen sayfa yedek sayfadır.
+// Giriş betiği (src/pcb/giris.ts) koşullar tutarsa <html data-gorunum> ile katmanı açar:
+//   "yukleniyor" → yalnızca ince turuncu çizgi; yedek sayfa kullanılabilir (katman tıklamaları geçirir)
+//   "3d"         → canvas yumuşakça belirir, yedek sayfa görsel olarak gizlenir (inert, DOM'da kalır)
+//   "yedek"      → katman gizli; gerekirse yedek sayfada "3D görünüm" düğmesi çıkar
+// JS kapalıyken data-gorunum hiç konmaz: katman gizli kalır, yedek sayfa tam görünür.
+// Çip, tabela düğmeleri ve detay kartı M3–M4'te buraya eklenecek.
+import { METINLER, type Dil } from '../i18n';
+import { publicDosyasiVar, type SayfaVerisi } from '../icerik/koleksiyonlar';
+import { belgeOgeleri, belgeOzeti } from '../pafta/belgeler';
+import { projeOgeleri, projeOzeti } from '../pafta/projeler';
+import { stajOgeleri, stajOzeti } from '../pafta/stajlar';
+import { yetkinlikOgeleri, yetkinlikOzeti } from '../pafta/yetkinlikler';
+import { PCB_VERI_KIMLIGI, adaMetni, pcbVerisiKur } from '../pcb/veri';
+import DilDugmesi from './DilDugmesi.astro';
+
+interface Props {
+  lang: Dil;
+  veri: SayfaVerisi;
+}
+
+const { lang, veri: v } = Astro.props;
+const m = METINLER[lang];
+const kaynak = { projeler: v.projeler, stajlar: v.stajlar };
+// Yedek sayfadaki paftalarla AYNI dönüşümler (src/pafta/*.ts): iki görünüm aynı veriyi gösterir.
+const ada = pcbVerisiKur([
+  { id: 'projeler', ad: m.projeler.baslik, ogeler: projeOgeleri(v.projeler, lang), ozet: projeOzeti(v.projeler, lang) },
+  { id: 'stajlar', ad: m.stajlar.baslik, ogeler: stajOgeleri(v.stajlar, lang), ozet: stajOzeti(v.stajlar, lang) },
+  {
+    id: 'yetkinlikler',
+    ad: m.yetkinlikler.baslik,
+    ogeler: yetkinlikOgeleri(v.alanlar, kaynak, lang),
+    ozet: yetkinlikOzeti(v.alanlar, kaynak, lang),
+  },
+  {
+    id: 'belgeler',
+    ad: m.belgeler.baslik,
+    ogeler: belgeOgeleri(v.belgeler, lang, publicDosyasiVar),
+    ozet: belgeOzeti(v.belgeler, lang, publicDosyasiVar),
+  },
+]);
+---
+
+<div class="pcb" data-pcb hidden>
+  <canvas class="tuval" aria-hidden="true"></canvas>
+  <div class="ust" role="group" aria-label={m.pcb.ustEtiketi}>
+    <DilDugmesi lang={lang} />
+    <button type="button" class="dugme" data-duz-gorunum>{m.pcb.duzGorunum}</button>
+  </div>
+  <div class="yukleniyor" role="status"><span class="ekran-okuyucu">{m.pcb.yukleniyor}</span></div>
+</div>
+
+<script type="application/json" id={PCB_VERI_KIMLIGI} set:html={adaMetni(ada)} />
+
+<script>
+  import { girisiCalistir } from '../pcb/giris';
+
+  girisiCalistir();
+</script>
+
+<style>
+  /* Katman bütün ekranı kaplar; açılırken (yükleniyor) tıklamaları alttaki yedek sayfaya geçirir. 3D her zaman koyu. */
+  .pcb {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    color-scheme: dark;
+    pointer-events: none;
+  }
+  .pcb[hidden] {
+    display: none;
+  }
+
+  .tuval {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  /* 3D üst şeridi: dil + "Düz görünüm" (M4'te mühendis modu). Yedek sayfanın üst şeridiyle aynı hizada. */
+  .ust {
+    position: absolute;
+    top: clamp(16px, 4vw, 48px);
+    right: clamp(16px, 4vw, 48px);
+    display: flex;
+    gap: 8px;
+    visibility: hidden;
+  }
+  .dugme {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px; /* dokunma hedefi (§8) */
+    padding: 0 16px;
+    border: 1px solid var(--dugme-cizgi);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--hap-metin);
+    font: 500 13px/1 var(--font-govde);
+    cursor: pointer;
+  }
+  .dugme:hover {
+    background: var(--hap-zemin);
+  }
+
+  /* Yükleniyor: ekranın üstünde 2px'lik turuncu çizgi (süs; anlamı role=status metninde) */
+  .yukleniyor {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .yukleniyor::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 30%;
+    background: var(--turuncu);
+    animation: kosu 1.2s ease-in-out infinite;
+  }
+  @keyframes kosu {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(340%);
+    }
+  }
+
+  :global(html[data-gorunum='yukleniyor']) .yukleniyor {
+    display: block;
+  }
+  :global(html[data-gorunum='3d']) .tuval {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  :global(html[data-gorunum='3d']) .ust {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tuval {
+      transition: none;
+    }
+    .yukleniyor::after {
+      width: 100%;
+      opacity: 0.6;
+      animation: none;
+    }
+  }
+</style>

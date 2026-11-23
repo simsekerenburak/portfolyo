@@ -32,11 +32,19 @@ const bolumler = [
 ];
 ---
 
-<main>
+<main data-yedek>
   <div class="sayfa">
     <header class="ust">
       <Sekmeler sekmeler={bolumler} etiket={m.sahne.sekmeEtiketi} />
       <div class="dugmeler">
+        {/* 3D açılmadıysa ve ziyaretçi açabilecekse (Düz görünüm seçti / hareket azaltma) giris.ts gösterir */}
+        <button
+          type="button"
+          class="dugme-3d"
+          data-3d-ac
+          data-metin-duz={m.pcb.ucGorunum}
+          data-metin-hareket={m.pcb.ucYineDe}
+          hidden>{m.pcb.ucGorunum}</button>
         <DilDugmesi lang={lang} />
         <TemaDugmesi lang={lang} />
       </div>
@@ -67,6 +75,25 @@ const bolumler = [
     display: flex;
     flex: none;
     gap: 8px;
+  }
+  /* DilDugmesi ile aynı hap biçimi */
+  .dugme-3d {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--dugme-cizgi);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--hap-metin);
+    font: 500 13px/1 var(--font-govde);
+    cursor: pointer;
+  }
+  .dugme-3d[hidden] {
+    display: none;
+  }
+  .dugme-3d:hover {
+    background: var(--hap-zemin);
   }
 
   /* Telefon: dil/tema düğmeleri üstte sağda, bölüm linkleri altında tam genişlikte kayan şerit (§8). */

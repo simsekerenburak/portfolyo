@@ -26,6 +26,13 @@
     "sekmeEtiketi": "Paftalar",
     "hakkimda": "Hakkımda"
   },
+  "pcb": {
+    "duzGorunum": "Düz görünüm",
+    "ucGorunum": "3D görünüm",
+    "ucYineDe": "3D’yi yine de aç",
+    "yukleniyor": "Devre kartı yükleniyor",
+    "ustEtiketi": "Görünüm ve dil"
+  },
   "projeler": {
     "baslik": "Projeler",
     "giris": "Dört proje var, biri hâlâ yapım aşamasında.",

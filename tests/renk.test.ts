@@ -16,6 +16,7 @@ import {
   type RGBA,
 } from './yardimci/renk';
 import { TEMALAR, renkLiteralleri, tokenlariOku, type Tema } from './yardimci/tokenlar';
+import { RENK_3D } from '../src/pcb/renkler';
 
 // Dosya diskten okunur. (`?raw` içe aktarma KULLANMA: Vitest CSS dosyalarını varsayılan olarak
 // boş metne çevirir, testler boş dosyayı ölçüp yanıltıcı sonuç verir.)
@@ -113,6 +114,11 @@ describe('"mavi ve soğuk gri yok" kuralı', () => {
 
   it.each(literaller)('%s mavi değil, gri ise sıcak', (lit) => {
     expect(sogukRenkSebebi(rgb(renkCoz(lit))), lit).toBeNull();
+  });
+
+  // 3D sahnenin paleti (src/pcb/renkler.ts, CLAUDE.md §4.2): ışıklar dahil hepsi aynı kurala uyar.
+  it.each(Object.entries(RENK_3D))('3D: %s (%s) mavi değil, gri ise sıcak', (_ad, deger) => {
+    expect(sogukRenkSebebi(rgb(renkCoz(deger))), deger).toBeNull();
   });
 });
 

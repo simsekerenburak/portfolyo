@@ -77,3 +77,16 @@ samp {
   outline: 2px solid var(--turuncu-cizgi);
   outline-offset: 2px;
 }
+
+/* ── 3D görünüm (src/pcb/giris.ts → <html data-gorunum="3d">, CLAUDE.md §2.2, §3.4) ─────────────────
+   Sayfa kaymaz (kaydırma 3D'de kameranın ilerlemesidir); yedek içerik görsel olarak gizlenir ama DOM'da kalır
+   (giris.ts ayrıca inert yapar: gezilemez, ekran okuyucu okumaz). 3D her zaman koyu: light-dark() token'ları
+   DOM katmanlarında koyu değeri verir. :root[data-gorunum] tokens.css'teki :root[data-theme]'den sonra gelir. */
+:root[data-gorunum='3d'] {
+  color-scheme: dark;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+:root[data-gorunum='3d'] [data-yedek] {
+  visibility: hidden;
+}

@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "test": "vitest run",
     "kontrol": "node scripts/kontrol.mjs",
+    "uctan-uca": "node scripts/uctan-uca.mjs",
     "yayinla": "npm test && npm run build && npm run kontrol && wrangler pages deploy dist --project-name burakerensimsek --branch main",
     "astro": "astro"
   },

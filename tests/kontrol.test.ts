@@ -3,7 +3,7 @@
 // değişiklikle bozulur ve TAM OLARAK bir hata beklenir. Böylece hem kuralın kırıldığı görülür hem de
 // alakasız yerlerde boşuna hata vermediği. Hiç kırılmayan bir kontrol, kontrol yokluğundan farksızdır.
 import { describe, expect, it } from 'vitest';
-import { adresCoz, hedefBul, htmlParcala, kontrolEt, sunumAdresi } from '../scripts/kontrol.mjs';
+import { adresCoz, hedefBul, htmlParcala, jsButcesi, kontrolEt, statikIthalatlar, sunumAdresi } from '../scripts/kontrol.mjs';
 
 const SITE = 'https://ornek.test';
 const PRELOAD = '<link rel="preload" href="/_astro/f.woff2" as="font" type="font/woff2" crossorigin>';
@@ -147,4 +147,92 @@ describe('yardımcılar', () => {
     expect(etiketler[0]).toEqual({ ad: 'a', nit: { href: '/a/?x=1&y=2', title: 'T', 'data-n': '5', hidden: '' } });
     expect(stiller).toEqual(['p{color:red}']);
   });
+});
+
+// ── JS bütçesi (CLAUDE.md §2.2) ────────────────────────────────────────────
+/** Sıkıştırılamayan (rastgele) n karakterlik JS: gz boyutu ≈ n · 0,75 */
+function sikismaz(n: number, tohum = 1): string {
+  let a = tohum;
+  let s = '';
+  const harfler = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  for (let i = 0; i < n; i++) {
+    a = (Math.imul(a ^ (a >>> 15), 1 | a) + 0x6d2b79f5) | 0;
+    s += harfler[(a >>> 8) & 63];
+  }
+  return `var x="${s}";`;
+}
+
+describe('jsButcesi: hangi JS hemen, hangisi dinamik iner', () => {
+  const d = dist({
+    'index.html': sayfa('tr', '<a href="/en/">EN</a><section id="stajlar"></section><script type="module">import"/_astro/c.js";</script><script type="module" src="/_astro/a.js"></script><script type="application/json" id="v">{"x":1}</script>'),
+    '_astro/a.js': 'import{b}from"./b.js";const y=()=>import("./uc.js");',
+    '_astro/b.js': 'export const b=1;',
+    '_astro/c.js': 'export{}',
+    '_astro/uc.js': 'import{t}from"./three.js";',
+    '_astro/three.js': 'export const t=2;',
+  });
+  const b = jsButcesi(d, SITE);
+
+  it('statik zincir (a → b) ve satır içi betiğin içe aktardığı (c) hemen; import() ile inen (uc → three) dinamik', () => {
+    expect(b.dinamik.dosyalar).toEqual(['_astro/three.js', '_astro/uc.js']);
+    expect(b.sayfalar.find((s) => s.yol === 'index.html')!.gz).toBeGreaterThan(0);
+  });
+
+  it('statikIthalatlar dinamik import()\'u saymaz', () => {
+    expect(statikIthalatlar('import{a}from"./a.js";import "./b.js";export*from"./c.js";const d=import("./d.js")')).toEqual(['./a.js', './b.js', './c.js']);
+  });
+
+  it('JSON adası (type="application/json") JS sayılmaz', () => {
+    const yalniz = dist({ 'index.html': sayfa('tr', '<a href="/en/">EN</a><section id="stajlar"></section><script type="application/json">' + sikismaz(30000) + '</script>') });
+    expect(jsButcesi(yalniz, SITE).sayfalar.find((s) => s.yol === 'index.html')!.gz).toBe(0);
+  });
+});
+
+describe('kontrolEt: JS bütçesi', () => {
+  const tr = (govde: string, ek: Record<string, string> = {}) =>
+    dist({ 'index.html': sayfa('tr', `<a href="/en/">EN</a><section id="stajlar"></section>${govde}`), ...ek });
+
+  it('yedek sayfanın JS\'si sınırı aşarsa hata', () => {
+    tekHata(tr('<script type="module" src="/_astro/a.js"></script>', { '_astro/a.js': sikismaz(40000) }), 'hemen inen JS');
+  });
+
+  it('hedefi aşıp sınırın altında kalırsa yalnızca uyarı', () => {
+    const { hatalar, uyarilar } = kontrol(tr('<script type="module" src="/_astro/a.js"></script>', { '_astro/a.js': sikismaz(26000) }));
+    expect(hatalar).toEqual([]);
+    expect(uyarilar).toEqual([expect.stringContaining('hedef')]);
+  });
+
+  it('3D parçası (dinamik) sınırı aşarsa hata', () => {
+    tekHata(tr('', { '_astro/uc.js': sikismaz(280000) }), '3D parçası');
+  });
+
+  it('3D parçası hedef ile sınır arasında: uyarı', () => {
+    const { hatalar, uyarilar } = kontrol(tr('', { '_astro/uc.js': sikismaz(245000) }));
+    expect(hatalar).toEqual([]);
+    expect(uyarilar).toEqual([expect.stringContaining('3D parçası')]);
+  });
+});
+
+// ── JSON adası (CLAUDE.md §3.3) ────────────────────────────────────────────
+describe('kontrolEt: JSON adası ↔ yedek sayfadaki <article>', () => {
+  const ada = (json: string) => `<script type="application/json" id="pcb-veri">${json}</script>`;
+  const kart = '<li id="stajlar-dogaka"><article aria-labelledby="stajlar-dogaka-baslik"><h3 id="stajlar-dogaka-baslik">D</h3></article></li>';
+  const tr = (govde: string) => dist({ 'index.html': sayfa('tr', `<a href="/en/">EN</a><section id="stajlar">${kart}</section>${govde}`) });
+  const iyi = { surum: 1, sapaklar: [{ id: 'stajlar', ad: 'Stajlar', sayi: 1, birim: 'staj', ogeler: [{ id: 'stajlar-dogaka', kisaAd: 'DOĞAKA' }] }] };
+
+  it('her kimliğin karşılığı varsa hata yok', () => {
+    expect(kontrol(tr(ada(JSON.stringify(iyi))))).toEqual({ hatalar: [], uyarilar: [] });
+  });
+
+  it('karşılığı olmayan öğe', () => {
+    const kotu = structuredClone(iyi);
+    kotu.sapaklar[0]!.ogeler.push({ id: 'stajlar-yok', kisaAd: 'Yok' });
+    tekHata(tr(ada(JSON.stringify(kotu))), '"stajlar-yok"');
+  });
+
+  it('karşılığı olmayan sapak', () => {
+    tekHata(tr(ada(JSON.stringify({ surum: 1, sapaklar: [{ ...iyi.sapaklar[0], id: 'belgeler', ogeler: [] }] }))), 'sapak "belgeler"');
+  });
+
+  it('okunamayan ada', () => tekHata(tr(ada('{bozuk')), 'okunamıyor'));
 });
