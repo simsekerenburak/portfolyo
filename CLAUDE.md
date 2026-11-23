@@ -93,12 +93,14 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 4. İlk 3D kare hazır olunca sahne yumuşakça belirir. Hakkımda paneli iki görünümde aynı yerde durduğu için içerik zıplamaz (CLS).
 5. Herhangi bir adım başarısız olursa (indirme hatası, istisna, `webglcontextlost`) yedek sayfada kalınır; konsola tek satır uyarı.
 
-**Bütçe.** İlk sayılar tahmindir; M2'nin ilk adımında boş bir Three.js sahnesi derlenip ölçülür ve burada kesinleşir. `kontrol.mjs` build sonrası gz boyutlarını denetler; sınır aşılırsa yayın durur.
+**Bütçe.** `kontrol.mjs` build sonrası gz boyutlarını denetler; sınır aşılırsa yayın durur.
+
+**Ölçüm (M2 0. adım, 2026-11-23; three 0.187.0, projenin Vite 8 / Rolldown derleyicisi, küçültülmüş):** en küçük sahne (renderer + kamera + tek kutu + ışık) 518 KB → **126,8 KB gz** (brotli 104,1): Three.js'in taban maliyeti budur, `WebGLRenderer` çekirdeğin çoğunu çeker. Prototip sahne (§3.1 ölçüleri: tahta, ana hat, Hakkımda çipi, 4 kavşak + tabela + bölüm çipi, via'lar, ızgara, gölge, `RoomEnvironment`, canvas yazı dokuları) **132,8 KB gz** (brotli 109,1): sahne kodu yalnızca ~6 KB ekliyor. Prototip 79 çizim çağrısı, ~29 bin üçgen; entegre Intel UHD'de (D3D11) headless ortalama kare 7,4 ms, en kötü %1 12,3 ms (gerçek ölçüm tarayıcıda M2 6. adımda).
 
 | Ölçüt | Hedef | Sınır |
 |---|---|---|
 | Yedek sayfanın JS'si (tema, dil, kart destesi, giriş betiği) | ≤ 15 KB gz | 25 KB gz |
-| 3D parçası (Three.js + sahne kodu; Three.js çekirdeği tahminen 130–160 KB gz) | ≤ 200 KB gz | 250 KB gz |
+| 3D parçası (Three.js + sahne kodu; ölçülen taban 126,8 KB gz) | ≤ 200 KB gz | 250 KB gz |
 | İndirilen model/doku dosyası | 0 | 0 |
 | LCP (yedek sayfa, 4G orta telefon) | ≤ 2,5 sn | — |
 | CLS (3D geçişi dahil) | ≤ 0,05 | 0,1 |
