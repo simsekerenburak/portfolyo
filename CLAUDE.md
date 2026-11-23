@@ -146,6 +146,7 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 - **Zemin:** ince serigrafi ızgarası (5 birim) ve dağınık via noktaları.
 - **Ufkun üstü** (Burak, 2026-11-23): uzakta, hafif sis içinde kartın diğer parçalarının **silüetleri**: elektrolitik kondansatörler, büyük QFP çipler, bir USB-C ve bir pin header konnektörü, birkaç direnç. Yakına gelmezler (kamera ilerledikçe onlar da ufukta kalır), yalnızca derinlik verirler; koyu yeşil/bakır tonlar, mavi yok. Tavan rayı ve kol bu şeridin üstüne oturur.
 - Sapak uzunluğu öğe sayısına göre uzar (6 birim × öğe); kavşak aralığı 18 birim buna yetmezse yerleşim aralığı açar (test).
+- **Yerleşim ayrıntıları** (M2 2. adım, 2026-11-23; `src/pcb/duzen.ts`, testli): öğe i, düz kısmın başından `6 + 6·i` uzakta, ilk öğe gidiş yönünün solunda, sonra dönüşümlü; öğe çipi merkezi sapak ekseninden 3,05 yanda, 0,35'lik kısa bağla. Düz kısım `max(11, son öğe + 3)`; bölüm çipi ucun 0,6 üstüne biner (yol çipin altına girer). Sapakta kamera bölüm çipine 6 kala durur; son öğe o noktadan ≥ 3 birim önde kalır. Sapağın çıktığı tarafta koyu yan yol kavşakta **kesilir** (gerçek kartta kesişen yol kısa devre olur); kavşak via'sı 0,55 (prototipte 0,62; yan yolla arasında boşluk kalsın). Kasıtlı değmeyen her parça arasında en az 0,15 boşluk (test). Dağınık via'lar deterministik (mulberry32, tohum 42).
 
 ### 3.2 Gezinme
 
@@ -305,12 +306,14 @@ Her eksen (taşıyıcı x, direk z, hedef noktanın x ve y'si, gripper açıklı
 
 ```ts
 // ẍ = k(hedef − x) − c·ẋ ,  c = 2√k  (kritik sönüm: salınım yok, en hızlı oturma)
+// Adım, denklemin TAM çözümüyle atılır (e = x − hedef, ω = √k, B = v + ω·e):
+//   e(t) = (e + B·t)·e^(−ωt),  v(t) = (v − ω·B·t)·e^(−ωt)
 export function yay(x, v, hedef, k, dt) {
-  const c = 2 * Math.sqrt(k);
-  v += (k * (hedef - x) - c * v) * dt;
-  return [x + v * dt, v];
+  const w = Math.sqrt(k), e = x - hedef, B = v + w * e, s = Math.exp(-w * dt);
+  return [hedef + (e + B * dt) * s, (v - w * B * dt) * s];
 }
 ```
+*(2026-11-23, M2 2. adım: ilk taslaktaki yarı örtük Euler kare hızına bağlıydı; 30 fps'te `k=12` yayı 2 sn'de hedefin %1'ine giremiyordu. Denklem ve sertlikler aynı, yalnızca integrasyon tam çözüm: her kare hızında aynı yol, hiçbir dt'de kararsızlık yok.)*
 Sertlikler: taşıyıcı `k=18` (en ağır, en yavaş), direk `k=30`, uç nokta `k=70`, gripper `k=40`. `dt` en fazla 0,033 s ile sınırlanır.
 Dosya `src/hareket/yay.ts`: kol ve kamera aynı yayı kullanır. Kamera sertlikleri M2'de denenip buraya yazılacak (başlangıç: ilerleme `k=12`, bakış yönü `k=20`).
 
