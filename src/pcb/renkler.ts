@@ -33,6 +33,8 @@ export const RENK_3D = {
   siluetKoyu: '#0F2D20',
   siluetAcik: '#14362A',
   siluetBakir: '#33291E',
+  /** gölge lekesi (Orta/Düşük kademede çiplerin altı): siyah değil, çok koyu yeşil */
+  golge: '#06120D',
   /** ışıklar: gökyüzü (yarı küre) ve tek yönlü "güneş" */
   isikGok: '#FFE9C9',
   isikGunes: '#FFE2B8',

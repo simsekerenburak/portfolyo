@@ -182,6 +182,11 @@ denetle(await d(`getComputedStyle(document.documentElement).overflow === 'hidden
 denetle(await d(`!!document.querySelector('[data-duz-gorunum]') && getComputedStyle(document.querySelector('[data-duz-gorunum]')).visibility === 'visible'`), '"Düz görünüm" düğmesi görünüyor');
 const cls = await d(`new Promise((bitti) => { let t = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) t += e.value; }).observe({ type: 'layout-shift', buffered: true }); setTimeout(() => bitti(t), 100); })`);
 denetle(cls <= CLS_SINIR, `CLS ≤ ${CLS_SINIR} (3D geçişi dahil)`, cls.toFixed(4));
+const kok = `document.querySelector('[data-pcb]').dataset`;
+denetle((await d(`${kok}.kademe`)) === 'yuksek', 'masaüstü başlangıç kademesi: Yüksek (gölge haritası)', await d(`${kok}.kademe`));
+const cizim = Number(await d(`${kok}.cizim`));
+const ucgen = Number(await d(`${kok}.ucgen`));
+denetle(cizim > 0 && cizim <= 100 && ucgen <= 150000, 'çizim çağrısı ≤ 100, üçgen ≤ 150 bin (§2.2)', `${cizim} çağrı, ${ucgen} üçgen`);
 const png1 = await cek('3d-1440');
 const p1 = await pikselOlc(png1, [700, 860, 740, 890]);
 denetle(p1.maviOran <= MAVI_ORAN_SINIR, 'mavi piksel yok (≤ %0,1)', `${(p1.maviOran * 100).toFixed(3)}% / ${p1.renkli} renkli piksel`);
@@ -241,6 +246,7 @@ denetle(
 );
 await git_s(18);
 await cek('ilk-kavsak-1440');
+denetle(Number(await d(`${kok}.cizim`)) <= 100, 'kavşak önünde de çizim çağrısı ≤ 100', `${await d(`${kok}.cizim`)} çağrı, ${await d(`${kok}.ucgen`)} üçgen`);
 await git_s(40);
 await cek('ikinci-kavsak-1440');
 const png2 = await cek('ana-hat-ortasi-1440');
@@ -310,10 +316,20 @@ denetle(
 );
 await gonder('Emulation.setScriptExecutionDisabled', { value: false });
 
+// ── 6b. Dokunmatik ekran → Orta kademe (gölge haritası yerine hazır lekeler) ──
+await gonder('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+await git('/');
+denetle((await gorunumBekle('3d')) === '3d', '3D açılıyor (dokunmatik)');
+denetle((await d(`${kok}.kademe`)) === 'orta', 'dokunmatik başlangıç kademesi: Orta', await d(`${kok}.kademe`));
+await git_s(18);
+await cek('orta-kademe-1440');
+await gonder('Emulation.setTouchEmulationEnabled', { enabled: false });
+
 // ── 7. EN ve telefon genişliği ──
 await git('/en/');
 denetle((await gorunumBekle('3d')) === '3d', '3D açılıyor (EN)');
 await olcu(390, 844);
+await gonder('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
 await git('/');
 denetle((await gorunumBekle('3d')) === '3d', '3D açılıyor (390 px)');
 await bekle(800);

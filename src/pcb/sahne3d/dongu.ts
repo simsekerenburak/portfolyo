@@ -31,6 +31,12 @@ export interface DonguSecenekleri {
   takipciler: Object3D[];
   /** Hakkımda paneli (HTML): kamera ilerledikçe söner */
   panel: HTMLElement | null;
+  /** kamera her yeni yere konduğunda: konum ve ileri yön (ışık kamerayı izler) */
+  kameraDegisti?: (x: number, z: number, tx: number, tz: number) => void;
+  /** kamera hareket ederken her karenin süresi (ms): kalite kademesi bunlara bakar */
+  kareOlctu?: (ms: number) => void;
+  /** kamera durunca (son kare çizildikten sonra) */
+  durdu?: () => void;
   /** s değerinin yazıldığı öğe: data-s (durunca), data-hareket (hareket ederken); uçtan uca deneme okur */
   kok: HTMLElement;
 }
@@ -58,6 +64,7 @@ export function donguKur(sec: DonguSecenekleri) {
     const uzat = ILERI_BAKIS - kalan;
     kamera.lookAt(ileri.x + ileri.tx * uzat, KAMERA.yukseklik, ileri.z + ileri.tz * uzat);
     for (const t of takipciler) t.position.z = p.z;
+    sec.kameraDegisti?.(p.x, p.z, p.tx, p.tz);
     // Hakkımda paneli: opaklık = 1 − (s − baş)/(son − baş), [0, 1]
     if (panel) {
       const o = Math.min(1, Math.max(0, 1 - (s - PANEL_SONUM.bas) / (PANEL_SONUM.son - PANEL_SONUM.bas)));
@@ -73,6 +80,7 @@ export function donguKur(sec: DonguSecenekleri) {
 
   const kare = (zaman: number) => {
     const dt = onceki ? (zaman - onceki) / 1000 : 1 / 60;
+    if (onceki) sec.kareOlctu?.(zaman - onceki);
     onceki = zaman;
     if (atalet !== 0) {
       const a = ataletAdim(atalet, dt);
@@ -98,6 +106,7 @@ export function donguKur(sec: DonguSecenekleri) {
       onceki = 0;
       kok.dataset.s = s.toFixed(2);
       delete kok.dataset.hareket;
+      sec.durdu?.();
     } else {
       requestAnimationFrame(kare);
     }

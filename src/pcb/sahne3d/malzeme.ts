@@ -11,7 +11,9 @@ export function malzemelerKur() {
     grafit: new MeshStandardMaterial({ color: RENK_3D.grafit, roughness: 0.7 }),
     kalay: new MeshStandardMaterial({ color: RENK_3D.kalay, metalness: 0.9, roughness: 0.3 }),
     altin: new MeshStandardMaterial({ color: RENK_3D.altin, metalness: 0.9, roughness: 0.3 }),
-    turuncu: new MeshStandardMaterial({ color: RENK_3D.turuncu, roughness: 0.4, emissive: RENK_3D.turuncu, emissiveIntensity: 0.25 }),
+    // Turuncu (kavşak via'sı, tabela çerçevesi): mat ve az ışımalı. Parlak hâli (roughness 0,4, ışıma 0,25)
+    // ışık altında somon/pembeye kaçıyordu (ekranda #FAAF9A, ton 13°).
+    turuncu: new MeshStandardMaterial({ color: RENK_3D.turuncu, roughness: 0.65, emissive: RENK_3D.turuncu, emissiveIntensity: 0.1 }),
     tabela: new MeshStandardMaterial({ color: RENK_3D.tabela, roughness: 0.5 }),
     // Silüetler ışıksız, sissiz ve ton eşlemesiz: renkleri ekrandaki son renktir (sise karışmış hâlleri seçildi).
     // toneMapped: false şart: PBR Neutral çok koyu renklerde kırmızıyı sıfıra çekip doygunluğu artırıyor,

@@ -3,12 +3,10 @@
 //
 // Sahnenin parçaları: tahta.ts (tahta, ızgara, dağınık via) · yollar.ts (bakır yollar, kavşak via'ları) ·
 // cipler.ts (Hakkımda, bölüm, öğe, konnektör) · tabelalar.ts · siluetler.ts (ufkun üstü) · dongu.ts (kaydırma).
-// Işık ayarı ve gölge 5. adımda isik.ts / kalite.ts'e taşınacak.
+// isik.ts (kamerayı izleyen güneş, gölge haritası) · leke.ts (hazır gölge lekeleri) · kalite kademesi (../kalite.ts).
 import {
   Color,
-  DirectionalLight,
   Fog,
-  HemisphereLight,
   LineSegments,
   Mesh,
   NeutralToneMapping,
@@ -22,12 +20,15 @@ import {
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { duzenKur, OLCU } from '../duzen';
 import type { Sahne3d } from '../giris';
+import { baslangicKademesi, KADEMELER, kademeKarari, OLCUM, type Kademe } from '../kalite';
 import { KAMERA, lensKaydirma } from '../lens';
 import { RENK_3D } from '../renkler';
 import type { PcbVerisi } from '../veri';
 import { yolKur } from '../yol';
 import { ciplerKur } from './cipler';
 import { donguKur } from './dongu';
+import { isikKur } from './isik';
+import { lekelerKur } from './leke';
 import { malzemelerKur } from './malzeme';
 import { siluetlerKur } from './siluetler';
 import { tabelalarKur } from './tabelalar';
@@ -54,7 +55,6 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
   await fontlariBekle();
 
   const renderer = new WebGLRenderer({ canvas: tuval, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   // Khronos PBR Neutral ton eşleme: marka renklerini (bakır, turuncu) kaydırmaz (CLAUDE.md §4.2)
   renderer.toneMapping = NeutralToneMapping;
 
@@ -73,8 +73,11 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
   const m = malzemelerKur();
   const dokular: Texture[] = [ortam];
 
-  sahne.add(tahtaKur(duzen, m));
+  const tahta = tahtaKur(duzen, m);
+  sahne.add(tahta.grup);
   sahne.add(yollarKur(duzen, m));
+  const lekeler = lekelerKur(duzen);
+  sahne.add(lekeler.mesh);
   const cipler = ciplerKur(duzen, veri, m, renderer, dil);
   const tabelalar = tabelalarKur(duzen, veri, m, renderer, dil);
   sahne.add(cipler.grup, tabelalar.grup);
@@ -82,11 +85,38 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
   const siluetler = siluetlerKur(m);
   sahne.add(siluetler);
 
-  // ── Işık: sıcak gökyüzü/zemin + tek sıcak yönlü ışık (gölge 5. adımda) ──
-  sahne.add(new HemisphereLight(RENK_3D.isikGok, RENK_3D.zemin, 0.45));
-  const gunes = new DirectionalLight(RENK_3D.isikGunes, 2.4);
-  gunes.position.set(-9, 16, -4);
-  sahne.add(gunes);
+  // ── Işık ve kalite kademesi (§8): başlangıç ekrandan tahmin edilir, hareket sırasında ölçülüp gerekirse düşer ──
+  const isik = isikKur(sahne, renderer);
+  let kademe: Kademe = baslangicKademesi({
+    en: window.innerWidth,
+    boy: window.innerHeight,
+    dpr: window.devicePixelRatio || 1,
+    dokunmatik: window.matchMedia('(pointer: coarse)').matches,
+  });
+  const kademeUygula = (k: Kademe) => {
+    kademe = k;
+    const a = KADEMELER[k];
+    isik.golge(a.golgeHaritasi);
+    lekeler.mesh.visible = a.leke;
+    for (const x of [...tahta.ayrintilar, siluetler]) x.visible = a.ayrinti;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, a.pikselOraniUst));
+    kok.dataset.kademe = k;
+  };
+  kademeUygula(kademe);
+  let sureler: number[] = [];
+  const kareOlctu = (ms: number) => {
+    sureler.push(ms);
+    if (sureler.length < OLCUM.kareSayisi) return;
+    const karar = kademeKarari(kademe, sureler);
+    sureler = [];
+    if (karar.tur === 'dusur') {
+      kademeUygula(karar.yeni);
+      boyutla();
+    } else if (karar.tur === 'duz-oner') {
+      // M5: ziyaretçiye "Düz görünüm" önerisi (şimdilik yalnızca işaret)
+      kok.dataset.duzOner = '';
+    }
+  };
 
   // ── Boyut, çizim ve kaydırma döngüsü ──
   const boyutla = () => {
@@ -100,10 +130,26 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
   const ciz = () => renderer.render(sahne, kamera);
   boyutla();
   const yol = yolKur(duzen.anaHat.kameraNoktalari, OLCU.kameraYaricap);
-  const dongu = donguKur({ kamera, yol, ciz, takipciler: [siluetler], panel, kok });
+  const dongu = donguKur({
+    kamera,
+    yol,
+    ciz,
+    takipciler: [siluetler],
+    panel,
+    kok,
+    kameraDegisti: isik.guncelle,
+    kareOlctu,
+    // Durunca son karenin ölçüleri yazılır (§2.2 bütçesi: çizim çağrısı ≤ 100, üçgen ≤ 150 bin; uçtan uca okur)
+    durdu: () => {
+      kok.dataset.cizim = String(renderer.info.render.calls);
+      kok.dataset.ucgen = String(renderer.info.render.triangles);
+    },
+  });
   // Gölgesiz ve ışıklar sabitken GPU'da derlenmesi gereken her şey ilk karede derlensin (ilk kaydırmada takılmasın)
   renderer.compile(sahne, kamera);
   ciz();
+  kok.dataset.cizim = String(renderer.info.render.calls);
+  kok.dataset.ucgen = String(renderer.info.render.triangles);
   const yenidenBoyutla = () => {
     boyutla();
     ciz();
@@ -130,7 +176,10 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
         }
       });
       m.yokEt();
+      lekeler.yokEt();
+      isik.yokEt();
       for (const d of dokular) d.dispose();
+      for (const ad of ['kademe', 'cizim', 'ucgen', 'duzOner']) delete kok.dataset[ad];
       renderer.dispose();
       // Bağlamı hemen bırak (GPU belleği); dinleyici yukarıda kaldırıldı, kayboldu() tetiklenmez.
       renderer.forceContextLoss();

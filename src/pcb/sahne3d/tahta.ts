@@ -20,7 +20,8 @@ import type { Malzemeler } from './malzeme';
 const PAY = { yan: 160, ileri: 200, geri: 30 };
 const IZGARA = 5;
 
-export function tahtaKur(duzen: Duzen, m: Malzemeler): Group {
+/** Tahta grubu ve Düşük kademede gizlenen ayrıntılar (ızgara, dağınık via'lar). */
+export function tahtaKur(duzen: Duzen, m: Malzemeler): { grup: Group; ayrintilar: Object3D[] } {
   const grup = new Group();
   const s = duzen.sinir;
   const x0 = s.x0 - PAY.yan;
@@ -44,7 +45,8 @@ export function tahtaKur(duzen: Duzen, m: Malzemeler): Group {
   for (let z = iz0; z <= iz1; z += IZGARA) iz.push(ix0, 0.003, z, ix1, 0.003, z);
   const izgaraGeo = new BufferGeometry();
   izgaraGeo.setAttribute('position', new Float32BufferAttribute(iz, 3));
-  grup.add(new LineSegments(izgaraGeo, new LineBasicMaterial({ color: RENK_3D.krem, transparent: true, opacity: 0.06 })));
+  const izgara = new LineSegments(izgaraGeo, new LineBasicMaterial({ color: RENK_3D.krem, transparent: true, opacity: 0.06 }));
+  grup.add(izgara);
 
   // Dağınık via'lar (duzen.ts deterministik yerleştirdi; kavşak via'ları yollar.ts'te turuncu çizilir)
   const dag = duzen.vialar.filter((v) => v.id.startsWith('dag-'));
@@ -57,5 +59,5 @@ export function tahtaKur(duzen: Duzen, m: Malzemeler): Group {
     vialar.setMatrixAt(i, o.matrix);
   });
   grup.add(vialar);
-  return grup;
+  return { grup, ayrintilar: [izgara, vialar] };
 }
