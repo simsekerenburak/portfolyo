@@ -2,7 +2,8 @@
 
 Bu dosya, bu repodaki her Claude Code oturumunun ana talimatıdır. Projenin tüm kararları, mimarisi, tasarım sistemi, algoritmaları, içerikleri ve yol haritası burada. Bir karar burada yazıyorsa tartışılmış ve verilmiştir; değiştirmeden önce Burak'a sor.
 
-Görsel referans (tasarım taslakları): https://claude.ai/artifact/CpnHDC12EXRFrqReVNZnbM
+**Konsept 2026-11-23'te değişti: PCB üzerinde birinci şahıs gezinti (§1).** Prototip ölçüleri §3.1'de (Burak, 2026-11-23; başlangıç noktası, birebir değil). Plan aynı gün onaylandı.
+Eski taslak (pafta konsepti; renk sistemi, tipografi ve robot kol görünüşü için hâlâ geçerli): https://claude.ai/artifact/CpnHDC12EXRFrqReVNZnbM
 İlgili paftalar: `E · Premium: Hakkımda`, `Projeler`, `Stajlar`, `Yetkinlikler`, `Belgeler`, `Renk sistemi`. A–D satırları eski, kullanılmayacak yönlerdir.
 
 ---
@@ -27,7 +28,12 @@ Burak 4. sınıf bilgisayar mühendisliği öğrencisi. Kodu **anlamak** istiyor
 
 - **Ne:** Burak'ın kendini, projelerini, stajlarını, yetkinliklerini ve belgelerini anlatan kişisel portfolyo sitesi.
 - **Kimin için:** Genel portfolyo (işverenler, staj/burs başvuruları, LinkedIn ziyaretçileri).
-- **Fikir:** Site bir **endüstriyel otomasyon hattı** gibi çalışır. Tavan rayına asılı bir **gantry robot kol** imleci takip eder. İçerik **üst üste duran paftalar (deste)** halindedir; her paftada öğeler **yürüyen bant** üzerinde kutu olarak durur ve kol bunları alıp **kart destesine** koyar. Robot kol, Burak'ın bitirme projesinin (uç değiştirebilen robot kol) dijital ikizidir.
+- **Fikir (konsept 2026-11-23'te değişti):** Site koyu yeşil bir **devre kartıdır (PCB)** ve **birinci şahıs** görünümle gezilir. Ziyaretçi, bakır bir yolda (**ana hat**) ilerleyen bir sinyaldir: kaydırdıkça (tekerlek, dokunma, klavye) kamera ana hat boyunca ilerler.
+  - Ana hattın başında **Hakkımda çipi**: isim, kısa tanıtım, iletişim.
+  - Ana hattan sırayla **sapaklar** ayrılır: Projeler (sol), Stajlar (sağ), Yetkinlikler (sol), Belgeler (sağ). Her sapağın başında turuncu bir **tabela** durur. Tabelaya tıklayınca kamera o yöne döner ve sapağa girer; "Ana hatta dön" ile geri gelir.
+  - Sapakta her öğe (proje, staj, yetkinlik alanı, belge) sapaktan ayrılan küçük bir yolun ucundaki **küçük bir çiptir**. Sapakta da kaydırarak ilerlenir.
+  - Ekranın üstündeki tavan rayına asılı **gantry robot kol** imleci izler. Bir çipe tıklayınca kartı çekip ekranın ortasına getirir (**detay kartı**); tekrar tıklayınca ya da ← → ile kartı yerine bırakıp diğerini alır; boştayken katlanır. Kol, Burak'ın bitirme projesinin (uç değiştirebilen robot kol) dijital ikizidir.
+- **İptal edilen konsept:** "üst üste pafta destesi + yürüyen bant" (M1–M2'de yapıldı). Bant ve kart destesi bileşenleri yalnızca **yedek sayfada** yaşar (§3.4).
 - **Diller:** Türkçe (varsayılan) ve İngilizce.
 - **Barındırma:** Cloudflare Pages, ücretsiz; `wrangler` ile doğrudan yükleme. Proje adı `burakerensimsek` → `burakerensimsek.pages.dev`. Kalıcı adres ücretsiz is-a.dev alt alan adı: `burakerensimsek.is-a.dev` (M7). GitHub yalnızca kod yedeği.
 
@@ -38,7 +44,8 @@ Burak 4. sınıf bilgisayar mühendisliği öğrencisi. Kodu **anlamak** istiyor
 | Konu | Karar |
 |---|---|
 | Site üretici | **Astro** (güncel kararlı sürüm), TypeScript |
-| Etkileşim | Astro **island** mimarisi; kol/bant/deste mantığı saf TypeScript + SVG. React vb. framework yok |
+| Etkileşim | Astro **island** mimarisi. 3D PCB sahnesi Three.js; robot kol 2D **SVG** katmanı (§5.5). Mantık (yerleşim, yol, kaydırma, kamera ve kol durum makineleri, kinematik) DOM'suz ve Three.js'siz saf TypeScript. React vb. framework yok |
+| 3D | **Three.js**, yalnızca `WebGLRenderer` (WebGL2). Tam sürüm sabit (`npm install -E`, en az ~1 haftalık sürüm). Model ya da doku dosyası indirilmez: geometri ve yazı dokuları kodla üretilir. Yalnızca `src/pcb/sahne3d/` Three.js içe aktarır |
 | Stil | Saf CSS + CSS değişkenleri (tasarım token'ları). Tailwind yok |
 | İçerik | Astro **content collections** + Zod şeması |
 | Test | **Vitest** (algoritmalar ve durum makinesi için birim testleri) |
@@ -77,60 +84,125 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 
 **Türkiye'den erişim sorunu (2026-11-22):** Burak'ın bağlantısında `*.pages.dev` üç katmanda engelli: sağlayıcı DNS'i sahte adres veriyor (213.14.227.50, Türk Telekom aralığı; gerçek: 172.66.44.144 / 172.66.47.112), doğru IP'ye TLS'te SNI görülünce bağlantı sıfırlanıyor, düz HTTP'de `Host` başlığında kesiliyor. Site çalışıyor: ölçüm, Chrome'da DoH + **ECH** (alan adı şifreli; dış ad `cloudflare-ech.com`) ile yapıldı. `is-a.dev` aynı bağlantıdan açılıyor. Sonuç: Türkiye'deki ziyaretçiler için **kalıcı adres (M7) şart**; `pages.dev` adresi paylaşılmamalı. M7'de dikkat: DNS cevabındaki CNAME zinciri `pages.dev`'i ele verirse sağlayıcı DNS'i özel alan adını da engelleyebilir → M7 bitince Türkiye bağlantısından ECH'siz düz `curl` ile test edilecek.
 
+### 2.2 Performans bütçesi ve yükleme (3D)
+
+**Yükleme sırası: yedek sayfa önce, 3D sonra.**
+1. Sunucudan **yedek sayfa** gelir (tam HTML, §3.4): ilk boyama ve LCP onunla olur, içerik hemen okunur.
+2. Küçük **giriş betiği** (`src/pcb/giris.ts`, ≤ 5 KB gz) 3D koşullarını denetler: JS var; `prefers-reduced-motion: reduce` değil (ya da ziyaretçi "3D'yi yine de aç"ı seçmiş); ziyaretçi "Düz görünüm"ü seçmemiş (iki seçim de localStorage'da, try/catch); WebGL2 bağlamı kurulabiliyor; `navigator.connection.saveData` değil.
+3. Koşullar tutarsa 3D parçası tarayıcı boşalınca (`requestIdleCallback`, yoksa `setTimeout`) **dinamik `import()`** ile iner. Bu sırada sayfa kullanılabilir; ince bir "devre kartı yükleniyor" çizgisi görünür.
+4. İlk 3D kare hazır olunca sahne yumuşakça belirir. Hakkımda paneli iki görünümde aynı yerde durduğu için içerik zıplamaz (CLS).
+5. Herhangi bir adım başarısız olursa (indirme hatası, istisna, `webglcontextlost`) yedek sayfada kalınır; konsola tek satır uyarı.
+
+**Bütçe.** İlk sayılar tahmindir; M2'nin ilk adımında boş bir Three.js sahnesi derlenip ölçülür ve burada kesinleşir. `kontrol.mjs` build sonrası gz boyutlarını denetler; sınır aşılırsa yayın durur.
+
+| Ölçüt | Hedef | Sınır |
+|---|---|---|
+| Yedek sayfanın JS'si (tema, dil, kart destesi, giriş betiği) | ≤ 15 KB gz | 25 KB gz |
+| 3D parçası (Three.js + sahne kodu; Three.js çekirdeği tahminen 130–160 KB gz) | ≤ 200 KB gz | 250 KB gz |
+| İndirilen model/doku dosyası | 0 | 0 |
+| LCP (yedek sayfa, 4G orta telefon) | ≤ 2,5 sn | — |
+| CLS (3D geçişi dahil) | ≤ 0,05 | 0,1 |
+| INP | ≤ 200 ms | — |
+| 3D'nin hazır olması (masaüstü, geniş bant, sayfa yüklendikten sonra) | ≤ 2 sn | — |
+| Kare hızı, masaüstü (entegre GPU, 1440×900) | 60 fps | en kötü %1 kare ≤ 25 ms |
+| Kare hızı, telefon (iPhone 12 sınıfı) | 60 fps | 30 fps |
+| Kare başına JS (mantık + çizim hazırlığı) | ≤ 4 ms | 8 ms |
+| Çizim çağrısı / üçgen | ≤ 100 / ≤ 150 bin | — |
+| GPU doku belleği | ≤ 32 MB | — |
+| Lighthouse mobil: performans / erişilebilirlik | ≥ 90 / ≥ 95 | — |
+
+**Çizim ilkeleri:** tekrarlayan parçalar (pad, via, yol parçaları) `InstancedMesh`; tek sıcak yönlü ışık + sıcak ortam ışığı; gölge Yüksek kademede tek gölge haritası, diğerlerinde çiplerin altında hazır yumuşak leke; `devicePixelRatio` en fazla 2 (kademeye göre 1–2); **isteğe bağlı çizim**: kamera, kol ya da vurgu değişmiyorsa kare çizilmez (pil); sekme gizliyken ve sahne ekranda değilken döngü durur. Kalite kademeleri §8'de.
+
 ---
 
-## 3. Bilgi mimarisi
+## 3. Bilgi mimarisi ve gezinme
 
-### 3.1 Paftalar (üst üste deste)
+### 3.1 PCB yerleşimi
 
-Site dikey kaymaz. **Beş pafta üst üste durur**, en önde Hakkımda vardır. Arkadaki paftaların üst kenarları hafifçe görünür.
-
-| Sıra | Pafta | Hash | Düzen |
+| Sıra | Durak | Adres | Yeri |
 |---|---|---|---|
-| 01 | Hakkımda | `#hakkimda` | Giriş paftası, sade (bant/deste yok) |
-| 02 | Projeler | `#projeler` | Bant + deste + kol |
-| 03 | Stajlar | `#stajlar` | Bant + deste + kol |
-| 04 | Yetkinlikler | `#yetkinlikler` | Bant + deste + kol |
-| 05 | Belgeler | `#belgeler` | Bant + deste + kol |
+| 01 | Hakkımda çipi | `/` (ya da `#hakkimda`) | Ana hattın başı |
+| 02 | Projeler | `#projeler` | 1. sapak, **sol** |
+| 03 | Stajlar | `#stajlar` | 2. sapak, **sağ** |
+| 04 | Yetkinlikler | `#yetkinlikler` | 3. sapak, **sol** |
+| 05 | Belgeler | `#belgeler` | 4. sapak, **sağ** |
+| 06 | Konnektör çipi: İletişim (M6'da CV de) | `#iletisim` | Ana hattın sonu; hat orada biter |
 
-- **Gezinme:** üstte pafta sekmeleri, altta pafta göstergesi (5 nokta, aktif olan turuncu uzun çubuk), sağ altta "← önceki / sonraki →" linkleri, klavyede ← → tuşları, telefonda yatay kaydırma (swipe).
-- **Geçiş:** Kol öndeki paftanın kenarını gripper ile tutar, kaldırır ve destenin **en arkasına** koyar (~0,7 sn). Geri giderken en arkadakini alıp öne getirir. Sekmeye tıklayınca doğrudan o paftaya geçilir (kol animasyonu kısaltılmış).
-- **Döngü:** Belgeler'den sonra ileri → Hakkımda (deste döner).
-- Her paftanın kendi hash'i vardır; `burakerensimsek.is-a.dev/#stajlar` doğrudan Stajlar'ı açar. `hashchange` dinlenir.
-- Proje detay sayfaları ayrıca: `/projeler/[slug]` ve `/en/projeler/[slug]` (tam sayfa, link paylaşılabilir).
+- Öğe çiplerinin adresi `#<sapak>-<öğe>` (ör. `#projeler-simsek`, `#stajlar-dogaka`): M1'deki kimliklerin aynısı. Yedek sayfa ve 3D aynı adresleri anlar; paylaşılan bir link iki görünümde de aynı yeri açar.
+- **Yerleşim içerikten hesaplanır** (`src/pcb/duzen.ts`, saf): sapak uzunluğu öğe sayısına, öğe çiplerinin yeri sıraya göre. Yollar gerçek PCB gibi yalnızca 0° / 45° / 90° açılarla döner, köşeler pahlıdır. Kurallar (test): çipler, tabelalar ve yollar çakışmaz; yollar arasında en az boşluk var; sapaklar sol/sağ dönüşümlü; aynı içerik → aynı yerleşim (deterministik).
+- Proje detay sayfaları ayrıca: `/projeler/[slug]` ve `/en/projeler/[slug]` (tam sayfa, link paylaşılabilir; M6).
 
-**M2'de uygulandı (2026-11-23, Burak'ın kararları):**
-- **Klavye ← → odağa göre:** odak bir destenin içindeyse (kart, kart okları, bant kutusu; `data-kart-alani`) o destenin kartını çevirir, değilse paftayı değiştirir. Alt/Ctrl/Meta/Shift'li basışlar ve yazı alanları tarayıcıya bırakılır; basılı tutunca pafta tekrarlanmaz (`src/sahne/klavye.ts`).
-- **Geri düğmesi siteden çıkar:** pafta geçişi adresi `history.replaceState` ile yazar, geçmişe kayıt eklemez. Elle yazılan/tıklanan #parça `hashchange` ile o paftayı (kart kimliğiyse kartı da) öne getirir; tanınmayan parça paftayı değiştirmez.
-- **Kol gelene kadar geçiş (M4'te kol yapacak):** → öndeki pafta opak kalarak kendi boyu kadar yukarı çekilir, en sonda söner ("çıkan" konumu = destenin en arkası); ← oradan opak iner. Sekmeyle komşu olmayan paftaya: aynı geçiş 0,35 sn. `prefers-reduced-motion` → geçiş yok.
-- Taslağa göre **Hakkımda'da "← önceki" linki yok** (kapak); Belgeler'de "Hakkımda →" var. Klavyede halka tam döner.
-- İlk kare: satır içi `SAHNE_ILK_BETIK` paftaları ilk boyamadan önce adresteki paftaya göre dizer (sayfa zıplamaz); modül betiği sonra gezinmeyi bağlar. Konum kuralı iki yerde (betik metni + `paftaKonumu`), `tests/sahne.test.ts` ikisini eşit tutar.
-- Dil/tema düğmeleri ve sekmeler sahnenin üst şeridinde (her paftada aynı yer); telefonda düğmeler üstte, sekmeler altta kayan şerit. Swipe M5'te.
+**Prototip ölçüleri** (Burak, 2026-11-23). Birim: metre benzeri dünya birimi. Birebir değil, başlangıç noktası; `src/pcb/duzen.ts` bunları sabit olarak taşır, ana hat +z yönünde ilerler:
+- **Kamera:** yükseklik 1,6; dikey görüş açısı ~54°; **düz bakar, eğim yok**; ufuk ekranın üstten ~%34'ünde (§5.8: lens kaydırma).
+- **Ana hat:** bakır yol genişliği 0,9; iki yanında 0,35 genişliğinde daha koyu paralel yollar (merkezleri ±0,9).
+- **Hakkımda çipi:** z = 10, yarı genişlik 3,4, yolun üstünde.
+- **Kavşaklar:** z = 26 / 44 / 62 / 80 (her 18 birimde bir), sırayla sol / sağ. Kavşakta turuncu bir via noktası.
+- **Sapak:** kavşaktan 45° ile 3 birim çapraz, sonra 90° düz ~11 birim; sonunda bölüm çipi (yarı genişlik 3,2).
+- **Tabela:** kavşağın ~3 birim yanında, yerden 1,9 yükseklikte, turuncu çerçeveli yuvarlak yeşil levha; üstünde bölüm adı ve büyük sayı ("4 proje").
+- **Sapak içi (B seçeneği):** öğeler sapak boyunca her 6 birimde bir, sırayla iki yana kısa bir yolla bağlı küçük çipler (yarı genişlik 1,4); çipin üstünde kısa adı yazan krem etiket.
+- **Zemin:** ince serigrafi ızgarası (5 birim) ve dağınık via noktaları.
+- Sapak uzunluğu öğe sayısına göre uzar (6 birim × öğe); kavşak aralığı 18 birim buna yetmezse yerleşim aralığı açar (test).
 
-### 3.2 İçerik paftası şablonu (tek bileşen: `Pafta`)
+### 3.2 Gezinme
+
+- **Ana hatta:** kaydırma (tekerlek, dikey dokunma sürüklemesi, klavye) yol üzerindeki ilerlemeyi değiştirir; kamera onu yayla izler (§5.8). Kavşakların önünden kaydırarak **geçilir**; sapağa yalnızca **tabelayla** (tıklama, dokunma, Enter) girilir.
+- **Sapağa giriş** (prototip): kavşağa ilerle → 90° dön → sapağa gir; her parça ~0,7 sn, ease-in-out (toplam ~2,1 sn). Kamera sapakta bölüm çipine ~6 birim kala durur. Giriş/dönüş sırasında kaydırma ve tıklama yok sayılır.
+- **Sapakta:** kaydırma sapak boyunca ilerletir, sapağın sonunda durur. "Ana hatta dön" düğmesi (ve Esc) aynı üç parçayı tersinden oynatır (kavşağa geri → 90° dön → ana hat yönü); ana hatta aynı noktadan devam edilir.
+- **Detay kartı:** çipe tıklayınca kol kartı ekranın ortasına getirir (§5.4); ← → komşu öğenin kartına geçer; tekrar tıklama, Esc ya da "Yerine bırak" kartı çipine geri koyar. Kart açıkken kaydırılırsa kol önce kartı bırakır, sonra kamera ilerler.
+- **Adres:** ana hatta `/` (parçasız), sapakta `#<sapak>`, kart açıkken `#<sapak>-<öğe>`. `history.replaceState` ile yazılır, geçmişe kayıt eklenmez (Burak'ın kararı, 2026-11-23: Geri siteden çıkar). `hashchange` dinlenir. Derin link açılışta kamerayı doğrudan oraya koyar (ilk kare animasyonsuz); kart adresinde kart açık gelir.
+- **Ana hattın sonu:** konnektör çipi, İletişim (Burak, 2026-11-23; M6'da CV de). Hat orada biter; End tuşu oraya götürür.
+- **Reduced-motion + "3D'yi yine de aç":** bütün geçişler animasyonsuz kesmedir (kamera yeni yere anında konur, kol anında yerine geçer).
+
+### 3.3 Hakkımda ve detay kartı
+
+- **Hakkımda:** ana hattın başındaki büyük çip. İsim (h1), unvan, tanıtım, "İletişime geç" ve iletişim satırı bir **HTML paneldir** (WebGL yazısı değil); çipin yanında durur, kamera ilerledikçe söner. Yedek sayfadaki Hakkımda'yla aynı düzendedir: 3D yüklenince panel yerinde kalır, arkasında devre kartı belirir.
+- **Detay kartı:** HTML'dir (okunur, seçilebilir, ekran okuyucu okur). İçerik eski kartla aynı: üst satır (mono, önünde turuncu nokta), varsa etiket hapı, başlık 27px, alt satır, açıklama, teknoloji hapları, bağlantılar, "i / n" sayacı, ← → düğmeleri ve "Yerine bırak" düğmesi.
+- **Tek kaynak:** content collections → `src/pafta/*.ts` dönüşümleri (`PaftaOgesi`, `Ozet`) → hem yedek sayfa hem 3D. 3D katmanı kart içeriğini yedek sayfadaki ilgili `<article>`'dan alır. Yerleşim için gereken kısa veriyi (kimlik, kısa ad, sapak, özet sayısı) sayfadaki bir JSON adasından (`<script type="application/json">`) okur. Metin kopyalanmaz.
+- **Özet:** tabelada büyük sayı ("4 proje"); açılır `<details>` özet menüsü yalnızca yedek sayfada (Burak, 2026-11-23).
+- Çip ve tabela üstündeki yazılar (serigrafi) WebGL'de **canvas dokusu** olarak çizilir: aynı self-host fontlar, `document.fonts.load` sonrası. Süs sayılır; anlamı DOM'dadır (§3.5).
+
+### 3.4 Yedek sayfa (aşamalı geliştirme)
+
+- **Her zaman** HTML olarak üretilir ve sayfada durur (M1'in düz sayfası): üstte bölüm linkleri + dil/tema düğmeleri; Hakkımda + dört bölüm alt alta; bölümlerde kartlar (JS varken kart destesi + bant), `<details>` özet menüsü. Ortak `Pafta` şablonu burada yaşar (§3.6).
+- **Gösterildiği durumlar:** JS kapalı; `prefers-reduced-motion: reduce` (varsayılan; yedek sayfada "3D'yi yine de aç" düğmesi var, seçim localStorage'da); WebGL2 yok ya da bağlam kurulamadı/kaybedildi; 3D parçası inemedi; ziyaretçi "Düz görünüm"ü seçti (üst şeritte düğme; seçim localStorage'da). Arama motorları tam içeriği bu HTML'den okur.
+- 3D etkinken yedek içerik **görsel olarak** gizlenir ama DOM'da kalır (detay kartının içeriği oradan gelir). Klavye ve ekran okuyucu için 3D katmanın kendi düğmeleri vardır (§3.5); iki görünüm aynı anda gezilebilir olmaz (çift okuma olmasın).
+- Eski M2'nin **pafta destesi** (beş paftayı üst üste dizen sahne, ilk kare betiği, pafta göstergesi, önceki/sonraki linkleri) yeni M2'de **kaldırılır**. JS varken yedek sayfada yalnızca kart destesi + bant ve klavye kuralı kalır (odak destedeyse ← → kartı çevirir; `src/sahne/klavye.ts`).
+
+### 3.5 Klavye ve erişilebilirlik (3D görünüm)
+
+- `<canvas>` `aria-hidden`. Her **tabela** ve **çip** için şeffaf bir DOM düğmesi (`<button>`) vardır; her karede o nesnenin ekran izdüşümüne taşınır. Fare, dokunma, klavye ve ekran okuyucu **aynı düğmeleri** kullanır (tek yol, ayrı ışın izleme yok). Erişilebilir adlar: "Projeler sapağı, 4 proje", "Şimşek, 2026 · tek kişilik".
+- Tab sırası yol sırasıdır; odak ekran dışındaki bir nesneye giderse kamera onu görüş alanına getirir. Odak halkası her zaman görünür (`--turuncu-cizgi`, 3:1).
+- Detay kartı açılınca odak kartın başlığına, kapanınca çipine döner. Önemli değişiklikler `aria-live` ile duyurulur ("Stajlar sapağı, 3 staj", "Şimşek, 2 / 4").
+- Üst şeritte her zaman: dil, **"Düz görünüm"**, mühendis modu. Tema düğmesi 3D'de gizli (3D her zaman koyu, §4.2).
+
+| Tuş | Ana hatta | Sapakta | Kart açıkken |
+|---|---|---|---|
+| ↓ / PageDown / Space | ileri | ileri | kartı bırakır, sonra ileri |
+| ↑ / PageUp / Shift+Space | geri | geri | kartı bırakır, sonra geri |
+| Home / End | ana hattın başı (Hakkımda) / sonu (konnektör) | sapağın başı / sonu | — |
+| ← / → | önceki / sonraki kavşak | önceki / sonraki çip | önceki / sonraki kart (kol değiştirir) |
+| Tab / Shift+Tab | sıradaki / önceki tabela | sıradaki / önceki çip, "Ana hatta dön" | kartın içindeki linkler ve düğmeler |
+| Enter (odak tabela/çipte) | sapağa gir | kartı getir | — |
+| Esc | — | ana hatta dön | kartı yerine bırak |
+
+Alt/Ctrl/Meta'lı basışlar ve yazı alanları tarayıcıya bırakılır (`klavyeEylemi` ilkesi). Basılı tutunca ilerleme sürer, kavşak/çip atlaması tekrarlanmaz.
+
+### 3.6 Ortak `Pafta` şablonu (yalnızca yedek sayfa)
 
 Projeler, Stajlar, Yetkinlikler ve Belgeler **aynı bileşenden**, sadece farklı veriyle üretilir:
 
 - Sol üst: başlık (52px) + tek cümle giriş.
-- Orta-sol: **Deste** — en fazla 3 kart görünür. Öndeki kart tam içerik (üst satır turuncu mono yazı + varsa etiket hapı, başlık 27px, alt satır, açıklama, teknoloji hapları, "i / n" sayacı, ← → düğmeleri). Arkadaki iki kartın yalnızca üst şeridi görünür ve üzerinde `ad · üst satır` yazar.
-- Kol öndeki kartı üst kenarından tutar.
-- Alt: **Bant** — öğeler krem renkli kutular halinde; öndeki kartın kutusu turuncu çerçeveli. Kutuya tıklamak o öğeyi öne getirir.
-- Sağ: **Özet açılır menüsü** — büyük turuncu sayı + etiket (ör. "3 staj"), açılınca alt açılır menüler (ör. "2 şehir", "1 devam eden"), onlar da açılınca satırlar. **`<details>/<summary>` ile yap** (JS olmadan da çalışsın, erişilebilir olsun).
-- ← → (veya kutuya tıklama) ile deste döner; gerçek sitede kol öndeki kartı kaldırıp destenin arkasına koyar.
-
-### 3.3 Aşamalı geliştirme (progressive enhancement)
-
-- JS kapalıyken: paftalar alt alta normal bölümler olarak görünür, her deste kartı düz bir liste olur, linkler çalışır. Google ve ekran okuyucular tüm içeriği okur.
-- Sahnenin ilk karesi build sırasında statik SVG olarak üretilir; JS sonra yüklenip hareketi başlatır (`client:idle`).
-- `prefers-reduced-motion: reduce` → kol animasyonları kapanır, geçişler anında olur.
-- Sekme arka plandayken veya sahne görünmüyorken `requestAnimationFrame` döngüsü durur.
+- Orta-sol: **Deste**: en fazla 3 kart görünür. Öndeki kart tam içerik (üst satır mono yazı + varsa etiket hapı, başlık 27px, alt satır, açıklama, teknoloji hapları, "i / n" sayacı, ← → düğmeleri). Arkadaki iki kartın yalnızca üst şeridi görünür ve üzerinde `ad · üst satır` yazar.
+- Alt: **Bant**: öğeler krem renkli kutular hâlinde; öndeki kartın kutusu turuncu çerçeveli. Kutuya tıklamak o öğeyi öne getirir.
+- Sağ: **Özet açılır menüsü**: büyük turuncu sayı + etiket (ör. "3 staj"), açılınca alt açılır menüler (ör. "2 şehir", "1 devam eden"), onlar da açılınca satırlar. **`<details>/<summary>` ile** (JS olmadan da çalışır, erişilebilir).
+- JS yokken kartlar düz liste, kutular karta atlayan linkler.
 
 ---
 
 ## 4. Tasarım sistemi
 
 ### 4.1 Görsel dil
-Modern ve premium (ürün fotoğrafı stüdyosu hissi): tek yumuşak ışık kaynağı, derinlik, yumuşak gölgeler, metal malzeme hissi, büyük ve rahat tipografi, bol boşluk. Tematik doku (PCB, ızgara, kod) **yok**.
+Modern ve premium (ürün fotoğrafı stüdyosu hissi): tek yumuşak ışık kaynağı, derinlik, yumuşak gölgeler, metal malzeme hissi, büyük ve rahat tipografi, bol boşluk. **2026-11-23'ten beri sahnenin kendisi bir PCB'dir:** lehim maskesi koyu yeşil, bakır yollar, krem serigrafi yazıları, sıcak grafit çip gövdeleri; stüdyo hissi korunur (tek sıcak ışık, yumuşak gölge, sade). Zeminde ince serigrafi ızgarası (5 birim) ve dağınık via noktaları var (prototip); kod dokusu yok. Yedek sayfada doku yok.
 
 ### 4.2 Renkler — yeşil %60 · turuncu %30 · krem %10
 Mavi ve soğuk gri **yasak**. Tüm griler sıcak (kahverengiye çalan) olmalı.
@@ -171,6 +243,8 @@ Kural: Yeşil = zemin/kartlar. Turuncu = etkileşim (kolun metali, ana düğme, 
 - **Hakkımda unvanı 24px / 500** (taslakta 22px): koyu temada `--turuncu-yazi` pafta üstünde 3.98; 24px'te büyük metin sayılır (3:1).
 - **Kart üst satırı** (mono, 13px): `--metin-2`, önünde **6px `--turuncu` nokta** (turuncu yazı değil).
 
+**3D sahne renkleri (2026-11-23):** lehim maskesi = zemin yeşilleri (`#0B241B` … `#18503C`); bakır yollar `#D9893F` civarı (ton ~29°); tabela ve vurgu `--turuncu` `#FF7A1A`, tabela yazısı `--turuncu-ustu`; serigrafi krem `#F3EBDD`; çip gövdeleri sıcak grafit (R > B); pad'ler bakır/altın. Değerler `src/pcb/renkler.ts`'te tek yerde; `tests/renk.test.ts` "mavi yok" kuralını onlara da uygular. Işıklar da sıcak renkli (soğuk/mavi ortam ışığı yok). Işık, speküler parlama ve ton eşleme (tone mapping) rengi kaydırabilir; bu yüzden uçtan uca denemede 3D ekran görüntüsünün pikselleri sayılır: kroma ≥ 5 olan piksellerin en fazla %0,1'i 170°–270° bandında olabilir. **3D her zaman koyu** (Burak, 2026-11-23): açık tema yalnızca yedek sayfada. 3D etkinken tema düğmesi gizlenir ve 3D kabı `color-scheme: dark` zorlar; böylece `light-dark()` token'ları DOM katmanlarında (Hakkımda paneli, detay kartı) koyu değerleri verir.
+
 Tema: varsayılan cihaz ayarı (`prefers-color-scheme`), üstteki düğmeyle değiştirilir, seçim `localStorage`'da (try/catch ile) saklanır. `<html data-theme="koyu|acik">`. Uygulama: her renk `light-dark(AÇIK, KOYU)` ile tek satırda; `:root { color-scheme: light dark }` cihaza uyar, `[data-theme]` `color-scheme`'i zorlar (JS kapalıyken de cihaz ayarı çalışır). **Yapıldı (2026-11-22):** mantık `src/tema/tema.ts` (anahtar `tema`); kayıtlı seçim `<head>`'deki satır içi `ILK_BETIK` ile ilk boyamadan önce uygulanır (meta `color-scheme` de güncellenir), kayıt yoksa `data-theme` konmaz; `TemaDugmesi.astro` JS'siz gizli (`hidden`), simge hedef temayı gösterir (koyuda güneş, açıkta ay).
 
 ### 4.3 Tipografi
@@ -190,9 +264,9 @@ Tema: varsayılan cihaz ayarı (`prefers-color-scheme`), üstteki düğmeyle de�
 
 ---
 
-## 5. Robot kol: kinematik, hareket ve durum makinesi
+## 5. Hareket: robot kol, kamera ve kaydırma
 
-Bu bölüm sitenin mühendislik kalbi. Kodu `src/kol/` altında, **DOM'dan bağımsız saf fonksiyonlar** olarak yaz (test edilebilsin).
+Bu bölüm sitenin mühendislik kalbi. Kod `src/kol/`, `src/pcb/` ve `src/hareket/` altında, **DOM'dan ve Three.js'ten bağımsız saf fonksiyonlar** olarak yazılır (test edilebilsin). Three.js yalnızca `src/pcb/sahne3d/` içinde çizer; kolun SVG'sini `src/kol/ciz.ts` günceller.
 
 ### 5.1 Mekanizma (kartezyen gantry + 2 eklemli kol)
 Serbestlik dereceleri: taşıyıcı X (prizmatik), direk Z (prizmatik, teleskopik), omuz θ₁ ve dirsek θ₂ (dönel). Hedef 2 boyutlu, sistem 4 serbestlik dereceli → **fazlalık (redundancy) şu kurallarla çözülür:**
@@ -234,31 +308,51 @@ export function yay(x, v, hedef, k, dt) {
 }
 ```
 Sertlikler: taşıyıcı `k=18` (en ağır, en yavaş), direk `k=30`, uç nokta `k=70`, gripper `k=40`. `dt` en fazla 0,033 s ile sınırlanır.
+Dosya `src/hareket/yay.ts`: kol ve kamera aynı yayı kullanır. Kamera sertlikleri M2'de denenip buraya yazılacak (başlangıç: ilerleme `k=12`, bakış yönü `k=20`).
 
-### 5.4 Durum makinesi
+### 5.4 Kol durum makinesi
 Açık bir durum makinesi olarak yaz (if-else yığını değil). Durumlar ve geçişler:
 
 | Durum | Ne olur | Geçiş |
 |---|---|---|
 | `BOSTA` | Kol katlanmış, gripper kapalı | İmleç hareket → `TAKIP` |
-| `TAKIP` | Kol imleci izler, gripper açık | 1,2 sn hareketsizlik veya imleç dışarı → `KATLANIYOR`; bir kutu/kartın üstü → `HEDEFTE` |
+| `TAKIP` | Kol imleci izler, gripper açık | 1,2 sn hareketsizlik veya imleç dışarı → `KATLANIYOR`; bir çipin üstü → `HEDEFTE` |
 | `KATLANIYOR` | Direk kısalır, kol **olduğu yerde** katlanır | Bitti → `BOSTA`; hareket → `TAKIP` |
-| `HEDEFTE` | Kutu/kart vurgulanır, gripper açılır | Tıklama → `KAVRAMA`; uzaklaşma → `TAKIP` |
-| `KAVRAMA` | Gripper kapanır, nesne kola bağlanır | → `TASIMA` |
-| `TASIMA` | Nesne desteye/masaya taşınır (yumuşatılmış yol) | → `BIRAKMA` |
-| `BIRAKMA` | Nesne bırakılır, deste güncellenir | → `TAKIP` |
-| `PAFTA_TASIMA` | Öndeki paftayı tutup arkaya koyar (~0,7 sn) | → `TAKIP` |
+| `HEDEFTE` | Çip vurgulanır, gripper açılır | Tıklama → `KAVRAMA`; uzaklaşma → `TAKIP` |
+| `KAVRAMA` | Gripper kapanır, kart çipten ayrılır | → `TASIMA` |
+| `TASIMA` | Kart çipten ekranın ortasına taşınır (yumuşatılmış yol) | → `GOSTERIM` |
+| `GOSTERIM` | Kol kartı ortada tutar, kamera durur | Tıklama / Esc / "Yerine bırak" / kaydırma → `GERI_TASIMA`; ← → → `GERI_TASIMA` (hedef: komşu çip) |
+| `GERI_TASIMA` | Kart çipine geri taşınır | → `BIRAKMA` |
+| `BIRAKMA` | Gripper açılır, kart çipe oturur | Komşu hedef varsa → `KAVRAMA` (komşu çipte); yoksa → `TAKIP` |
 
-Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınmaz, yok sayılır. Katlanma gecikmesi 1,2 sn.
+Kurallar: `KAVRAMA`, `TASIMA`, `GERI_TASIMA`, `BIRAKMA` sırasında gelen tıklama ve ← → kuyruğa alınmaz, yok sayılır. Kamera geçiş durumlarındayken (§5.7) çip seçilemez. Katlanma gecikmesi 1,2 sn.
 
 ### 5.5 Kolun sayfayla etkileşimi
-- Kol SVG'si tüm sahnenin üstünde, `pointer-events: none` (tıklamaları engellemez).
-- Kol bir metnin üstünden geçerken yarı saydam olur (`opacity ≈ 0.85`). *(Açık karar: Burak onaylamadı, varsayılan bu.)*
-- Telefonda: dokunulan noktaya uzanır, parmak kalkınca katlanır.
+- **Kol 2D katmandır** *(Burak onayladı, 2026-11-23)*: SVG, 3D sahnenin üstünde, ekran koordinatlarında, `pointer-events: none`. Gerekçe: (1) ray "ekranın üstünde" sabittir, dünyayla birlikte hareket etmez; (2) IK ve yay ekran pikseliyle çalışır, §4.4 görünüşü ve testler aynen kalır; (3) taşınan detay kartı HTML'dir, kol onu ekran düzleminde tutar; (4) 3D kol modeli, ışığı ve perspektifli IK işi ve bütçeyi büyütür.
+- Bağlantı: çipin 3D konumu her karede ekrana izdüşürülür (`Vector3.project`) ve kolun hedefi olur. Derinlik hissi için gripper'ın altına, PCB düzleminde yumuşak bir gölge lekesi düşer (ekran noktasından tahta düzlemine ışın).
+- Kol bir metnin ya da kartın üstünden geçerken yarı saydam olur (`opacity ≈ 0.85`). *(Açık karar 1.)*
+- Telefonda: dokunulan noktaya uzanır, parmak kalkınca katlanır (kart açık değilse).
 
 ### 5.6 Telemetri ve Mühendis modu
-- Küçük telemetri hapı: `durum · θ₁ · θ₂ · x` (JetBrains Mono, canlı).
-- **Mühendis modu** düğmesi: kolun üstüne L₁/L₂ ölçü çizgileri, θ açı yayları, erişim sınırı (`r = L1+L2`) ve rahat mesafe (`d*`) çemberleri çizilir.
+- Küçük telemetri hapı: `durum · θ₁ · θ₂ · x` (JetBrains Mono, canlı); kamera için `s` ve bulunulan yer (ana hat / sapak).
+- **Mühendis modu** düğmesi: kolun üstüne L₁/L₂ ölçü çizgileri, θ açı yayları, erişim sınırı (`r = L1+L2`) ve rahat mesafe (`d*`) çemberleri; 3D'de kamera yolu ve ileri bakış noktası çizilir.
+
+### 5.7 Kamera durum makinesi
+
+| Durum | Ne olur | Geçiş |
+|---|---|---|
+| `ANA_HAT` | Kamera ana hatta `s` noktasında; kaydırma `s`'yi değiştirir | Tabela → `SAPAGA_GIRIS(sapak)` |
+| `SAPAGA_GIRIS` | Üç parça: kavşağa ilerle → 90° dön → sapağa gir (her biri ~0,7 sn, ease-in-out); kamera bölüm çipine ~6 birim kala durur | Bitti → `SAPAKTA` |
+| `SAPAKTA` | Kamera sapakta `s` noktasında; kaydırma ilerletir | "Ana hatta dön" / Esc → `ANA_HATTA_DONUS` |
+| `ANA_HATTA_DONUS` | Aynı üç parça tersinden (~2,1 sn) | Bitti → `ANA_HAT` (kavşak noktasında) |
+
+Kurallar: geçiş durumlarında kaydırma, tabela ve çip tıklamaları yok sayılır (kuyruk yok). Kol `GOSTERIM`'deyken kamera hareket etmez; kaydırma önce kartı bıraktırır. Adres ↔ (durum, `s`) eşlemesi saf fonksiyondur; derin link ilk karede animasyonsuz uygulanır. Geçişler süreli ve ease-in-out'tur (yay değil): başı ve sonu belli, kesilmez; reduced-motion + "3D'yi yine de aç" → süre 0.
+
+### 5.8 Kaydırma ve kamera yolu
+- **Yol:** ana hat ve sapaklar, yay uzunluğuyla (arc length) parametrelenmiş kırık çizgilerdir; köşeler kamera için yumuşatılır (pah → dairesel yay). `noktaAl(yol, s)` → konum + birim teğet; `s ∈ [0, L]` sıkıştırılır.
+- **Kamera:** yolun `s` noktasında, tahtanın 1,6 üstünde; dikey görüş açısı ~54°; **düz bakar, eğim yok**. Ufuk ekranın üstten ~%34'ündedir: kamera eğilmeden projeksiyon dikey kaydırılır (*lens kaydırma*, mimari fotoğraftaki shift objektif gibi; Three.js'te `camera.setViewOffset`). Böylece tabela direkleri ve çip kenarları dik kalır. Bakış yönü yolun teğetidir (ileri bakış Δ ile yumuşatılır). **Yuvarlanma (roll) ve sallanma (bob) yok**; dönüşte açısal hız sınırlı (baş dönmesine karşı).
+- **Girdi:** tekerlekte `deltaMode` (piksel / satır / sayfa) piksele çevrilir, hedef `s += c·Δ`. Dokunmada dikey sürükleme hedef `s`'yi değiştirir; parmak kalkınca son hızla atalet (`hedef += v·τ`). Klavye §3.5. Kamera hedef `s`'yi kritik sönümlü yayla izler (§5.3).
+- Sayfanın kendisi kaymaz (sahne tam ekran, `overscroll-behavior: none`); tekerlek olayı yalnızca 3D etkinken `preventDefault` edilir.
 
 ---
 
@@ -272,51 +366,59 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 ├─ public/
 │  ├─ cv/ (burak-eren-simsek-cv-tr.pdf, ...-en.pdf)   ← Burak ekleyecek
 │  └─ favicon.svg
-├─ scripts/kontrol.mjs              (build sonrası dist/ denetimi: TR/EN eşleşmesi, kırık link, 404.html, fontlar)
+├─ scripts/
+│  ├─ kontrol.mjs                   (build sonrası dist/ denetimi: TR/EN eşleşmesi, kırık link, 404.html, fontlar, JS bütçesi)
+│  └─ uctan-uca.mjs                 (M2: headless Chrome + CDP; yedek/3D seçimi, gezinme, kare süresi, mavi piksel sayımı)
 ├─ src/
 │  ├─ content.config.ts             (koleksiyon tanımları; şemalar icerik/sema.ts'te)
 │  ├─ icerik/sema.ts                (Zod şemaları, yalnızca astro/zod'a bağlı → Vitest'te test edilir)
 │  ├─ icerik/koleksiyonlar.ts       (astro:content okuması: sayfaVerisi(dil) = bütün koleksiyonlar + sayfa taslak bayrağı; publicDosyasiVar)
-│  ├─ pafta/tipler.ts               (ortak paftanın veri sözleşmesi: PaftaOgesi, Ozet)
-│  ├─ pafta/deste.ts                (deste durumu, saf: dongu, sonraki/onceki, konumAdi)
-│  ├─ pafta/projeler.ts             (projeler → kartlar + özet menüsü, saf)
-│  ├─ pafta/{stajlar,yetkinlikler,belgeler}.ts  (aynı dönüşüm, diğer paftalar için)
+│  ├─ pafta/tipler.ts               (ortak veri sözleşmesi: PaftaOgesi, Ozet; yedek sayfa ve 3D aynı veriyi kullanır)
+│  ├─ pafta/deste.ts                (yedek sayfanın kart destesi, saf: dongu, sonraki/onceki, konumAdi)
+│  ├─ pafta/{projeler,stajlar,yetkinlikler,belgeler}.ts  (koleksiyon → kartlar + özet, saf)
 │  ├─ pafta/bicim.ts                (ay adları/tarih aralığı "Ağu – Eyl 2026", tekil/çoğul)
-│  ├─ sahne/sahne.ts                (pafta destesi, saf: PAFTA_SIRASI, paftaKonumu, gecisTuru, komsular, hedefPafta)
-│  ├─ sahne/ilkBetik.ts             (SAHNE_ILK_BETIK: ilk karede paftaları diken satır içi betik)
-│  ├─ sahne/klavye.ts               (← → kuralı: klavyeEylemi, baglamOku)
+│  ├─ sahne/klavye.ts               (yedek sayfada ← → kuralı: odak destedeyse kart)
+│  ├─ hareket/yay.ts                (kritik sönümlü yay: kol ve kamera ortak)
+│  ├─ pcb/
+│  │  ├─ duzen.ts       (içerikten PCB yerleşimi: ana hat, kavşaklar, sapaklar, öğe çipleri, tabelalar; saf)
+│  │  ├─ yol.ts         (yay uzunluğu parametrelemesi, noktaAl, köşe yumuşatma; saf)
+│  │  ├─ kamera.ts      (kamera durum makinesi + adres ↔ konum; saf)
+│  │  ├─ kaydirma.ts    (tekerlek / dokunma / klavye → hedef s, atalet; saf)
+│  │  ├─ renkler.ts     (3D palet; renk testi denetler)
+│  │  ├─ giris.ts       (koşul denetimi + dinamik import; yedek sayfaya giden tek 3D betiği)
+│  │  └─ sahne3d/       (Three.js yalnızca burada: kur.ts, tahta.ts, yollar.ts, cipler.ts, yazi.ts (canvas dokusu), isik.ts, kalite.ts, dongu.ts, etkilesim.ts (DOM düğmelerini izdüşüme taşır))
+│  ├─ kol/
+│  │  ├─ kinematik.ts  (ik2, gantry çözümü)
+│  │  ├─ durum.ts      (kol durum makinesi, §5.4)
+│  │  ├─ ciz.ts        (SVG güncelleme)
+│  │  └─ kol.ts        (giriş noktası; döngüyü 3D ile paylaşır)
 │  ├─ content/
 │  │  ├─ projeler/{tr,en}/*.md       (frontmatter = kart; gövde = M6 detay sayfasının uzun metni)
-│  │  ├─ stajlar/{tr,en}.json        (dil başına tek dosya: { taslak, stajlar: [...] }; dizideki sıra = destedeki sıra)
+│  │  ├─ stajlar/{tr,en}.json        (dil başına tek dosya: { taslak, stajlar: [...] }; dizideki sıra = sapaktaki sıra)
 │  │  ├─ yetkinlikler/{tr,en}.json   (kullanım = referans: "proje:<slug>", "staj:<id>", "egitim")
 │  │  └─ belgeler/{tr,en}.json       (cv | sertifika; CV PDF yoksa kart "Yakında")
-│  ├─ i18n/{tr,en}.json             (arayüz ve Hakkımda metinleri; EN'de `taslak`)
-│  ├─ i18n/index.ts                 (METINLER, Dil tipi, anaSayfa/otekiDil)
+│  ├─ i18n/{tr,en}.json, i18n/index.ts, i18n/adres.ts
 │  ├─ kisi.ts                       (çevrilmeyen bilgiler: ad, GitHub, LinkedIn, e-posta)
 │  ├─ styles/tokens.css             (§4 token'ları, iki tema)
 │  ├─ tema/tema.ts                  (tema seçimi mantığı + <head> ILK_BETIK)
-│  ├─ kol/
-│  │  ├─ kinematik.ts  (ik2, gantry çözümü)
-│  │  ├─ yay.ts
-│  │  ├─ durum.ts      (durum makinesi)
-│  │  ├─ ciz.ts        (SVG güncelleme)
-│  │  └─ kol.ts        (island giriş noktası, rAF döngüsü)
 │  ├─ components/
-│  │  ├─ Sahne.astro   (5 pafta + üst şerit (sekmeler, dil/tema) + alt şerit (gösterge, önceki/sonraki); M3'te tavan rayı + kol katmanı)
-│  │  ├─ Pafta.astro   (§3.2 şablonu)
-│  │  ├─ Deste.astro, Bant.astro, OzetMenu.astro
-│  │  ├─ Projeler.astro, Stajlar.astro, Yetkinlikler.astro, Belgeler.astro  (Pafta + o paftanın verisi)
-│  │  ├─ Hakkimda.astro
-│  │  ├─ PaftaCercevesi.astro  (pafta yüzeyi; sahnede data-konum'a göre yer ve kayma, tek başına sahte arka kenarlar)
-│  │  ├─ KolStatik.astro  (GEÇİCİ durağan kol çizimi; M3'te canlı kol gelince silinir)
-│  │  ├─ Sekmeler.astro, PaftaGostergesi.astro
-│  │  └─ TemaDugmesi.astro, DilDugmesi.astro
+│  │  ├─ YedekSayfa.astro  (bölüm linkleri + dil/tema + Hakkımda + 4 bölüm; eski Sahne'nin düz hâli)
+│  │  ├─ Pcb.astro         (canvas + etkileşim düğmeleri + detay kartı + kol katmanı + JSON adası + giriş betiği)
+│  │  ├─ DetayKarti.astro, HakkimdaPaneli.astro (3D'de Hakkımda; yedek sayfadakiyle aynı düzen)
+│  │  ├─ Pafta.astro, Deste.astro, Bant.astro, OzetMenu.astro  (yalnızca yedek sayfa, §3.6)
+│  │  ├─ Projeler.astro, Stajlar.astro, Yetkinlikler.astro, Belgeler.astro, Hakkimda.astro
+│  │  ├─ PaftaCercevesi.astro, KolStatik.astro (yedek sayfada durağan kol çizimi)
+│  │  ├─ Sekmeler.astro (yedek sayfanın bölüm linkleri)
+│  │  └─ TemaDugmesi.astro, DilDugmesi.astro, DuzGorunumDugmesi.astro
 │  └─ pages/
 │     ├─ index.astro, en/index.astro
 │     ├─ 404.astro      (iki dilli; Cloudflare Pages için zorunlu, bkz. §2.1)
 │     └─ projeler/[slug].astro, en/projeler/[slug].astro
-└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler, bicim, stajlar, yetkinlikler, belgeler, sahne, klavye, adres; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
+└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler, bicim, stajlar, yetkinlikler, belgeler, klavye, adres;
+           yeni: duzen, yol, kaydirma, kamera, yay (M2–M3); kinematik, durum (M4))
 ```
+
+Yeni M2'de silinecekler (eski pafta destesi): `src/sahne/sahne.ts`, `src/sahne/ilkBetik.ts`, `tests/sahne.test.ts`, `PaftaGostergesi.astro`, `Sahne.astro`'nun deste kısmı ve `PaftaCercevesi.astro`'daki konum/kayma CSS'i.
 
 ---
 
@@ -330,7 +432,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 - İletişim: GitHub `github.com/simsekerenburak` · LinkedIn `linkedin.com/in/burak-eren-şimşek-` · `burakerensimsek59@gmail.com`
 
 ### Projeler — "4 proje" (3 tamamlanan, 1 yapım aşamasında)
-Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki ilk cümle "Kol bir kutuyu bantten alıp desteye koyar." kol bunu gerçekten yapınca, M4'te geri gelecek). Kartta kısa açıklama, uzun metin md gövdesinde. MediTrack ve Robot Kol tek kişilik (Burak, 2026-11-22). Kol cümlesinin M4'e ertelenmesini Burak onayladı.
+Giriş cümlesi: "Dört proje var, biri hâlâ yapım aşamasında." (taslaktaki "Kol bir kutuyu bantten alıp desteye koyar." cümlesi bant konsepti iptal olduğu için gelmeyecek). Kartta kısa açıklama, uzun metin md gövdesinde. MediTrack ve Robot Kol tek kişilik (Burak, 2026-11-22).
 1. **Otonom Yıldız Takip Sistemi** · 2026 · takım projesi · Gömülü Sistemler dersi final projesi — STM32 ile hem otonom hem manuel çalışan teleskop takip sistemi; yıldız haritası çıkarıp seçilen hedefe (GOTO) kilitlenir. Yatay eksende step, dikey eksende servo motor. Yer kontrol istasyonu Python/PyQt6, UART. **Rolüm: sensör verilerinin hesaplanması.** · STM32F401RE, MPU6050, GY-271, C, PyQt6
 2. **Şimşek** · 2026 · tek kişilik · Kişisel yapay zekâ asistanı — iPhone, web ve bilgisayarı tek bir bulut beyne bağlayan asistan: kalıcı hafıza, dosya arama, görevler ve sesli komut. · React Native (Expo), Cloudflare Workers, D1, R2, Workers AI, Whisper
 3. **MediTrack** · 2026 · tek kişilik · IoT ilaç takip sistemi — Arduino hatırlatıcı (LCD + buzzer), Python masaüstü uygulaması, FastAPI backend (Render) ve Firebase ile uçtan uca ilaç takip sistemi; PWA. · Arduino, Python, FastAPI, Firebase, PWA
@@ -359,50 +461,59 @@ Her alan bir kart; üst satırda nerede kullanıldığı yazar. Yüzdelik çubuk
 ---
 
 ## 8. Telefon görünümü (390px)
-- Aynı sahne, ölçeklenmiş. Pafta sekmeleri yatay kaydırılabilir şerit.
-- Deste kartı tam genişlik; bantta aynı anda 2 kutu görünür, bant yatay kaydırılır.
-- Özet açılır menüsü destenin altına iner.
-- Kol küçülür (L1, L2 ekranla ölçeklenir), dokunmayla çalışır.
-- Dokunma hedefleri en az 44px. *(Detaylı mobil tasarım Faz 1'de henüz çizilmedi; M5'te önce taslak göster.)*
+- **Önce tam hâl** (aynı 3D sahne) gerçek iPhone'da denenir, ölçülür, sonra sadeleştirilir (Burak'ın kararı, 2026-11-23). Ölçülenler: 3D'nin hazır olma süresi, ortalama ve en kötü %1 kare süresi, 2 dakikada ısınma/kısılma, bellek.
+- **Kalite kademeleri** (`src/pcb/sahne3d/kalite.ts`): Yüksek (gölge haritası, pixelRatio ≤ 2) · Orta (gölge haritası yok → hazır yumuşak lekeler, pixelRatio 1,5) · Düşük (pixelRatio 1, daha az ayrıntı). Başlangıç kademesi ekran boyutundan tahmin edilir, ilk 2 sn'nin kare sürelerine göre ayarlanır. Düşük kademede de sürekli < 24 fps → "Düz görünüm" önerilir.
+- **Dokunma:** dikey sürükleme = ilerleme (ataletli); tabela/çipe dokunma = tıklama; kol dokunulan noktaya uzanır, parmak kalkınca katlanır.
+- Detay kartı tam genişlik; Hakkımda paneli ekranın alt yarısında; dokunma hedefleri en az 44px; yatay sayfa kayması yok.
+- Sadeleştirme adayları (ölçüme göre karar): gölge haritası, ileri bakış mesafesi, aynı anda çizilen sapak sayısı, serigrafi doku çözünürlüğü, kol ayrıntısı.
 
 ---
 
 ## 9. Yol haritası (milestone'lar)
 
-Her milestone sonunda site canlıya çıkabilir durumda olmalı.
+Her milestone sonunda site canlıya çıkabilir durumda olmalı (3D hazır değilse yedek sayfa yayında kalır).
 
 | # | Hedef | Kabul kriteri |
 |---|---|---|
-| **M1 İskelet** | Astro + TS kurulumu, token'lar, iki tema, TR/EN, 5 pafta statik HTML olarak (JS'siz düz hali), `npm run yayinla` ile `burakerensimsek.pages.dev` yayında, `kontrol.mjs`, `404.astro` | Build + test yeşil; site açılıyor; tema ve dil değişiyor; JS kapalıyken tüm içerik okunuyor |
-| **M2 Deste ve bant** | `Pafta` şablonu: deste dönüşü, bant kutuları, `<details>` özet menüsü, pafta destesi + sekmeler + hash + klavye | Dört içerik paftası taslaklardaki gibi; ← → ve kutu tıklaması çalışıyor |
-| **M3 Kol** | `kinematik.ts`, `yay.ts`, kol SVG'si, imleç takibi, katlanma, telemetri, mühendis modu | Birim testleri geçiyor (§10); kol 60 fps; reduced-motion'da animasyon yok |
-| **M4 Durum makinesi** | §5.4'ün tamamı: kavrama → taşıma → bırakma, pafta taşıma | Her geçiş test edildi; kenar durumlar (taşıma sırasında tıklama) tanımlı |
-| **M5 Erişim ve mobil** | Telefon görünümü, dokunma, swipe, klavye odak sırası, ekran okuyucu etiketleri | Lighthouse erişilebilirlik ≥ 95; gerçek iPhone'da test |
-| **M6 İçerik ve EN** | Proje detay sayfaları, İngilizce çeviriler, CV PDF'leri + Hakkımda'ya "CV'yi indir" düğmesi, görseller (blok diyagram/foto), `kontrol.mjs`'te `TASLAK_HATA = true` | TR/EN eşleşme kontrolü yeşil |
-| **M7 Alan adı** *(Burak 2026-11-23: M2'den hemen sonra; is-a.dev PR metnini Burak yazar)* | is-a.dev'e `domains/burakerensimsek.json` (CNAME → `burakerensimsek.pages.dev`) başvurusu + Cloudflare Pages'e özel alan adının API ya da `cf-pages.is-a.dev` ile eklenmesi | `https://burakerensimsek.is-a.dev` açılıyor, HTTPS sertifikası geçerli |
+| **M1 İskelet** ✅ 2026-11-22 | Astro + TS, token'lar, iki tema, TR/EN, 5 bölüm statik HTML (JS'siz düz hâl), `npm run yayinla`, `kontrol.mjs`, `404.astro` | Build + test yeşil; site açılıyor; tema ve dil değişiyor; JS kapalıyken tüm içerik okunuyor |
+| ~~M2 Deste ve bant~~ ✅ 2026-11-23, **iptal** | Pafta destesi + sekmeler + hash + klavye yapıldı ve yayınlandı; konsept PCB'ye dönünce iptal edildi | Kart destesi + bant yedek sayfada kalır, pafta destesi yeni M2'de silinir |
+| **M2 PCB sahnesi + kaydırma** | 0) boş Three.js sahnesinin boyutunu ölç, §2.2 bütçesini kesinleştir · 1) eski pafta destesini kaldır, yedek sayfayı sadeleştir · 2) saf modüller: `duzen.ts`, `yol.ts`, `kaydirma.ts`, `hareket/yay.ts` · 3) giriş betiği, dinamik import, yedeğe düşme, "Düz görünüm" düğmesi · 4) tahta, ana hat, Hakkımda çipi + HTML paneli, sapaklar ve tabelalar (henüz girilemez), serigrafi · 5) ışık, bakır malzeme, gölge, kalite iskeleti · 6) ölç ve yayınla | duzen/yol/kaydirma/yay testleri yeşil; masaüstünde 60 fps; 3D parçası bütçe içinde (`kontrol.mjs`); JS kapalı / reduced-motion / WebGL yok → yedek sayfa; 3D ekran görüntüsünde mavi piksel yok; CLS ≤ 0,05 |
+| **M3 Sapaklar + kamera geçişleri** | Kamera durum makinesi (§5.7), tabela → dönüş ve giriş, sapakta kaydırma, öğe çipleri (B seçeneği, §3.1), konnektör çipi, "Ana hatta dön", etkileşim düğmeleri (fare/klavye/ekran okuyucu), adres ↔ konum, odak yönetimi, `aria-live` | kamera.test her geçiş; tüm içerik yalnızca klavyeyle gezilebiliyor; `/#stajlar` ve `/#stajlar-dogaka` doğrudan açılıyor |
+| **M4 Kol + kart taşıma** | `kinematik.ts`, kol SVG katmanı, imleç takibi, katlanma, kol durum makinesi (§5.4), detay kartı (HTML, içerik yedek sayfadan), ← → ile değiştirme, telemetri, mühendis modu | kinematik/yay/durum testleri (§10); kol + sahne 60 fps; kart içeriği yedek sayfayla aynı (tek kaynak) |
+| **M5 Telefon + erişilebilirlik** | Gerçek iPhone'da ölçüm, kalite kademeleri, dokunma, sadeleştirme (§8); ekran okuyucu turu (NVDA + VoiceOver), odak sırası | Lighthouse erişilebilirlik ≥ 95 (iki görünümde); iPhone'da ≥ 30 fps (hedef 60) ya da kendiliğinden yedek sayfa |
+| **M6 İçerik + EN + CV** | Proje detay sayfaları, İngilizce çeviriler, CV PDF'leri + Hakkımda'ya "CV'yi indir", görseller, `kontrol.mjs`'te `TASLAK_HATA = true` | TR/EN eşleşme kontrolü yeşil |
+| **M7 Alan adı** *(is-a.dev PR #62488 Burak tarafından açıldı, 2026-11-23, incelemede; onaylanınca Cloudflare'e özel alan adı bağlanacak, o zamana kadar beklenir)* | is-a.dev'e `domains/burakerensimsek.json` (CNAME → `burakerensimsek.pages.dev`) başvurusu + Cloudflare Pages'e özel alan adı | `https://burakerensimsek.is-a.dev` açılıyor, HTTPS geçerli; Türkiye bağlantısından ECH'siz `curl` ile açılıyor |
 
-**İlk adım:** M1. Kod yazmadan önce Burak'a M1 planını madde madde göster, onay al.
+**Sıradaki adım:** PCB planı onaylandı (2026-11-23). Yeni M2'nin 0. adımı: Three.js boyut ölçümü + prototip ölçüleriyle ilk sahne görüntüsü; sonuç Burak'a gösterilir, onayla devam.
 
 ---
 
 ## 10. Test ve doğrulama
-- `kinematik.test.ts`: bilinen bir hedefte θ₁/θ₂ doğru; uç nokta hedefle çakışıyor (tolerans 1e-6); erişim dışı hedefte kol tam uzanıyor ve NaN üretmiyor; `|L1−L2|`'den yakın hedefte patlamıyor.
+- `duzen.test.ts`: sapak sırası ve yönü (sol/sağ dönüşümlü); öğe sayısı içerikle aynı; çip, tabela ve yol çakışması yok; yollar arası en az boşluk; yalnızca 0° / 45° / 90° açılar; aynı girdi → aynı yerleşim.
+- `yol.test.ts`: bilinen şekillerde yay uzunluğu doğru; `noktaAl` uçlarda sıkıştırır ve NaN üretmez; teğet birim uzunlukta ve köşelerde sürekli; konum `s`'ye göre sürekli.
+- `kaydirma.test.ts`: `deltaMode` dönüşümü; sınırlarda sıkıştırma; atalet sönüyor; büyük tek bir tekerlek olayı kamerayı ışınlamıyor (adım sınırı).
+- `kamera.test.ts`: §5.7'deki her geçiş; geçiş durumlarında olaylar yok sayılıyor; adres → (durum, s) → adres gidiş-dönüşü.
 - `yay.test.ts`: kritik sönümde salınım yok (hedefi aşmıyor), 2 sn içinde hedefe %1 yakınsıyor.
-- `durum.test.ts`: tablo §5.4'teki her geçiş; geçersiz olaylar durumu değiştirmiyor.
+- `kinematik.test.ts`: bilinen bir hedefte θ₁/θ₂ doğru; uç nokta hedefle çakışıyor (tolerans 1e-6); erişim dışı hedefte kol tam uzanıyor ve NaN üretmiyor; `|L1−L2|`'den yakın hedefte patlamıyor.
+- `durum.test.ts`: §5.4'teki her geçiş; geçersiz olaylar durumu değiştirmiyor; taşıma sırasında tıklama ve ← → yok sayılıyor.
+- `renk.test.ts`: `tokens.css` + `src/pcb/renkler.ts` (mavi yok, kontrast).
 - `kontrol.mjs` (build sonrası `dist/` üzerinde; kuralları `tests/kontrol.test.ts` sınar, her kural için "tek bozma → tek hata"):
   - `404.html` var; içindeki linkler `/` ile başlar (404 her adreste sunulur).
-  - İç linkler (`href`, `src`, `poster`, `srcset`, CSS `url()`, sitenin kendi tam adresi dahil) kırık değil; sayfa linkleri `/` ile biter, `.html` ile bitmez (Pages yönlendirmesi olmasın); `#parça` hedef sayfada `id` olarak var.
+  - İç linkler (`href`, `src`, `poster`, `srcset`, CSS `url()`, sitenin kendi tam adresi dahil) kırık değil; sayfa linkleri `/` ile biter, `.html` ile bitmez; `#parça` hedef sayfada `id` olarak var.
   - Font CSS'e gömülü değil (`data:`); preload edilen her font bir `@font-face`'te kullanılıyor ve `crossorigin` taşıyor.
   - Her TR sayfanın EN karşılığı var ve tersi; `<html lang>` doğru.
-  - `<html data-taslak>` (Duzen `taslak` özelliği): M1–M5 uyarı, M6'dan itibaren hata (`TASLAK_HATA` sabiti).
-- Elle: Windows laptop (Chrome) + iPhone; koyu/açık tema; JS kapalı.
+  - `<html data-taslak>`: M1–M5 uyarı, M6'dan itibaren hata (`TASLAK_HATA` sabiti).
+  - **Yeni:** JS bütçesi (yedek sayfa ve 3D parçası gz boyutu, §2.2); JSON adasındaki her kimliğin yedek sayfada bir `<article>` karşılığı var.
+- **Uçtan uca** (`scripts/uctan-uca.mjs`, headless Chrome + CDP; yerel ve canlı): yedek/3D seçimi (JS yok, reduced-motion, WebGL yok); kaydırma → `s`; tabela → sapak; derin link; klavye turu; kare süresi ölçümü (`requestAnimationFrame` aralıkları); 3D ekran görüntüsünde mavi piksel sayımı (§4.2).
+- Elle: Windows laptop (Chrome, Firefox) + gerçek iPhone (Safari); koyu/açık; JS kapalı; reduced-motion; NVDA + VoiceOver turu (M5).
 
 ---
 
 ## 11. Açık kararlar (Burak'a sorulacak)
-1. Kol yazının üstünden geçerken yarı saydam mı olsun, içeriğin arkasında mı kalsın? (Varsayılan: yarı saydam.)
-2. Hakkımda paftası sade mi kalsın? (Varsayılan: sade.)
-3. Ses efektleri (bant uğultusu, gripper sesi) varsayılan kapalı, açılabilir — M3 sonrası eklenecek mi?
-4. Bitirme kolunun gerçek link oranları (L1/L2).
-5. İleride: IK ve durum makinesini C ile yazıp WebAssembly'ye derleme fikri (gömülü vurgusu için) — ilk sürümden sonra.
-6. Siteden sonra LinkedIn yetenek listesini §7 Yetkinlikler ile eşitlemek.
+1. Kol yazının ya da kartın üstünden geçerken yarı saydam mı olsun, içeriğin arkasında mı kalsın? (Varsayılan: yarı saydam.)
+2. Ses efektleri (sinyal vızıltısı, gripper sesi) varsayılan kapalı, açılabilir: M4 sonrası eklenecek mi?
+3. Bitirme kolunun gerçek link oranları (L1/L2).
+4. İleride: IK ve durum makinelerini C ile yazıp WebAssembly'ye derleme fikri (gömülü vurgusu için): ilk sürümden sonra.
+5. Siteden sonra LinkedIn yetenek listesini §7 Yetkinlikler ile eşitlemek.
+
+PCB konsepti soruları 2026-11-23'te cevaplandı (prototip ölçüleri §3.1, M7 §9, 3D koyu §4.2, konnektör §3.2, kart açıkken kaydırma §3.2, özet §3.3, kol 2D §5.5, reduced-motion §3.4).
