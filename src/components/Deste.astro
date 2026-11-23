@@ -4,6 +4,7 @@
 //   JS var  → Pafta.astro'daki betik kökteki data-deste="etkin" niteliğini koyar ve her karta
 //             data-konum="on|orta|arka|gizli" yazar; aşağıdaki CSS kartları üst üste dizer.
 // Mantık (hangi kart nerede) src/pafta/deste.ts'te; bu dosya yalnızca işaretleme ve görünüş.
+// data-kart-alani: odak buradayken klavyede ← → kartı çevirir, paftayı değil (src/sahne/klavye.ts).
 import { METINLER, type Dil } from '../i18n';
 import type { PaftaOgesi } from '../pafta/tipler';
 
@@ -19,7 +20,7 @@ const m = METINLER[lang].pafta;
 const n = ogeler.length;
 ---
 
-<div class="kart-destesi" data-deste>
+<div class="kart-destesi" data-deste data-kart-alani>
   <ol class="kartlar" aria-label={etiket}>
     {
       ogeler.map((o, i) => (

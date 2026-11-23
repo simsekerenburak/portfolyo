@@ -3,6 +3,7 @@
 //   JS yok  → link sayfada o karta atlar (düz listede de gezinme çalışır).
 //   JS var  → Pafta.astro'daki betik linki yakalar, kartı destenin önüne getirir ve kutuya
 //             aria-current="true" koyar (turuncu çerçeve). M4'te kutuyu kol taşıyacak.
+// data-kart-alani: odak bir kutudayken ← → kartı çevirir ve odak yeni öndeki kartın kutusuna geçer.
 import type { PaftaOgesi } from '../pafta/tipler';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 const { ogeler, etiket } = Astro.props;
 ---
 
-<div class="bant-alani">
+<div class="bant-alani" data-kart-alani>
   <div class="bant-ic">
     <ul class="kutular" aria-label={etiket}>
       {

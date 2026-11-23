@@ -47,9 +47,12 @@ const baslikId = `${id}-baslik`;
 </PaftaCercevesi>
 
 <script>
-  // Desteyi etkinleştirir: ← → düğmeleri ve bant kutuları öndeki kartı değiştirir.
-  // Durum tek bir sayı (`on`, öndeki kartın indisi); konum hesabı src/pafta/deste.ts'teki saf fonksiyonlarda.
+  // Desteyi etkinleştirir: ← → düğmeleri, bant kutuları ve (odak destedeyken) klavyedeki ← → öndeki kartı değiştirir.
+  // Durum tek bir sayı (`on`, öndeki kartın indisi); konum hesabı src/pafta/deste.ts'teki saf fonksiyonlarda,
+  // klavye kuralı src/sahne/klavye.ts'te.
   import { konumAdi, onceki, sonraki } from '../pafta/deste';
+  import { baglamOku, klavyeEylemi } from '../sahne/klavye';
+  import { parcaKimligi } from '../sahne/sahne';
 
   for (const kok of document.querySelectorAll<HTMLElement>('[data-pafta]')) {
     const deste = kok.querySelector<HTMLElement>('[data-deste]');
@@ -57,12 +60,16 @@ const baslikId = `${id}-baslik`;
     const kutular = [...kok.querySelectorAll<HTMLAnchorElement>('[data-kutu]')];
     const sayac = kok.querySelector<HTMLElement>('[data-sayac]');
     const duyuru = kok.querySelector<HTMLElement>('[data-duyuru]');
+    const oncekiDugme = kok.querySelector<HTMLButtonElement>('[data-onceki]');
+    const sonrakiDugme = kok.querySelector<HTMLButtonElement>('[data-sonraki]');
     const n = kartlar.length;
     // Tek kartlık destede döndürülecek bir şey yok: düz hâl kalır.
     if (!deste || n < 2) continue;
 
-    /** Kutunun gösterdiği kartın indisi: kutu `#<kart-id>` linki (JS'siz hâlde de bu adrese atlar). */
-    const kartIndisi = (href: string | null) => kartlar.findIndex((kart) => `#${kart.id}` === href);
+    const kartIdleri = kartlar.map((kart) => kart.id);
+    /** Bir #parçanın (kutunun href'i ya da adres) gösterdiği kartın indisi: "#projeler-simsek" → 1; yoksa −1.
+     *  Kutu `#<kart-id>` linkidir: JS'siz hâlde de bu adrese atlar. */
+    const kartIndisi = (parca: string | null) => kartIdleri.indexOf(parcaKimligi(parca ?? '') ?? '');
 
     // Adres bir kartı gösteriyorsa (/#projeler-simsek) o kart önde başlar.
     let on = Math.max(0, kartIndisi(location.hash));
@@ -89,16 +96,38 @@ const baslikId = `${id}-baslik`;
       goster(true);
     };
 
-    kok.querySelector('[data-onceki]')?.addEventListener('click', () => git(onceki(on, n)));
-    kok.querySelector('[data-sonraki]')?.addEventListener('click', () => git(sonraki(on, n)));
+    oncekiDugme?.addEventListener('click', () => git(onceki(on, n)));
+    sonrakiDugme?.addEventListener('click', () => git(sonraki(on, n)));
     for (const kutu of kutular) {
       kutu.addEventListener('click', (olay) => {
         const k = kartIndisi(kutu.getAttribute('href'));
         if (k < 0) return; // tanımadığımız link: tarayıcı normal davransın
-        olay.preventDefault(); // sayfa karta atlamasın, adres değişmesin (adres M2'de paftanın)
+        olay.preventDefault(); // sayfa karta atlamasın, adres değişmesin (adres paftanın: Sahne yazar)
         git(k);
       });
     }
+
+    // Klavye: odak destede ya da bantta ([data-kart-alani]) iken ← → kartı çevirir. Basış "kullanıldı" diye
+    // işaretlenir (preventDefault) ki Sahne'nin sayfa düzeyindeki dinleyicisi aynı basışla paftayı da değiştirmesin.
+    kok.addEventListener('keydown', (olay) => {
+      const eylem = klavyeEylemi(olay, baglamOku(olay.target));
+      if (eylem?.hedef !== 'kart') return;
+      olay.preventDefault();
+      const odak = document.activeElement;
+      const odakKartta = kartlar.some((kart) => kart.contains(odak));
+      const odakBantta = kutular.some((kutu) => kutu === odak);
+      git(eylem.yon === 'ileri' ? sonraki(on, n) : onceki(on, n));
+      // Odak az önce arkaya giden (artık inert) kartın içindeyse kaybolmasın: basılan yöndeki ok düğmesine geçer.
+      if (odakKartta) (eylem.yon === 'ileri' ? sonrakiDugme : oncekiDugme)?.focus();
+      // Odak banttaysa yeni öndeki kartın kutusuna geçer: bant oklarla gezilen bir liste gibi davranır.
+      if (odakBantta) kutular.find((kutu) => kartIndisi(kutu.getAttribute('href')) === on)?.focus();
+    });
+
+    // Adres sonradan bir kartı gösterirse (elle yazılan /#projeler-simsek) o kart öne gelir; paftayı Sahne getirir.
+    window.addEventListener('hashchange', () => {
+      const k = kartIndisi(location.hash);
+      if (k >= 0 && k !== on) git(k);
+    });
 
     goster(false);
     deste.dataset.deste = 'etkin';
