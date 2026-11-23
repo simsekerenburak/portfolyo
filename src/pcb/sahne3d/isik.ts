@@ -9,8 +9,9 @@ const GUNES_KONUM = { sol: 9, yukari: 17, geri: 15 };
 /** Odak noktası: kameranın ileri baktığı yönde bu kadar önde (gölge kutusu orayı ortalar) */
 const ODAK_ILERI = 14;
 /** Gölge kutusunun yarı boyu (birim) ve haritanın çözünürlüğü */
-const GOLGE_YARI = 24;
-const GOLGE_HARITA = 2048;
+const GOLGE_YARI = 20;
+/** 1024² derinlik haritası = 4 MB (2048² 16 MB'tı, §2.2 doku bütçesi 32 MB); 40 birimlik kutuda texel ≈ 4 cm, yumuşak gölge için yeterli */
+const GOLGE_HARITA = 1024;
 
 export function isikKur(sahne: Scene, renderer: WebGLRenderer) {
   const gok = new HemisphereLight(RENK_3D.isikGok, RENK_3D.zemin, 0.45);

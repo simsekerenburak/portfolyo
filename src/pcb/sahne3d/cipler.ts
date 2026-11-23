@@ -142,7 +142,9 @@ export function ciplerKur(duzen: Duzen, veri: PcbVerisi, m: Malzemeler, renderer
     const enine = k.yukari.z !== 0 ? k.cip.yariX : k.cip.yariZ;
     const en = enine * 2 * k.oran[0];
     const boy = boyuna * 2 * k.oran[1];
-    const pikselEn = k.cip.tur === 'oge' ? 384 : 1024;
+    // Doku genişliği (piksel): yakından okunan Hakkımda ve konnektör 1024; uzaktan görülen bölüm çipi 512, küçük
+    // öğe etiketi 256. (İlk denemede hepsi 1024'tü: bölüm çiplerinin dokusu 1024 × 1227 → GPU belleği 58 MB'a çıktı.)
+    const pikselEn = k.cip.tur === 'oge' ? 256 : k.cip.tur === 'bolum' ? 512 : 1024;
     const pikselBoy = Math.max(64, Math.round((pikselEn * boy) / en));
     const satirlar = k.satirlar.map((s) => ({ ...s, y: s.y * pikselBoy, font: olcekliFont(s.font, pikselEn / 1024) }));
     const doku = yaziDokusu(renderer, satirlar, pikselEn, pikselBoy, k.zemin);

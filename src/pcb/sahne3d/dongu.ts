@@ -53,6 +53,10 @@ export function donguKur(sec: DonguSecenekleri) {
   let calisiyor = false;
   let onceki = 0;
   let panelOpaklik = -1;
+  /** Kare başına JS süresi (ms; mantık + çizim komutlarının hazırlanması, §2.2 bütçesi ≤ 4 ms). Durunca yazılır. */
+  let jsToplam = 0;
+  let jsEnCok = 0;
+  let jsKare = 0;
 
   /** Kamerayı yolun s noktasına koyar: yükseklik 1,6, yolun ilerisine bakar (eğim yok, yuvarlanma yok). */
   const kameraKoy = () => {
@@ -79,6 +83,7 @@ export function donguKur(sec: DonguSecenekleri) {
   };
 
   const kare = (zaman: number) => {
+    const t0 = performance.now();
     const dt = onceki ? (zaman - onceki) / 1000 : 1 / 60;
     if (onceki) sec.kareOlctu?.(zaman - onceki);
     onceki = zaman;
@@ -101,11 +106,17 @@ export function donguKur(sec: DonguSecenekleri) {
     }
     kameraKoy();
     ciz();
+    const js = performance.now() - t0;
+    jsToplam += js;
+    jsEnCok = Math.max(jsEnCok, js);
+    jsKare++;
     if (durdu) {
       calisiyor = false;
       onceki = 0;
       kok.dataset.s = s.toFixed(2);
       delete kok.dataset.hareket;
+      kok.dataset.kareJs = `${(jsToplam / jsKare).toFixed(2)}/${jsEnCok.toFixed(2)}`; // ortalama / en çok
+      jsToplam = jsEnCok = jsKare = 0;
       sec.durdu?.();
     } else {
       requestAnimationFrame(kare);
@@ -205,6 +216,7 @@ export function donguKur(sec: DonguSecenekleri) {
       }
       delete kok.dataset.s;
       delete kok.dataset.hareket;
+      delete kok.dataset.kareJs;
     },
   };
 }

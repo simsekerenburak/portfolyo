@@ -336,6 +336,39 @@ await bekle(800);
 await cek('3d-390');
 denetle((await d('document.documentElement.scrollWidth - document.documentElement.clientWidth')) === 0, '390 px: yatay taşma yok');
 
+// ── 8. Ölçümler (§2.2): kare süresi, kare başına JS, doku belleği, LCP — masaüstü 1440 × 900 ──
+await gonder('Emulation.setTouchEmulationEnabled', { enabled: false });
+await olcu(1440, 900);
+await git('/');
+await gorunumBekle('3d');
+await bekle(800);
+const lcp = await d(
+  `new Promise((bitti) => new PerformanceObserver((l) => { const e = l.getEntries(); bitti(Math.round(e[e.length - 1].startTime)); }).observe({ type: 'largest-contentful-paint', buffered: true }))`,
+);
+denetle(lcp <= 2500, 'LCP ≤ 2,5 sn (yerel, kısıtlamasız: yalnızca fikir verir)', `${lcp} ms`);
+// Kamera ana hat boyunca sürekli ilerlerken requestAnimationFrame aralıkları
+await d(
+  `(window.__kareler = [], (() => { let o = performance.now(); const f = (t) => { window.__kareler.push(t - o); o = t; if (window.__kareler.length < 420) requestAnimationFrame(f); }; requestAnimationFrame(f); })(), true)`,
+);
+for (let i = 0; i < 90; i++) {
+  await tekerlek(90);
+  await bekle(60);
+}
+await otur();
+const kareler = (await d('window.__kareler')).slice(5).sort((a, b) => a - b);
+const ort = kareler.reduce((t, x) => t + x, 0) / kareler.length;
+const p99 = kareler[Math.floor(kareler.length * 0.99)];
+denetle(
+  ort <= 17.5 && p99 <= 25,
+  'masaüstü 60 fps, en kötü %1 kare ≤ 25 ms (§2.2)',
+  `ortalama ${ort.toFixed(1)} ms (${(1000 / ort).toFixed(0)} fps), en kötü %1 ${p99.toFixed(1)} ms, ${kareler.length} kare, s = ${await sOku()}`,
+);
+const [jsOrt, jsEnCok] = String(await d(`${kok}.kareJs`)).split('/').map(Number);
+denetle(jsOrt <= 4 && jsEnCok <= 8, 'kare başına JS ≤ 4 ms (en çok ≤ 8)', `ortalama ${jsOrt} ms, en çok ${jsEnCok} ms`);
+const dokuMb = Number(await d(`${kok}.dokuMb`));
+denetle(dokuMb <= 32, 'GPU doku belleği ≤ 32 MB (tahmin)', `${dokuMb} MB`);
+denetle((await d(`${kok}.kademe`)) === 'yuksek', 'ölçüm boyunca kademe düşmedi (Yüksek)', await d(`${kok}.kademe`));
+
 console.log(basarisiz ? `\n✗ ${basarisiz} denetim başarısız` : '\n✓ hepsi geçti');
 ws.close();
 chrome.kill();

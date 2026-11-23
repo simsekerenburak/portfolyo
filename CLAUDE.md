@@ -100,6 +100,8 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 
 **Ölçüm (M2 0. adım, 2026-11-23; three 0.187.0, projenin Vite 8 / Rolldown derleyicisi, küçültülmüş):** en küçük sahne (renderer + kamera + tek kutu + ışık) 518 KB → **126,8 KB gz** (brotli 104,1): Three.js'in taban maliyeti budur, `WebGLRenderer` çekirdeğin çoğunu çeker. Prototip sahne (§3.1 ölçüleri: tahta, ana hat, Hakkımda çipi, 4 kavşak + tabela + bölüm çipi, via'lar, ızgara, gölge, `RoomEnvironment`, canvas yazı dokuları) **132,8 KB gz** (brotli 109,1): sahne kodu yalnızca ~6 KB ekliyor. Prototip 79 çizim çağrısı, ~29 bin üçgen; entegre Intel UHD'de (D3D11) headless ortalama kare 7,4 ms, en kötü %1 12,3 ms (gerçek ölçüm tarayıcıda M2 6. adımda).
 
+**Ölçüm (M2 6. adım, 2026-11-23; `npm run uctan-uca`, headless Chrome, Intel UHD / D3D11, 1440×900, Yüksek kademe):** hemen inen JS 4,1 KB gz · 3D parçası 139,8 KB gz · 3D hazır ~1,0 sn (ortam ışığının üretimi ~0,8 sn'sini alıyor) · CLS 0 · LCP 184 ms (yerel, kısıtlamasız) · kare ortalama 9,3 ms, en kötü %1 9,8 ms (headless rAF 60 Hz'e kilitli değil) · kare başına JS ortalama 0,5 ms, en çok 3 ms · 49 çizim çağrısı, ~49 bin üçgen · GPU doku belleği tahmini 23,6 MB (ilk hâli 58 MB: bölüm çipi yazı dokuları 1024 px genişlikteydi, gölge haritası 2048²; 512/256 px ve 1024² ile düştü). Telefon ve gerçek tarayıcı ölçümü M5'te. Lighthouse çalıştırılmadı (çevrimdışı ortam).
+
 | Ölçüt | Hedef | Sınır |
 |---|---|---|
 | Yedek sayfanın JS'si (tema, dil, kart destesi, giriş betiği) | ≤ 15 KB gz | 25 KB gz |

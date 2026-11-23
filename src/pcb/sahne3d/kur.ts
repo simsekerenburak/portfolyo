@@ -150,6 +150,15 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
   ciz();
   kok.dataset.cizim = String(renderer.info.render.calls);
   kok.dataset.ucgen = String(renderer.info.render.triangles);
+  // GPU doku belleği tahmini (§2.2 ≤ 32 MB): yazı dokuları RGBA 8 bit (4 bayt/piksel) + mip zinciri (×4/3);
+  // ortam haritası (PMREM) yarım kayan nokta RGBA (8 bayt/piksel), mip yok; gölge haritası 32 bit derinlik.
+  const dokuBayt = dokular.reduce((t, d) => {
+    const img = d.image as { width?: number; height?: number } | undefined;
+    const piksel = (img?.width ?? 0) * (img?.height ?? 0);
+    return t + (d === ortam ? piksel * 8 : piksel * 4 * (4 / 3));
+  }, 0);
+  const golgeBayt = KADEMELER[kademe].golgeHaritasi ? 1024 * 1024 * 4 : 0;
+  kok.dataset.dokuMb = ((dokuBayt + golgeBayt) / 2 ** 20).toFixed(1);
   const yenidenBoyutla = () => {
     boyutla();
     ciz();
@@ -179,7 +188,7 @@ export async function kur({ tuval, veri, panel, kok, kayboldu }: KurSecenekleri)
       lekeler.yokEt();
       isik.yokEt();
       for (const d of dokular) d.dispose();
-      for (const ad of ['kademe', 'cizim', 'ucgen', 'duzOner']) delete kok.dataset[ad];
+      for (const ad of ['kademe', 'cizim', 'ucgen', 'duzOner', 'dokuMb']) delete kok.dataset[ad];
       renderer.dispose();
       // Bağlamı hemen bırak (GPU belleği); dinleyici yukarıda kaldırıldı, kayboldu() tetiklenmez.
       renderer.forceContextLoss();
