@@ -99,6 +99,14 @@ Site dikey kaymaz. **Beş pafta üst üste durur**, en önde Hakkımda vardır. 
 - Her paftanın kendi hash'i vardır; `burakerensimsek.is-a.dev/#stajlar` doğrudan Stajlar'ı açar. `hashchange` dinlenir.
 - Proje detay sayfaları ayrıca: `/projeler/[slug]` ve `/en/projeler/[slug]` (tam sayfa, link paylaşılabilir).
 
+**M2'de uygulandı (2026-11-23, Burak'ın kararları):**
+- **Klavye ← → odağa göre:** odak bir destenin içindeyse (kart, kart okları, bant kutusu; `data-kart-alani`) o destenin kartını çevirir, değilse paftayı değiştirir. Alt/Ctrl/Meta/Shift'li basışlar ve yazı alanları tarayıcıya bırakılır; basılı tutunca pafta tekrarlanmaz (`src/sahne/klavye.ts`).
+- **Geri düğmesi siteden çıkar:** pafta geçişi adresi `history.replaceState` ile yazar, geçmişe kayıt eklemez. Elle yazılan/tıklanan #parça `hashchange` ile o paftayı (kart kimliğiyse kartı da) öne getirir; tanınmayan parça paftayı değiştirmez.
+- **Kol gelene kadar geçiş (M4'te kol yapacak):** → öndeki pafta opak kalarak kendi boyu kadar yukarı çekilir, en sonda söner ("çıkan" konumu = destenin en arkası); ← oradan opak iner. Sekmeyle komşu olmayan paftaya: aynı geçiş 0,35 sn. `prefers-reduced-motion` → geçiş yok.
+- Taslağa göre **Hakkımda'da "← önceki" linki yok** (kapak); Belgeler'de "Hakkımda →" var. Klavyede halka tam döner.
+- İlk kare: satır içi `SAHNE_ILK_BETIK` paftaları ilk boyamadan önce adresteki paftaya göre dizer (sayfa zıplamaz); modül betiği sonra gezinmeyi bağlar. Konum kuralı iki yerde (betik metni + `paftaKonumu`), `tests/sahne.test.ts` ikisini eşit tutar.
+- Dil/tema düğmeleri ve sekmeler sahnenin üst şeridinde (her paftada aynı yer); telefonda düğmeler üstte, sekmeler altta kayan şerit. Swipe M5'te.
+
 ### 3.2 İçerik paftası şablonu (tek bileşen: `Pafta`)
 
 Projeler, Stajlar, Yetkinlikler ve Belgeler **aynı bileşenden**, sadece farklı veriyle üretilir:
@@ -274,6 +282,9 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  ├─ pafta/projeler.ts             (projeler → kartlar + özet menüsü, saf)
 │  ├─ pafta/{stajlar,yetkinlikler,belgeler}.ts  (aynı dönüşüm, diğer paftalar için)
 │  ├─ pafta/bicim.ts                (ay adları/tarih aralığı "Ağu – Eyl 2026", tekil/çoğul)
+│  ├─ sahne/sahne.ts                (pafta destesi, saf: PAFTA_SIRASI, paftaKonumu, gecisTuru, komsular, hedefPafta)
+│  ├─ sahne/ilkBetik.ts             (SAHNE_ILK_BETIK: ilk karede paftaları diken satır içi betik)
+│  ├─ sahne/klavye.ts               (← → kuralı: klavyeEylemi, baglamOku)
 │  ├─ content/
 │  │  ├─ projeler/{tr,en}/*.md       (frontmatter = kart; gövde = M6 detay sayfasının uzun metni)
 │  │  ├─ stajlar/{tr,en}.json        (dil başına tek dosya: { taslak, stajlar: [...] }; dizideki sıra = destedeki sıra)
@@ -291,12 +302,12 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │  │  ├─ ciz.ts        (SVG güncelleme)
 │  │  └─ kol.ts        (island giriş noktası, rAF döngüsü)
 │  ├─ components/
-│  │  ├─ Sahne.astro   (pafta destesi + tavan rayı + kol katmanı)
+│  │  ├─ Sahne.astro   (5 pafta + üst şerit (sekmeler, dil/tema) + alt şerit (gösterge, önceki/sonraki); M3'te tavan rayı + kol katmanı)
 │  │  ├─ Pafta.astro   (§3.2 şablonu)
 │  │  ├─ Deste.astro, Bant.astro, OzetMenu.astro
 │  │  ├─ Projeler.astro, Stajlar.astro, Yetkinlikler.astro, Belgeler.astro  (Pafta + o paftanın verisi)
 │  │  ├─ Hakkimda.astro
-│  │  ├─ PaftaCercevesi.astro  (öndeki pafta yüzeyi + arkadaki iki paftanın üst kenarı)
+│  │  ├─ PaftaCercevesi.astro  (pafta yüzeyi; sahnede data-konum'a göre yer ve kayma, tek başına sahte arka kenarlar)
 │  │  ├─ KolStatik.astro  (GEÇİCİ durağan kol çizimi; M3'te canlı kol gelince silinir)
 │  │  ├─ Sekmeler.astro, PaftaGostergesi.astro
 │  │  └─ TemaDugmesi.astro, DilDugmesi.astro
@@ -304,7 +315,7 @@ Kurallar: `TASIMA`/`PAFTA_TASIMA` sırasında gelen tıklamalar kuyruğa alınma
 │     ├─ index.astro, en/index.astro
 │     ├─ 404.astro      (iki dilli; Cloudflare Pages için zorunlu, bkz. §2.1)
 │     └─ projeler/[slug].astro, en/projeler/[slug].astro
-└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler, bicim, stajlar, yetkinlikler, belgeler; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
+└─ tests/ (var olan: renk, fontlar, yedek-font, kontrol, i18n, tema, icerik, deste, projeler, bicim, stajlar, yetkinlikler, belgeler, sahne, klavye, adres; M3/M4'te: kinematik.test.ts, yay.test.ts, durum.test.ts)
 ```
 
 ---
@@ -368,7 +379,7 @@ Her milestone sonunda site canlıya çıkabilir durumda olmalı.
 | **M4 Durum makinesi** | §5.4'ün tamamı: kavrama → taşıma → bırakma, pafta taşıma | Her geçiş test edildi; kenar durumlar (taşıma sırasında tıklama) tanımlı |
 | **M5 Erişim ve mobil** | Telefon görünümü, dokunma, swipe, klavye odak sırası, ekran okuyucu etiketleri | Lighthouse erişilebilirlik ≥ 95; gerçek iPhone'da test |
 | **M6 İçerik ve EN** | Proje detay sayfaları, İngilizce çeviriler, CV PDF'leri + Hakkımda'ya "CV'yi indir" düğmesi, görseller (blok diyagram/foto), `kontrol.mjs`'te `TASLAK_HATA = true` | TR/EN eşleşme kontrolü yeşil |
-| **M7 Alan adı** | is-a.dev'e `domains/burakerensimsek.json` (CNAME → `burakerensimsek.pages.dev`) başvurusu + Cloudflare Pages'e özel alan adının API ya da `cf-pages.is-a.dev` ile eklenmesi | `https://burakerensimsek.is-a.dev` açılıyor, HTTPS sertifikası geçerli |
+| **M7 Alan adı** *(Burak 2026-11-23: M2'den hemen sonra; is-a.dev PR metnini Burak yazar)* | is-a.dev'e `domains/burakerensimsek.json` (CNAME → `burakerensimsek.pages.dev`) başvurusu + Cloudflare Pages'e özel alan adının API ya da `cf-pages.is-a.dev` ile eklenmesi | `https://burakerensimsek.is-a.dev` açılıyor, HTTPS sertifikası geçerli |
 
 **İlk adım:** M1. Kod yazmadan önce Burak'a M1 planını madde madde göster, onay al.
 
