@@ -251,3 +251,25 @@ describe('kontrast: kullanım tablosundaki her metin/yüzey çifti', () => {
     expect(saydamYuzeyler.filter((ad) => !olculen.has(ad))).toEqual([]);
   });
 });
+
+// ─── 3D'de Hakkımda paneli (CLAUDE.md §3.3) ──────────────────────────────
+// Panel metni 3D sahnenin üstünde, yarı saydam koyu "cam"ın (--cam-panel) üstünde durur. Sahnenin en açık renkleri
+// (krem serigrafi, bakır, turuncu tabela, kalay) camın arkasına düşse bile metin okunmalı. 3D her zaman koyu tema.
+describe('3D: Hakkımda paneli camın üstünde (en kötü arka plan)', () => {
+  const cam = tokenRengi('--cam-panel', 'koyu');
+  const ARKALAR = [RENK_3D.krem, RENK_3D.bakir, RENK_3D.turuncu, RENK_3D.kalay, RENK_3D.altin, RENK_3D.isikGok];
+  const METINLER = [
+    { ne: 'isim (76px)', metin: '--metin', esik: 3 },
+    { ne: 'unvan (24px)', metin: '--turuncu-yazi', esik: 3 },
+    { ne: 'tanıtım (17px)', metin: '--metin-3', esik: 4.5 },
+    { ne: 'iletişim satırı (14px)', metin: '--metin-3', esik: 4.5 },
+    { ne: 'iletişim linki üzerine gelince (14px)', metin: '--vurgu-metin', esik: 4.5 },
+    { ne: 'İletişime geç düğmesi (15px)', metin: '--metin', esik: 4.5 },
+  ];
+  for (const arka of ARKALAR) {
+    const yuzey = kompozit(cam, rgb(renkCoz(arka)));
+    it.each(METINLER)(`arkada ${arka}: $ne ≥ $esik`, ({ metin, esik }) => {
+      expect(kontrast(opakRenk(metin, 'koyu'), yuzey)).toBeGreaterThanOrEqual(esik);
+    });
+  }
+});

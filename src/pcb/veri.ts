@@ -17,18 +17,32 @@ export interface PcbSapagi {
   ogeler: { id: string; kisaAd: string }[];
 }
 
+/** Çiplerin üstündeki serigrafi yazıları (süs; anlamı DOM'da). */
+export interface PcbMetinleri {
+  /** Hakkımda çipi: "Burak Eren Şimşek" ve unvan */
+  ad: string;
+  unvan: string;
+  /** konnektör çipi: "İletişim" */
+  iletisim: string;
+}
+
 export interface PcbVerisi {
   /** biçim sürümü: ada değişirse eski önbellekteki betik yanlış okumasın */
   surum: 1;
+  metinler: PcbMetinleri;
   sapaklar: PcbSapagi[];
 }
 
 export const PCB_VERI_KIMLIGI = 'pcb-veri';
 
 /** Bölümlerin (yedek sayfadaki paftalarla aynı veri) adaya giden kısa hâli. */
-export function pcbVerisiKur(bolumler: readonly { id: string; ad: string; ogeler: readonly PaftaOgesi[]; ozet: Ozet }[]): PcbVerisi {
+export function pcbVerisiKur(
+  metinler: PcbMetinleri,
+  bolumler: readonly { id: string; ad: string; ogeler: readonly PaftaOgesi[]; ozet: Ozet }[],
+): PcbVerisi {
   return {
     surum: 1,
+    metinler: { ad: metinler.ad, unvan: metinler.unvan, iletisim: metinler.iletisim },
     sapaklar: bolumler.map((b) => ({
       id: b.id,
       ad: b.ad,
@@ -62,8 +76,10 @@ export function pcbVerisiOku(json: string | null | undefined): PcbVerisi | null 
     return null;
   }
   if (typeof ham !== 'object' || ham === null) return null;
-  const v = ham as { surum?: unknown; sapaklar?: unknown };
+  const v = ham as { surum?: unknown; sapaklar?: unknown; metinler?: unknown };
   if (v.surum !== 1 || !Array.isArray(v.sapaklar)) return null;
+  const mt = v.metinler as Partial<Record<keyof PcbMetinleri, unknown>> | null | undefined;
+  if (typeof mt !== 'object' || mt === null || !metin(mt.ad) || !metin(mt.unvan) || !metin(mt.iletisim)) return null;
   for (const s of v.sapaklar as unknown[]) {
     if (typeof s !== 'object' || s === null) return null;
     const sp = s as Partial<Record<keyof PcbSapagi, unknown>>;

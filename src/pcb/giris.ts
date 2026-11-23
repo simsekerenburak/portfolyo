@@ -113,12 +113,24 @@ export function girisiCalistir(): void {
   /** her açma denemesinin numarası: eski bir deneme geç biterse (ziyaretçi bu arada "Düz görünüm"e bastı) yok sayılır */
   let deneme = 0;
 
+  /** Hakkımda paneli: 3D'de yerinde kalır (§3.3), yedek sayfanın geri kalanı gezilemez olur. */
+  const panel = document.getElementById('hakkimda');
+  /**
+   * 3D açıkken yedek sayfanın üst düzey parçaları inert olur (çift okuma olmasın, §3.4), Hakkımda'yı içeren hariç:
+   * paneldeki "İletişime geç" ve linkler 3D'de de çalışır. inert bir atanın altındaki öğe kurtarılamadığı için
+   * <main>'in kendisi değil, tek tek çocukları kilitlenir.
+   */
+  const yedegiKilitle = (kilit: boolean) => {
+    const parcalar = yedek.querySelectorAll<HTMLElement>(':scope > * > *');
+    for (const p of parcalar) p.inert = kilit && !(panel && p.contains(panel));
+  };
+
   const yedegeDus = (neden: Neden) => {
     deneme++;
     sahne?.yokEt();
     sahne = null;
     kok.dataset.gorunum = 'yedek';
-    yedek.inert = false;
+    yedegiKilitle(false);
     pcb.hidden = true;
     if (ucDugmesi) {
       ucDugmesi.hidden = !geriAcilabilir(neden);
@@ -139,12 +151,14 @@ export function girisiCalistir(): void {
       try {
         const { kur } = await import('./sahne3d/kur');
         if (bu !== deneme) return;
-        const s = await kur({ tuval: yeni, veri, kayboldu: () => yedegeDus('hata') });
+        const s = await kur({ tuval: yeni, veri, panel, kok: pcb, kayboldu: () => yedegeDus('hata') });
         if (bu !== deneme) return void s.yokEt();
         sahne = s;
+        // 3D'de sayfa kaymaz; Hakkımda paneli ekrandaki yerine (sayfanın başı) dönsün
+        window.scrollTo(0, 0);
         kok.dataset.gorunum = '3d';
         // Yedek içerik DOM'da kalır (detay kartı metni oradan gelir) ama gezilemez: çift okuma olmasın (§3.4).
-        yedek.inert = true;
+        yedegiKilitle(true);
       } catch (hata) {
         if (bu !== deneme) return;
         console.warn('3D açılamadı, düz görünümde kalınıyor:', hata);

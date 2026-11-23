@@ -90,3 +90,26 @@ samp {
 :root[data-gorunum='3d'] [data-yedek] {
   visibility: hidden;
 }
+
+/* Hakkımda paneli 3D'de yerinde kalır (§3.3): kutular aynı (CLS yok), yalnızca boyası değişir. Pafta yüzeyi
+   saydamlaşır, arkasında devre kartı belirir; durağan kol çizimi gizlenir (kol M4'te SVG katmanı). Metin sütununun
+   arkasına koyu yeşil "cam" gelir: yayılan box-shadow yerleşimi değiştirmeden kenar payı boyar (§4.2 kontrastı
+   tests/renk.test.ts → "3D: Hakkımda paneli"). Panel canvas'ın (z-index 10) üstünde; boş yerleri tıklamayı geçirir. */
+:root[data-gorunum='3d'] #hakkimda {
+  z-index: 11;
+  visibility: visible;
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  pointer-events: none;
+  transition: opacity 0.2s linear;
+}
+:root[data-gorunum='3d'] #hakkimda .metin {
+  border-radius: 6px;
+  background: var(--cam-panel);
+  box-shadow: 0 0 0 28px var(--cam-panel);
+  pointer-events: auto;
+}
+:root[data-gorunum='3d'] #hakkimda .kol-alani {
+  visibility: hidden;
+}

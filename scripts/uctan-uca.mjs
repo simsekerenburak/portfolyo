@@ -169,8 +169,15 @@ denetle(hazirMs <= 2000, "3D 2 sn'de hazır (§2.2)", `${hazirMs} ms`);
 await bekle(800); // belirme geçişi (0,6 sn) bitsin
 const gpu = await d(`(() => { const gl = document.createElement('canvas').getContext('webgl2'); const e = gl?.getExtension('WEBGL_debug_renderer_info'); return e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : '?'; })()`);
 console.log(`  GPU: ${gpu}`);
-denetle(await d(`document.querySelector('[data-yedek]').inert === true`), 'yedek içerik inert (çift okuma yok)');
-denetle(await d(`getComputedStyle(document.querySelector('[data-yedek]')).visibility === 'hidden'`), 'yedek içerik görsel olarak gizli');
+denetle(
+  await d(`[...document.querySelectorAll('[data-yedek] > * > *')].every((p) => p.inert === !p.contains(document.getElementById('hakkimda')))`),
+  'yedek içerik inert (çift okuma yok), Hakkımda paneli hariç',
+);
+denetle(await d(`getComputedStyle(document.getElementById('projeler')).visibility === 'hidden'`), 'yedek içerik görsel olarak gizli');
+denetle(
+  await d(`getComputedStyle(document.getElementById('hakkimda')).visibility === 'visible' && !document.getElementById('hakkimda').inert`),
+  "Hakkımda paneli 3D'de görünür ve tıklanabilir",
+);
 denetle(await d(`getComputedStyle(document.documentElement).overflow === 'hidden'`), '3D açıkken sayfa kaymıyor');
 denetle(await d(`!!document.querySelector('[data-duz-gorunum]') && getComputedStyle(document.querySelector('[data-duz-gorunum]')).visibility === 'visible'`), '"Düz görünüm" düğmesi görünüyor');
 const cls = await d(`new Promise((bitti) => { let t = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) t += e.value; }).observe({ type: 'layout-shift', buffered: true }); setTimeout(() => bitti(t), 100); })`);
@@ -185,13 +192,71 @@ denetle(
 );
 denetle(konsol.length === 0, 'konsolda hata/uyarı yok', konsol.join(' | ') || undefined);
 
+// ── 1b. Kaydırma (ana hat): tekerlek / klavye → kamera s; Hakkımda paneli söner (§3.2, §3.3, §5.8) ──
+const sOku = async () => Number(await d(`document.querySelector('[data-pcb]').dataset.s`));
+/** Kamera durana kadar bekler (hareket ederken kökte data-hareket var; data-s durunca yazılır), s'yi döndürür. */
+const otur = async () => {
+  for (let i = 0; i < 100; i++) {
+    if (!(await d(`'hareket' in document.querySelector('[data-pcb]').dataset`))) break;
+    await bekle(100);
+  }
+  return sOku();
+};
+const tekerlek = (px) => gonder('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 720, y: 450, deltaX: 0, deltaY: px });
+const tus = async (key, kod) => {
+  for (const type of ['rawKeyDown', 'keyUp']) await gonder('Input.dispatchKeyEvent', { type, key, code: key, windowsVirtualKeyCode: kod, nativeVirtualKeyCode: kod });
+};
+/** Tekerlekle (her olay ≤ 6 birim) kamerayı yaklaşık hedef s'ye götürür. */
+const git_s = async (hedefS) => {
+  for (let i = 0; i < 40; i++) {
+    const s = await sOku();
+    if (Math.abs(hedefS - s) < 0.05) break;
+    await tekerlek(Math.max(-200, Math.min(200, (hedefS - s) / 0.03)));
+    await otur();
+  }
+  return sOku();
+};
+denetle((await sOku()) === 0, 'kamera ana hattın başında (s = 0)');
+await tekerlek(100);
+await tekerlek(100);
+await tekerlek(100);
+const s3 = await otur();
+denetle(Math.abs(s3 - 9) < 0.01, 'üç tekerlek çentiği (3 × 100 px) → s = 9', s3);
+denetle(
+  await d(`getComputedStyle(document.getElementById('hakkimda')).visibility === 'hidden' && document.getElementById('hakkimda').inert`),
+  'kamera ilerleyince Hakkımda paneli söner (gizli, inert)',
+);
+await tekerlek(1e6);
+const sDev = await otur();
+denetle(sDev - s3 <= 8.1, 'tek dev tekerlek olayı kamerayı ışınlamıyor (olay başına ≤ 240 px)', `${s3} → ${sDev}`);
+await tus('End', 35);
+const sSon = await otur();
+await cek('ana-hat-son-1440');
+await tus('Home', 36);
+const sBas = await otur();
+denetle(sSon > 85 && sBas === 0, 'End → ana hattın sonu, Home → başı', `End s = ${sSon}, Home s = ${sBas}`);
+denetle(
+  await d(`getComputedStyle(document.getElementById('hakkimda')).visibility === 'visible' && !document.getElementById('hakkimda').inert`),
+  "başa dönünce Hakkımda paneli geri geliyor",
+);
+await git_s(18);
+await cek('ilk-kavsak-1440');
+await git_s(40);
+await cek('ikinci-kavsak-1440');
+const png2 = await cek('ana-hat-ortasi-1440');
+const p2 = await pikselOlc(png2, [700, 860, 740, 890]);
+denetle(p2.maviOran <= MAVI_ORAN_SINIR, 'ana hat ortasında da mavi piksel yok', `${(p2.maviOran * 100).toFixed(3)}%`);
+await tus('Home', 36);
+await otur();
+denetle(konsol.length === 0, 'kaydırırken konsolda hata/uyarı yok', konsol.join(' | ') || undefined);
+
 // ── 2. "Düz görünüm" → yedek sayfa; seçim hatırlanır; "3D görünüm" geri açar ──
 await d(`document.querySelector('[data-duz-gorunum]').click(), true`);
 denetle((await d('document.documentElement.dataset.gorunum')) === 'yedek', '"Düz görünüm" → yedek sayfa');
 denetle((await d(`localStorage.getItem('gorunum')`)) === 'duz', 'seçim kaydedildi (gorunum = duz)');
 const ucDugme = `document.querySelector('[data-3d-ac]')`;
 denetle(await d(`!${ucDugme}.hidden && document.activeElement === ${ucDugme}`), '"3D görünüm" düğmesi görünür ve odakta', await d(`${ucDugme}.textContent`));
-denetle(await d(`document.querySelector('[data-yedek]').inert === false`), 'yedek sayfa yeniden gezilebilir');
+denetle(await d(`[...document.querySelectorAll('[data-yedek] > * > *')].every((p) => !p.inert)`), 'yedek sayfa yeniden gezilebilir');
 await cek('duz-gorunum-1440');
 await git('/');
 await bekle(1500);

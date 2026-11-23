@@ -23,8 +23,16 @@ export const RENK_3D = {
   turuncu: '#FF7A1A',
   /** serigrafi (krem) */
   krem: '#F3EBDD',
+  /** öğe çipinin krem etiketindeki yazı (--kutu-metin) */
+  etiketYazi: '#0F2E22',
   /** büyük turuncu yazı (--turuncu-yazi, koyu tema) */
   turuncuYazi: '#FF8A3D',
+  /** ufkun üstündeki silüetler (sisin içinde, ışıksız): gökyüzüne (zemin) yakın, hafif sıcak yeşiller ve kararmış
+   *  bakır. Sisin içinde kalsınlar diye gökyüzünden yalnızca biraz açık (ilk denemede #21463A fazla parlak ve
+   *  camgöbeğine kaçıyordu). */
+  siluetKoyu: '#0F2D20',
+  siluetAcik: '#14362A',
+  siluetBakir: '#33291E',
   /** ışıklar: gökyüzü (yarı küre) ve tek yönlü "güneş" */
   isikGok: '#FFE9C9',
   isikGunes: '#FFE2B8',

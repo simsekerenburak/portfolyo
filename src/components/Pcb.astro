@@ -13,6 +13,7 @@ import { belgeOgeleri, belgeOzeti } from '../pafta/belgeler';
 import { projeOgeleri, projeOzeti } from '../pafta/projeler';
 import { stajOgeleri, stajOzeti } from '../pafta/stajlar';
 import { yetkinlikOgeleri, yetkinlikOzeti } from '../pafta/yetkinlikler';
+import { TAM_AD } from '../kisi';
 import { PCB_VERI_KIMLIGI, adaMetni, pcbVerisiKur } from '../pcb/veri';
 import DilDugmesi from './DilDugmesi.astro';
 
@@ -25,7 +26,7 @@ const { lang, veri: v } = Astro.props;
 const m = METINLER[lang];
 const kaynak = { projeler: v.projeler, stajlar: v.stajlar };
 // Yedek sayfadaki paftalarla AYNI dönüşümler (src/pafta/*.ts): iki görünüm aynı veriyi gösterir.
-const ada = pcbVerisiKur([
+const ada = pcbVerisiKur({ ad: TAM_AD, unvan: m.hakkimda.unvan, iletisim: m.pcb.iletisim }, [
   { id: 'projeler', ad: m.projeler.baslik, ogeler: projeOgeleri(v.projeler, lang), ozet: projeOzeti(v.projeler, lang) },
   { id: 'stajlar', ad: m.stajlar.baslik, ogeler: stajOgeleri(v.stajlar, lang), ozet: stajOzeti(v.stajlar, lang) },
   {
