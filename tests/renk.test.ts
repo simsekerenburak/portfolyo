@@ -156,6 +156,9 @@ const KULLANIMLAR: Kullanim[] = [
   { ne: 'Aktif sekme', metin: '--vurgu-metin', ust: '--sekme-zemin', yuzey: PAFTA, px: 14, kalinlik: 500 },
   { ne: 'Dil / tema düğmesi', metin: '--hap-metin', yuzey: PAFTA, px: 13, kalinlik: 500 },
   { ne: 'Dil / tema düğmesi (üzerine gelince)', metin: '--hap-metin', ust: '--hap-zemin', yuzey: PAFTA, px: 13, kalinlik: 500 },
+  // JS kapalıyken sahnenin üst şeridi (sekmeler + dil düğmesi) paftanın değil, sayfa zemininin üstünde durur.
+  { ne: 'Dil düğmesi (JS kapalı, zemin üstünde)', metin: '--hap-metin', yuzey: ['--zemin'], px: 13, kalinlik: 500 },
+  { ne: 'Pasif sekme (JS kapalı, zemin üstünde)', metin: '--metin-3', yuzey: ['--zemin'], px: 14, kalinlik: 400 },
   { ne: 'İletişim linki (üzerine gelince)', metin: '--vurgu-metin', yuzey: PAFTA, px: 14, kalinlik: 400 },
   { ne: 'İkincil düğme (İletişime geç)', metin: '--metin', yuzey: PAFTA, px: 15, kalinlik: 500 },
   { ne: 'Önceki / sonraki linkleri', metin: '--metin-2', yuzey: PAFTA, px: 14, kalinlik: 400 },

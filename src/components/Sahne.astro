@@ -1,0 +1,283 @@
+---
+// Sahne (CLAUDE.md §3.1): beş pafta, üstte sekmeler + dil/tema, altta gösterge + "← önceki / sonraki →".
+// Paftaların sırası tek yerde: src/sahne/sahne.ts → PAFTA_SIRASI (sekmeler, gösterge ve deste onu izler).
+//
+// Aşamalı geliştirme (§3.3):
+//   JS yok → paftalar alt alta düz bölümler, sekmeler bölümlere atlayan linkler; gösterge ve önceki/sonraki gizli.
+//   JS var → satır içi ilk betik (src/sahne/ilkBetik.ts) ilk boyamadan önce data-sahne="etkin" der ve
+//            paftaları adresteki #parçaya göre desteye dizer; aşağıdaki modül betiği gezinmeyi canlandırır.
+// Paftaların her konumdaki görünüşü ve kayması PaftaCercevesi.astro'da; burada yalnızca şeritlerin yeri.
+// M3–M4: tavan rayı ve robot kol katmanı da buraya gelecek (kol, paftayı tutup arkaya taşıyacak).
+import { METINLER, type Dil } from '../i18n';
+import type { SayfaVerisi } from '../icerik/koleksiyonlar';
+import { SAHNE_ILK_BETIK } from '../sahne/ilkBetik';
+import { PAFTA_SIRASI } from '../sahne/sahne';
+import Belgeler from './Belgeler.astro';
+import DilDugmesi from './DilDugmesi.astro';
+import Hakkimda from './Hakkimda.astro';
+import PaftaGostergesi from './PaftaGostergesi.astro';
+import Projeler from './Projeler.astro';
+import Sekmeler from './Sekmeler.astro';
+import Stajlar from './Stajlar.astro';
+import TemaDugmesi from './TemaDugmesi.astro';
+import Yetkinlikler from './Yetkinlikler.astro';
+
+interface Props {
+  lang: Dil;
+  veri: SayfaVerisi;
+}
+
+const { lang, veri: v } = Astro.props;
+const m = METINLER[lang];
+const sekmeler = PAFTA_SIRASI.map((id) => ({ id, ad: id === 'hakkimda' ? m.sahne.hakkimda : m[id].baslik }));
+// İlk karede Hakkımda önde: önceki linki yok, sonraki Projeler (betik öndeki paftaya göre günceller).
+const [ilk, ikinci] = sekmeler;
+---
+
+<main class="sahne" data-sahne>
+  <div class="yigin">
+    <header class="ust">
+      <Sekmeler sekmeler={sekmeler} etiket={m.sahne.sekmeEtiketi} />
+      <div class="dugmeler">
+        <DilDugmesi lang={lang} />
+        <TemaDugmesi lang={lang} />
+      </div>
+    </header>
+
+    <Hakkimda lang={lang} />
+    <Projeler lang={lang} kayitlar={v.projeler} />
+    <Stajlar lang={lang} stajlar={v.stajlar} />
+    <Yetkinlikler lang={lang} alanlar={v.alanlar} kaynak={{ projeler: v.projeler, stajlar: v.stajlar }} />
+    <Belgeler lang={lang} belgeler={v.belgeler} />
+
+    <div class="alt">
+      <PaftaGostergesi idler={PAFTA_SIRASI} />
+      <nav class="komsular" aria-label={m.sahne.komsuEtiketi}>
+        <a class="komsu" href={`#${ilk?.id}`} data-komsu="onceki" hidden>
+          <span aria-hidden="true">←</span>
+          <span data-komsu-adi>{ilk?.ad}</span>
+        </a>
+        <a class="komsu" href={`#${ikinci?.id}`} data-komsu="sonraki">
+          <span data-komsu-adi>{ikinci?.ad}</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </nav>
+    </div>
+
+    {/* Pafta değişince ekran okuyucuya "Stajlar · 3 / 5" (odak sekmede ya da linkte kalırken). */}
+    <p class="ekran-okuyucu" data-sahne-duyuru aria-live="polite"></p>
+  </div>
+
+  {/* Ayrıştırıcı buraya gelince eşzamanlı çalışır: paftalar bu satırın üstünde, ilk boyama henüz yapılmadı. */}
+  <script is:inline set:html={SAHNE_ILK_BETIK} />
+</main>
+
+<script>
+  // Pafta destesini canlandırır: sekmeler, önceki/sonraki linkleri, klavye ← → ve adres (#parça) öndeki paftayı
+  // değiştirir. İlk kareyi satır içi betik kurdu; bu betik oradan devam eder.
+  // Konum hesabı src/sahne/sahne.ts'te, klavye kuralı src/sahne/klavye.ts'te; görünüş ve kayma CSS'te.
+  import { onceki, sonraki } from '../pafta/deste';
+  import { baglamOku, klavyeEylemi } from '../sahne/klavye';
+  import { gecisTuru, hedefPafta, komsular, paftaKonumu, parcaKimligi } from '../sahne/sahne';
+
+  const sahne = document.querySelector<HTMLElement>('[data-sahne="etkin"]');
+  if (sahne) canlandir(sahne);
+
+  function canlandir(sahne: HTMLElement) {
+    const paftalar = [...sahne.querySelectorAll<HTMLElement>('[data-sahne-paftasi]')];
+    const idler = paftalar.map((p) => p.dataset.sahnePaftasi ?? '');
+    const n = paftalar.length;
+    const isaretler = [...sahne.querySelectorAll<HTMLElement>('[data-isaret]')];
+    const sekmeler = [...sahne.querySelectorAll<HTMLAnchorElement>('a[data-sekme]')];
+    const komsuLinkleri = [...sahne.querySelectorAll<HTMLAnchorElement>('a[data-komsu]')];
+    const duyuru = sahne.querySelector<HTMLElement>('[data-sahne-duyuru]');
+
+    /** Paftanın görünen adı: sekmesindeki yazı ("Stajlar"). */
+    const ad = (k: number) => sekmeler.find((s) => s.dataset.sekme === idler[k])?.textContent?.trim() ?? '';
+    /** Kimliği taşıyan öğeyi (kart, iletişim listesi) içeren paftanın indisi; yoksa −1. */
+    const iceren = (kimlik: string) => {
+      const oge = document.getElementById(kimlik);
+      return oge ? paftalar.findIndex((p) => p.contains(oge)) : -1;
+    };
+
+    // İlk betik öndeki paftayı zaten seçti; oradan devam.
+    let on = Math.max(0, paftalar.findIndex((p) => p.dataset.konum === 'on'));
+
+    const goster = () => {
+      paftalar.forEach((p, k) => {
+        const konum = paftaKonumu(k, on, n);
+        p.dataset.konum = konum;
+        // inert: arkadaki paftanın linkleri Tab ile odaklanmaz, ekran okuyucu onu okumaz.
+        p.inert = konum !== 'on';
+      });
+      for (const isaret of isaretler) {
+        if (isaret.dataset.isaret === idler[on]) isaret.setAttribute('aria-current', 'true');
+        else isaret.removeAttribute('aria-current');
+      }
+      // Dar ekranda sekme şeridi kayar: öndeki paftanın sekmesini şeridin ortasına getir. scrollIntoView değil:
+      // o, sayfayı da dikey kaydırıp şeride götürürdü (aşağıdaki karta bakarken sayfa yukarı zıplardı).
+      const sekme = sekmeler.find((s) => s.dataset.sekme === idler[on]);
+      const serit = sekme?.closest('ul');
+      if (sekme && serit && serit.scrollWidth > serit.clientWidth) {
+        serit.scrollLeft = sekme.offsetLeft - (serit.clientWidth - sekme.offsetWidth) / 2;
+      }
+      const komsu = komsular(on, n);
+      for (const link of komsuLinkleri) {
+        const k = link.dataset.komsu === 'onceki' ? komsu.onceki : komsu.sonraki;
+        link.hidden = k === null;
+        if (k === null) continue;
+        link.href = `#${idler[k]}`;
+        const yazi = link.querySelector('[data-komsu-adi]');
+        if (yazi) yazi.textContent = ad(k);
+      }
+    };
+
+    /** Öndeki paftayı `yeni` yapar. adresiYaz: adres #yeni olsun mu (hashchange'den gelindiyse zaten öyle). */
+    const git = (yeni: number, adresiYaz: boolean) => {
+      const gecis = gecisTuru(on, yeni, n);
+      if (gecis === null) return;
+      const odakEskide = paftalar[on]?.contains(document.activeElement) ?? false;
+      sahne.dataset.gecis = gecis; // CSS: "atla" (sekmeyle uzağa) kısaltılmış geçiş
+      on = yeni;
+      goster();
+      // Geçmişe kayıt eklemeden (Burak'ın kararı: Geri siteden çıkar). Kopyalanan adres yine bu paftayı açar.
+      if (adresiYaz) history.replaceState(history.state, '', `#${idler[on]}`);
+      // Odak az önce arkaya giden (artık inert) paftadaysa kaybolmasın: yeni paftanın bölümüne geçer.
+      if (odakEskide) {
+        const bolum = paftalar[on]?.querySelector<HTMLElement>('section');
+        if (bolum) {
+          bolum.tabIndex = -1;
+          bolum.focus({ preventScroll: true });
+        }
+      }
+      if (duyuru) duyuru.textContent = `${ad(on)} · ${on + 1} / ${n}`;
+    };
+
+    // Sekmeler ve önceki/sonraki: #hash linkleri (JS'siz de çalışır); tıklama burada yakalanır.
+    for (const link of [...sekmeler, ...komsuLinkleri]) {
+      link.addEventListener('click', (olay) => {
+        const k = idler.indexOf(parcaKimligi(link.hash) ?? '');
+        if (k < 0) return;
+        olay.preventDefault(); // tarayıcı #paftaya kaydırıp geçmişe kayıt eklemesin
+        git(k, true);
+      });
+    }
+
+    // Klavye: bir deste basışı kart çevirmek için kullandıysa (defaultPrevented) dokunma; kalan ← → paftayı değiştirir.
+    document.addEventListener('keydown', (olay) => {
+      if (olay.defaultPrevented) return;
+      const eylem = klavyeEylemi(olay, baglamOku(olay.target));
+      if (eylem?.hedef !== 'pafta') return;
+      olay.preventDefault();
+      git(eylem.yon === 'ileri' ? sonraki(on, n) : onceki(on, n), true);
+    });
+
+    // Adres elle değişirse (yazılan /#stajlar, sayfa içi bir link) o pafta öne gelir.
+    window.addEventListener('hashchange', () => {
+      const k = hedefPafta(parcaKimligi(location.hash), idler, iceren);
+      if (k >= 0) git(k, false);
+    });
+
+    goster();
+    // Bundan sonra ilk betik hashchange'e karışmaz ve CSS geçişleri açılır (ilk kare kaymadan gelsin).
+    sahne.dataset.hazir = '';
+  }
+</script>
+
+<style>
+  /* ── JS yok: sekmeler üstte, paftalar alt alta ─────────────────────────── */
+  .yigin {
+    display: grid;
+    gap: clamp(32px, 6vw, 72px);
+    width: min(100%, 1184px);
+  }
+  .ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .dugmeler {
+    display: flex;
+    flex: none;
+    gap: 8px;
+  }
+  .alt {
+    display: none;
+  }
+
+  /* ── JS var: beş pafta aynı ızgara hücresinde üst üste (konumlar PaftaCercevesi'nde) ── */
+  /* Üstteki 28px arkadaki iki paftanın görünen kenarları (14px + 14px). Şeritler öndeki paftanın üstüne biner;
+     pafta da içeriğini onların altından başlatır (--pafta-ust-bosluk / --pafta-alt-bosluk). Ölçüler taslaktan:
+     sekmeler paftanın üstünden 30px aşağıda, başlık 112px'te; gösterge ve linkler alt kenara yakın. */
+  [data-sahne='etkin'] .yigin {
+    --kenar-payi: 28px;
+    --serit-ust: 30px;
+    --pafta-ust-bosluk: calc(var(--serit-ust) + 44px + 38px);
+    --pafta-alt-bosluk: 80px;
+    position: relative;
+    gap: 0;
+    padding-top: var(--kenar-payi);
+  }
+  [data-sahne='etkin'] .ust,
+  [data-sahne='etkin'] .alt {
+    position: absolute;
+    z-index: 10; /* bütün paftaların (kalkan dahil) üstünde: şeritler yerinde durur, paftalar altından geçer */
+    inset-inline: var(--pafta-bosluk);
+  }
+  [data-sahne='etkin'] .ust {
+    top: calc(var(--kenar-payi) + var(--serit-ust));
+  }
+  [data-sahne='etkin'] .alt {
+    bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .komsular {
+    display: flex;
+    gap: 24px;
+  }
+  .komsu {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px; /* dokunma hedefi (§8) */
+    color: var(--metin-2);
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .komsu:hover {
+    color: var(--metin);
+  }
+  /* Yazar CSS'indeki display, tarayıcının [hidden] kuralını ezer; açıkça geri koy. */
+  .komsu[hidden] {
+    display: none;
+  }
+
+  /* Telefon: dil/tema düğmeleri üstte sağda, sekmeler altında tam genişlikte kayan şerit (§8).
+     Tek satırda sekmelere ~150px kalıyordu, öndeki sekme yarım görünüyordu. Ayrıntılı mobil tasarım M5'te. */
+  @media (max-width: 599px) {
+    .ust {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .dugmeler {
+      order: -1;
+      margin-inline-start: auto;
+    }
+    .ust > :global(.sekmeler) {
+      flex-basis: 100%;
+    }
+    [data-sahne='etkin'] .yigin {
+      --serit-ust: 16px;
+      --pafta-ust-bosluk: calc(var(--serit-ust) + 44px + 8px + 44px + 24px);
+      --pafta-alt-bosluk: 72px;
+    }
+    [data-sahne='etkin'] .alt {
+      bottom: 12px;
+    }
+  }
+</style>

@@ -69,3 +69,6 @@ export async function sayfaVerisi(dil: Dil) {
       belgeler.taslak,
   };
 }
+
+/** sayfaVerisi'nin döndürdüğü veri (Sahne bütün paftalara bunu dağıtır). */
+export type SayfaVerisi = Awaited<ReturnType<typeof sayfaVerisi>>;

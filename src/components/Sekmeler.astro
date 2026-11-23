@@ -1,0 +1,80 @@
+---
+// Pafta sekmeleri (CLAUDE.md §3.1): her pafta bir #hash linki.
+//   JS yok → link sayfada o bölüme atlar (paftalar alt alta).
+//   JS var → Sahne'nin betiği tıklamayı yakalar ve paftayı öne getirir; öndeki paftanın sekmesine
+//            aria-current="true" konur (ekran okuyucu "geçerli" der, CSS turuncu hapı çizer).
+// data-isaret: ilk betik (src/sahne/ilkBetik.ts) ve Sahne betiği aria-current'i bu kimliğe göre koyar.
+interface Props {
+  sekmeler: { id: string; ad: string }[];
+  /** gezinme bölgesinin ekran okuyucu adı: "Paftalar" */
+  etiket: string;
+}
+
+const { sekmeler, etiket } = Astro.props;
+---
+
+<nav class="sekmeler" aria-label={etiket}>
+  <ul>
+    {
+      sekmeler.map((s) => (
+        <li>
+          <a class="sekme" href={`#${s.id}`} data-sekme={s.id} data-isaret={s.id}>
+            {s.ad}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .sekmeler {
+    min-width: 0; /* dar ekranda şerit kendi içinde kaysın, sayfayı taşırmasın */
+  }
+
+  /* Dar ekranda yatay kayan şerit (§8). 4px iç boşluk odak halkasına yer açar, eksi kenar hizayı geri alır. */
+  ul {
+    position: relative; /* sekmenin offsetLeft'i şeride göre ölçülsün (Sahne betiği öndeki sekmeyi ortalar) */
+    display: flex;
+    gap: 6px;
+    margin: -4px;
+    padding: 4px;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sekme {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px; /* dokunma hedefi (§8) */
+    padding: 0 14px;
+    border-radius: 999px;
+    color: var(--metin-3);
+    font-size: 14px;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+  .sekme:hover {
+    color: var(--metin);
+  }
+  /* Öndeki paftanın sekmesi (renk çifti tests/renk.test.ts: "Aktif sekme"). */
+  .sekme[aria-current='true'] {
+    background: var(--sekme-zemin);
+    color: var(--vurgu-metin);
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sekme {
+      transition: none;
+    }
+  }
+</style>

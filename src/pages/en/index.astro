@@ -1,11 +1,7 @@
 ---
 // Ana sayfa (EN). İçerik M6'ya kadar kaba çeviri: en.json'daki ve EN içerik dosyalarındaki
 // `taslak: true` → <html data-taslak>, kontrol.mjs bunu uyarı olarak gösterir.
-import Belgeler from '../../components/Belgeler.astro';
-import Hakkimda from '../../components/Hakkimda.astro';
-import Projeler from '../../components/Projeler.astro';
-import Stajlar from '../../components/Stajlar.astro';
-import Yetkinlikler from '../../components/Yetkinlikler.astro';
+import Sahne from '../../components/Sahne.astro';
 import { METINLER } from '../../i18n';
 import { sayfaVerisi } from '../../icerik/koleksiyonlar';
 import Duzen from '../../layouts/Duzen.astro';
@@ -15,11 +11,5 @@ const v = await sayfaVerisi('en');
 ---
 
 <Duzen lang="en" baslik={m.site.baslik} aciklama={m.site.aciklama} taslak={v.taslak}>
-  <main>
-    <Hakkimda lang="en" />
-    <Projeler lang="en" kayitlar={v.projeler} />
-    <Stajlar lang="en" stajlar={v.stajlar} />
-    <Yetkinlikler lang="en" alanlar={v.alanlar} kaynak={{ projeler: v.projeler, stajlar: v.stajlar }} />
-    <Belgeler lang="en" belgeler={v.belgeler} />
-  </main>
+  <Sahne lang="en" veri={v} />
 </Duzen>

@@ -1,9 +1,11 @@
 ---
-// Paftanın yüzeyi: öndeki pafta + arkasında üst kenarları görünen iki pafta (deste hissi, CLAUDE.md §3.1).
-// Şimdilik sitede tek pafta var; M2'de Sahne gerçek pafta destesini kurunca arkadakiler gerçek paftalar olur.
-// Kenar boşluğu burada; paftanın içindeki düzeni çağıran bileşen kurar (<slot />).
+// Paftanın yüzeyi (CLAUDE.md §3.1). İki hâli var:
+//   Tek başına (404, JS'siz sahne): öndeki pafta + arkasında üst kenarları görünen iki SAHTE pafta (::before/::after).
+//   Sahnede, JS varken (data-sahne="etkin"): arkadakiler gerçek paftalardır; Sahne betiği her paftaya
+//     data-konum="on|orta|arka|gizli|cikan" yazar, aşağıdaki CSS paftayı o yere koyar ve aradaki kaymayı çizer.
+// Konum mantığı src/sahne/sahne.ts'te (paftaKonumu). Paftanın içindeki düzeni çağıran bileşen kurar (<slot />).
 interface Props {
-  /** bölümün adresi, ör. "hakkimda" → /#hakkimda */
+  /** bölümün adresi, ör. "hakkimda" → /#hakkimda. Verilirse pafta sahnenin destesine katılır. */
   id?: string;
   /** bölüm başlığının id'si: ekran okuyucu bölümü bu başlıkla adlandırır */
   baslikId: string;
@@ -12,7 +14,7 @@ interface Props {
 const { id, baslikId } = Astro.props;
 ---
 
-<div class="deste">
+<div class="deste" data-sahne-paftasi={id}>
   <section class="pafta" id={id} aria-labelledby={baslikId}>
     <slot />
   </section>
@@ -46,6 +48,7 @@ const { id, baslikId } = Astro.props;
     background: var(--pafta-arka-1);
   }
 
+  /* Sahnede üst/alt boşluk büyür: sekme ve gösterge şeritleri paftanın üstüne biner (Sahne.astro). */
   .pafta {
     position: relative;
     z-index: 1; /* iki arka paftanın önünde */
@@ -53,6 +56,102 @@ const { id, baslikId } = Astro.props;
     border-radius: 28px;
     background: var(--pafta);
     box-shadow: 0 40px 120px var(--pafta-golge);
-    padding: clamp(24px, 5.5vw, 64px);
+    padding: var(--pafta-ust-bosluk, var(--pafta-bosluk)) var(--pafta-bosluk) var(--pafta-alt-bosluk, var(--pafta-bosluk));
+  }
+
+  /* ── Sahnede: gerçek pafta destesi ─────────────────────────────────────────
+     Bütün paftalar aynı ızgara hücresinde (grid-area 1 / 1); hücre en uzun pafta kadar olur, hepsi aynı boyda.
+     Arkadakiler yukarı kayar ve daralır: üst kenarları öndekinin 14px / 28px üstünde görünür. Daraltma ölçekle
+     (scale): taslaktaki 1108 / 1184 ≈ 0,936 ve 1032 / 1184 ≈ 0,872; ölçek üst kenardan (transform-origin) ölçülür.
+     Ön paftanın arkası tamamen örtülü olduğu için arkadakilerin içeriği görünmez; inert onu okumaz da. */
+  :global([data-sahne='etkin']) .deste[data-sahne-paftasi] {
+    display: grid; /* bölüm (section) hücre boyunca gerilsin: kısa paftanın yüzeyi de alt şeridin altına insin */
+    grid-area: 1 / 1;
+    width: 100%;
+    padding-top: 0;
+    transform-origin: 50% 0;
+  }
+  :global([data-sahne='etkin']) .deste[data-sahne-paftasi]::before,
+  :global([data-sahne='etkin']) .deste[data-sahne-paftasi]::after {
+    content: none;
+  }
+
+  .deste[data-konum='on'] {
+    z-index: 5;
+  }
+  .deste[data-konum='orta'] {
+    z-index: 4;
+    transform: translateY(-14px) scale(0.936);
+  }
+  .deste:is([data-konum='arka'], [data-konum='gizli']) {
+    z-index: 3;
+    transform: translateY(-28px) scale(0.872);
+  }
+  /* Görünen üçün arkası: görünmez bekler; bir sonraki → ile arka sıraya belirir. */
+  .deste[data-konum='gizli'] {
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+  }
+  /* Önden kalkan pafta: kendi boyu kadar yukarı çekilir (→), altındaki pafta açığa çıkar; ← ile buradan öne iner.
+     Kayarken öndekinin üstünde kalsın diye en büyük z-index onda. M4'te bu yolu robot kol izleyecek. */
+  .deste[data-konum='cikan'] {
+    z-index: 6;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-100%);
+  }
+
+  /* Arkadaki paftalar düz renk ve gölgesiz (taslak); öndeki ve sönerek kalkan pafta gradyan ve gölge taşır. */
+  .deste[data-konum='orta'] > .pafta {
+    background: var(--pafta-arka-1);
+    box-shadow: none;
+  }
+  .deste:is([data-konum='arka'], [data-konum='gizli']) > .pafta {
+    background: var(--pafta-arka-2);
+    box-shadow: none;
+  }
+
+  /* Odak arkaya giden paftadaysa betik onu yeni öndeki paftanın bölümüne taşır (tabindex −1). Bölüm bir düğme
+     değil, okumanın başladığı yer: etrafına odak halkası çizilmez. */
+  .pafta:focus {
+    outline: none;
+  }
+
+  /* Geçiş: ~0,7 sn kayma (§3.1). data-hazir, modül betiği gezinmeyi bağlayınca konur: ilk kare kaymadan gelsin.
+     Tarayıcı geçişi HEDEF konumun kuralıyla çizer; bu yüzden kalkan ve öne gelen paftanın kendi kuralı var.
+     --sure tek süre: sekmeyle uzağa atlarken yarıya iner, gecikmeler de onunla orantılı kalır. */
+  :global([data-sahne][data-hazir]) .deste[data-sahne-paftasi] {
+    --sure: 0.7s;
+    transition:
+      transform var(--sure) cubic-bezier(0.4, 0, 0.2, 1),
+      opacity var(--sure) cubic-bezier(0.4, 0, 0.2, 1),
+      visibility var(--sure);
+  }
+  /* Sekmeyle uzaktaki paftaya: kısaltılmış geçiş (§3.1). */
+  :global([data-sahne][data-hazir][data-gecis='atla']) .deste[data-sahne-paftasi] {
+    --sure: 0.35s;
+  }
+  /* Kalkan pafta OPAK kalarak hızlanıp yukarı çekilir, ancak en sonda söner: iki paftanın yazısı üst üste binmez. */
+  :global([data-sahne][data-hazir]) .deste[data-konum='cikan'] {
+    transition:
+      transform var(--sure) cubic-bezier(0.55, 0, 0.75, 0.2),
+      opacity calc(var(--sure) * 0.3) linear calc(var(--sure) * 0.7),
+      visibility 0s var(--sure);
+  }
+  /* Öne gelen pafta hemen opak olur (← ile yukarıdan inerken altındakini örtsün) ve yavaşlayarak yerine oturur. */
+  :global([data-sahne][data-hazir]) .deste[data-konum='on'] {
+    transition:
+      transform var(--sure) cubic-bezier(0.25, 1, 0.5, 1),
+      opacity calc(var(--sure) * 0.25) linear,
+      visibility 0s;
+  }
+
+  /* Hareket azaltma isteği: geçiş yok, paftalar anında yer değiştirir. !important: yukarıdaki konuma özel
+     kuralların hepsini tek yerden ezmek için (erişilebilirlik ayarı her şeyden önce gelir). */
+  @media (prefers-reduced-motion: reduce) {
+    :global([data-sahne]) .deste[data-sahne-paftasi] {
+      transition: none !important;
+    }
   }
 </style>

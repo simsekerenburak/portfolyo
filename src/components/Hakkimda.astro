@@ -1,12 +1,11 @@
 ---
 // Hakkımda paftası (01): giriş paftası, sade (bant/deste yok). Taslak: "E · Premium: Hakkımda".
 // JS gerektirmez. Metin/yüzey renk çiftleri tests/renk.test.ts kullanım tablosunda ölçülür.
+// Dil ve tema düğmeleri M2'de Sahne'nin üst şeridine taşındı (taslakta her paftanın sağ üstünde).
 import { METINLER, type Dil } from '../i18n';
 import { KISI } from '../kisi';
-import DilDugmesi from './DilDugmesi.astro';
 import KolStatik from './KolStatik.astro';
 import PaftaCercevesi from './PaftaCercevesi.astro';
-import TemaDugmesi from './TemaDugmesi.astro';
 
 interface Props {
   lang: Dil;
@@ -18,11 +17,6 @@ const eposta = `mailto:${KISI.eposta}`;
 ---
 
 <PaftaCercevesi id="hakkimda" baslikId="hakkimda-baslik">
-  <div class="ust">
-    <DilDugmesi lang={lang} />
-    <TemaDugmesi lang={lang} />
-  </div>
-
   <div class="duzen">
     <div class="metin">
       <h1 id="hakkimda-baslik">{KISI.adSatirlari[0]}<br />{KISI.adSatirlari[1]}</h1>
@@ -48,16 +42,6 @@ const eposta = `mailto:${KISI.eposta}`;
 </PaftaCercevesi>
 
 <style>
-  /* Dil düğmesi paftanın sağ üst köşesinde (taslak: üstten 34px, sağdan 64px).
-     Sağ boşluk PaftaCercevesi'nin kenar boşluğuyla aynı ifade: ara genişliklerde de hizalı kalsın. */
-  .ust {
-    position: absolute;
-    top: 34px;
-    right: clamp(24px, 5.5vw, 64px);
-    display: flex;
-    gap: 8px;
-  }
-
   /* Solda metin sütunu (taslakta 500px), sağda kol. Yükseklik taslaktaki 700px'lik paftaya denk. */
   .duzen {
     display: grid;
@@ -148,12 +132,6 @@ const eposta = `mailto:${KISI.eposta}`;
 
   /* Tablet ve telefon: tek sütun, kol gizli. Ayrıntılı mobil tasarım M5'te (kol orada ölçeklenecek). */
   @media (max-width: 1079px) {
-    .ust {
-      position: static;
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 24px;
-    }
     .duzen {
       grid-template-columns: minmax(0, 1fr);
       min-height: 0;

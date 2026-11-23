@@ -22,6 +22,11 @@
     "onceki": "Önceki",
     "sonraki": "Sonraki"
   },
+  "sahne": {
+    "sekmeEtiketi": "Paftalar",
+    "hakkimda": "Hakkımda",
+    "komsuEtiketi": "Önceki ve sonraki pafta"
+  },
   "projeler": {
     "baslik": "Projeler",
     "giris": "Dört proje var, biri hâlâ yapım aşamasında.",

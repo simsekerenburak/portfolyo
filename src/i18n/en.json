@@ -22,6 +22,11 @@
     "onceki": "Previous",
     "sonraki": "Next"
   },
+  "sahne": {
+    "sekmeEtiketi": "Sections",
+    "hakkimda": "About",
+    "komsuEtiketi": "Previous and next section"
+  },
   "projeler": {
     "baslik": "Projects",
     "giris": "Four projects, one of them still in progress.",
