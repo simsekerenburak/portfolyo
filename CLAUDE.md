@@ -21,6 +21,7 @@ Burak 4. sınıf bilgisayar mühendisliği öğrencisi. Kodu **anlamak** istiyor
 7. **Kişisel bilgi:** Kapsam Elektromekanik stajındaki projelerin adı ve detayı gizlidir. Sitede yalnızca "uzun dönem staj, gömülü sistemler ve mobil" yazar. Başka detay ekleme.
 8. **Mavi renk ve soğuk gri kullanma.** (Bkz. §4.) Bu Burak'ın kesin isteği.
 9. Commit mesajları Türkçe, kısa: `M2: bant modülü eklendi`.
+10. **Her adımın sonunda ekran görüntüleri** `C:\Users\asus\Projects\_gorseller\` klasörüne kaydedilir (repo dışında; ad: `<milestone>-<adım>-<ne>.png`, ör. `m2-1-yedek-koyu-1440.png`). Burak oradan bakar (2026-11-23).
 
 ---
 
@@ -100,7 +101,7 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 | Ölçüt | Hedef | Sınır |
 |---|---|---|
 | Yedek sayfanın JS'si (tema, dil, kart destesi, giriş betiği) | ≤ 15 KB gz | 25 KB gz |
-| 3D parçası (Three.js + sahne kodu; ölçülen taban 126,8 KB gz) | ≤ 200 KB gz | 250 KB gz |
+| 3D parçası (Three.js + sahne kodu; ölçülen taban 126,8 KB gz) | ≤ 170 KB gz | 200 KB gz *(Burak, 2026-11-23)* |
 | İndirilen model/doku dosyası | 0 | 0 |
 | LCP (yedek sayfa, 4G orta telefon) | ≤ 2,5 sn | — |
 | CLS (3D geçişi dahil) | ≤ 0,05 | 0,1 |
@@ -143,6 +144,7 @@ Site Burak'ın bilgisayarında üretilir ve `wrangler` ile Cloudflare Pages'e do
 - **Tabela:** kavşağın ~3 birim yanında, yerden 1,9 yükseklikte, turuncu çerçeveli yuvarlak yeşil levha; üstünde bölüm adı ve büyük sayı ("4 proje").
 - **Sapak içi (B seçeneği):** öğeler sapak boyunca her 6 birimde bir, sırayla iki yana kısa bir yolla bağlı küçük çipler (yarı genişlik 1,4); çipin üstünde kısa adı yazan krem etiket.
 - **Zemin:** ince serigrafi ızgarası (5 birim) ve dağınık via noktaları.
+- **Ufkun üstü** (Burak, 2026-11-23): uzakta, hafif sis içinde kartın diğer parçalarının **silüetleri**: elektrolitik kondansatörler, büyük QFP çipler, bir USB-C ve bir pin header konnektörü, birkaç direnç. Yakına gelmezler (kamera ilerledikçe onlar da ufukta kalır), yalnızca derinlik verirler; koyu yeşil/bakır tonlar, mavi yok. Tavan rayı ve kol bu şeridin üstüne oturur.
 - Sapak uzunluğu öğe sayısına göre uzar (6 birim × öğe); kavşak aralığı 18 birim buna yetmezse yerleşim aralığı açar (test).
 
 ### 3.2 Gezinme
@@ -245,7 +247,7 @@ Kural: Yeşil = zemin/kartlar. Turuncu = etkileşim (kolun metali, ana düğme, 
 - **Hakkımda unvanı 24px / 500** (taslakta 22px): koyu temada `--turuncu-yazi` pafta üstünde 3.98; 24px'te büyük metin sayılır (3:1).
 - **Kart üst satırı** (mono, 13px): `--metin-2`, önünde **6px `--turuncu` nokta** (turuncu yazı değil).
 
-**3D sahne renkleri (2026-11-23):** lehim maskesi = zemin yeşilleri (`#0B241B` … `#18503C`); bakır yollar `#D9893F` civarı (ton ~29°); tabela ve vurgu `--turuncu` `#FF7A1A`, tabela yazısı `--turuncu-ustu`; serigrafi krem `#F3EBDD`; çip gövdeleri sıcak grafit (R > B); pad'ler bakır/altın. Değerler `src/pcb/renkler.ts`'te tek yerde; `tests/renk.test.ts` "mavi yok" kuralını onlara da uygular. Işıklar da sıcak renkli (soğuk/mavi ortam ışığı yok). Işık, speküler parlama ve ton eşleme (tone mapping) rengi kaydırabilir; bu yüzden uçtan uca denemede 3D ekran görüntüsünün pikselleri sayılır: kroma ≥ 5 olan piksellerin en fazla %0,1'i 170°–270° bandında olabilir. **3D her zaman koyu** (Burak, 2026-11-23): açık tema yalnızca yedek sayfada. 3D etkinken tema düğmesi gizlenir ve 3D kabı `color-scheme: dark` zorlar; böylece `light-dark()` token'ları DOM katmanlarında (Hakkımda paneli, detay kartı) koyu değerleri verir.
+**3D sahne renkleri (2026-11-23):** lehim maskesi = zemin yeşilleri (`#0B241B` … `#18503C`); bakır yollar `#D9893F` civarı (ton ~29°); tabela ve vurgu `--turuncu` `#FF7A1A`, tabela yazısı `--turuncu-ustu`; serigrafi krem `#F3EBDD`; çip gövdeleri sıcak grafit (R > B); pad'ler bakır/altın. Değerler `src/pcb/renkler.ts`'te tek yerde; `tests/renk.test.ts` "mavi yok" kuralını onlara da uygular. Işıklar da sıcak renkli (soğuk/mavi ortam ışığı yok). **Bakır yollar mat** (Burak, 2026-11-23: kameraya yakın yerde beyaza dönmesin): `metalness ≈ 0,35`, `roughness ≈ 0,7`, `envMapIntensity ≈ 0,6`; ton eşleme **`NeutralToneMapping`** (Khronos PBR Neutral: marka renklerini korur). Prototipte ölçüldü: ACES + parlak metalde ana yol ekranda açıklık %69–86 (beyaza yakın); Neutral + mat bakırda ton 28–29°, açıklık %47–52 (hedef `#D9893F`: 29°, %55). Uçtan uca denemede ana yolun ekran rengi ölçülür: ton 29° ± 6°, açıklık %40–62. Işık, speküler parlama ve ton eşleme (tone mapping) rengi kaydırabilir; bu yüzden uçtan uca denemede 3D ekran görüntüsünün pikselleri sayılır: kroma ≥ 5 olan piksellerin en fazla %0,1'i 170°–270° bandında olabilir. **3D her zaman koyu** (Burak, 2026-11-23): açık tema yalnızca yedek sayfada. 3D etkinken tema düğmesi gizlenir ve 3D kabı `color-scheme: dark` zorlar; böylece `light-dark()` token'ları DOM katmanlarında (Hakkımda paneli, detay kartı) koyu değerleri verir.
 
 Tema: varsayılan cihaz ayarı (`prefers-color-scheme`), üstteki düğmeyle değiştirilir, seçim `localStorage`'da (try/catch ile) saklanır. `<html data-theme="koyu|acik">`. Uygulama: her renk `light-dark(AÇIK, KOYU)` ile tek satırda; `:root { color-scheme: light dark }` cihaza uyar, `[data-theme]` `color-scheme`'i zorlar (JS kapalıyken de cihaz ayarı çalışır). **Yapıldı (2026-11-22):** mantık `src/tema/tema.ts` (anahtar `tema`); kayıtlı seçim `<head>`'deki satır içi `ILK_BETIK` ile ilk boyamadan önce uygulanır (meta `color-scheme` de güncellenir), kayıt yoksa `data-theme` konmaz; `TemaDugmesi.astro` JS'siz gizli (`hidden`), simge hedef temayı gösterir (koyuda güneş, açıkta ay).
 
